@@ -11,10 +11,13 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import java.util.logging.Logger;
 
 @Controller
 @RequestMapping("/")
 public class AuthController {
+    Logger log = Logger.getLogger(AuthController.class.getName());
+
     @Autowired
     private UserService userService;
     private User userConnecte;
@@ -24,18 +27,23 @@ public class AuthController {
         return "index";
     }
 
-    @GetMapping(path = {"/login "})
+    @GetMapping(path = {"/login"})
     public String login(Model model) {
+        model.addAttribute("user", new User());
+        System.out.println("test");
         return "login";
     }
 
     @PostMapping(path = {"/login"})
-    public String inscriptionSubmit(@ModelAttribute User user, BindingResult bindingResult) {
+    public String inscriptionSubmit(@ModelAttribute User user, BindingResult bindingResult, Model model) {
+        System.out.println("Entering inscriptionSubmit");
         User nouveauUser = userService.ajoutMembre(user);
         userConnecte = nouveauUser;
         if (bindingResult.hasErrors()) {
-            return "inscription";
+            log.info("fail");
+            return "login";
         }
+        log.info("Redirecting to /index");
         return "redirect:/index";
     }
 

@@ -5,12 +5,17 @@
 </head>
 <body>
 <h2>Login</h2>
-<form th:action="@{/login}" method="post">
-    <label for="username">Username:</label>
-    <input type="text" id="username" name="username" required autofocus/><br/>
-    <label for="password">Password:</label>
-    <input type="password" id="password" name="password" required/><br/>
-    <button type="submit">Login</button>
+<form method="post" th:action="@{/login}" th:object="${user}">
+    <label for="username">Nom d'utilisateur :</label>
+    <input autofocus id="username" name="username" required type="text"/>
+
+    <label for="password">Mot de passe :</label>
+    <input id="password" name="password" required type="password"/>
+
+    <button type="submit">Connexion</button>
 </form>
+<div th:if="${param.error}">
+    <p style="color: red;">Invalid username or password. Please try again.</p>
+</div>
 </body>
 </html>
