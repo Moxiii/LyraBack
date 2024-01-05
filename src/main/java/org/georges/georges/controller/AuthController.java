@@ -24,27 +24,39 @@ public class AuthController {
 
     @GetMapping(path = {"/", "/index"})
     public String index() {
+
         return "index";
     }
 
     @GetMapping(path = {"/login"})
     public String login(Model model) {
         model.addAttribute("user", new User());
-        System.out.println("test");
         return "login";
     }
 
     @PostMapping(path = {"/login"})
-    public String inscriptionSubmit(@ModelAttribute User user, BindingResult bindingResult, Model model) {
-        System.out.println("Entering inscriptionSubmit");
-        User nouveauUser = userService.ajoutMembre(user);
-        userConnecte = nouveauUser;
-        if (bindingResult.hasErrors()) {
-            log.info("fail");
-            return "login";
+    public String inscriptionSubmit(@ModelAttribute("user") User user, BindingResult bindingResult, Model model) {
+        // Vérifier si l'utilisateur existe dans votre système
+        User existingUser = userService.findByUsername(user.getPseudo());
+        // Définir manuellement la valeur de pseudo si elle est null
+        if (user.getPseudo() == null && existingUser != null) {
+            user.setPseudo(existingUser.getPseudo());
+             existingUser = userService.findByUsername(user.getPseudo());
         }
-        log.info("Redirecting to /index");
-        return "redirect:/index";
+        if (existingUser != null) {
+            // L'utilisateur existe, vérifier le mot de passe
+            if (existingUser.getPassword().equals(user.getPassword())) {
+
+                userConnecte = existingUser;
+                model.addAttribute("membreConnecte", userConnecte);
+                return "redirect:/index";
+            } else {
+                model.addAttribute("error", true);
+                return "login";
+            }
+        } else {
+            return "redirect:/register";
+        }
     }
 
     //gestion du membre connecte:

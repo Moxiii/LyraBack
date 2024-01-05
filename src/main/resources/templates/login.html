@@ -6,14 +6,16 @@
 <body>
 <h2>Login</h2>
 <form method="post" th:action="@{/login}" th:object="${user}">
-    <label for="username">Nom d'utilisateur :</label>
-    <input autofocus id="username" name="username" required type="text"/>
+    <label for="pseudo">Nom d'utilisateur :</label>
+    <input autofocus id="pseudo" name="pseudo" th:field="*{pseudo}" required type="text"/>
 
     <label for="password">Mot de passe :</label>
-    <input id="password" name="password" required type="password"/>
+    <input id="password" name="password" th:field="*{password}" required type="password"/>
 
     <button type="submit">Connexion</button>
 </form>
+
+
 <div th:if="${param.error}">
     <p style="color: red;">Invalid username or password. Please try again.</p>
 </div>

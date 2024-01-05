@@ -58,11 +58,32 @@ public class User {
         this.id = Long.valueOf(id);
     }
 
+
     public String getNom() {
         return nom;
     }
 
-    public String getpseudo() {
+    public void setNom(String nom) {
+        this.nom = nom;
+    }
+
+    public void setPseudo(String pseudo) {
+        this.pseudo = pseudo;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public void setDateInscription(Date dateInscription) {
+        this.dateInscription = dateInscription;
+    }
+
+    public String getPseudo() {
         return pseudo;
     }
 

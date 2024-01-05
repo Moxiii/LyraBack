@@ -51,7 +51,7 @@ public class SecurityConfig {
         http
                 .authorizeRequests()
                 .requestMatchers("/login").permitAll()
-                .requestMatchers("/**").hasAnyRole("USER", "ADMIN")
+                .requestMatchers("/**").permitAll()
                 .requestMatchers("/admin/**").hasAnyRole("ADMIN")
                 .and()
                 .formLogin()
