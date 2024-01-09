@@ -5,7 +5,7 @@
 </head>
 <body>
 <h2>Login</h2>
-<form method="post" th:action="@{/login}" th:object="${user}">
+<form method="post" th:action="@{/auth/login}" th:object="${user}">
     <label for="pseudo">Nom d'utilisateur :</label>
     <input autofocus id="pseudo" name="pseudo" th:field="*{pseudo}" required type="text"/>
 
@@ -14,7 +14,9 @@
 
     <button type="submit">Connexion</button>
 </form>
-
+<div class="home">
+    <a th:href="@{/}">retrurn home</a>
+</div>
 
 <div th:if="${param.error}">
     <p style="color: red;">Invalid username or password. Please try again.</p>

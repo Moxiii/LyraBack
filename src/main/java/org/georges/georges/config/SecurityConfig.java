@@ -55,11 +55,11 @@ public class SecurityConfig {
                 .requestMatchers("/admin/**").hasAnyRole("ADMIN")
                 .and()
                 .formLogin()
-                .loginPage("/login") // Spécifiez l'URL de votre page de connexion personnalisée
-                .loginProcessingUrl("/process-login")
-                .defaultSuccessUrl("/index")
-                .failureUrl("/custom-login?error=true")
-                .permitAll()
+                    .loginPage("/login") // Spécifiez l'URL de votre page de connexion personnalisée
+                    .loginProcessingUrl("/process-login")
+                    .defaultSuccessUrl("/index")
+                    .failureUrl("/custom-login?error=true")
+                    .permitAll()
                 .and()
                 .logout()
                 .logoutSuccessUrl("/custom-login?logout=true")

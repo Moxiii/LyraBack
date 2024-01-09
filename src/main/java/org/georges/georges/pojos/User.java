@@ -4,7 +4,8 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-
+import org.hibernate.annotations.ColumnDefault;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -25,6 +26,8 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @ColumnDefault(value = "'ROLE_USER'")
     @ElementCollection
     private List<String> roles;
 
@@ -37,7 +40,7 @@ public class User {
         this.roles = roles;
     }
 
-
+// todo add role for conversation 
     public User() {
 
     }
@@ -97,5 +100,13 @@ public class User {
 
     public Date getDateInscription() {
         return dateInscription;
+    }
+
+    //auto exec role injection :
+    @PrePersist
+    public void prePersist() {
+        if (roles == null || roles.isEmpty()) {
+            roles = Arrays.asList("ROLE_USER");
+        }
     }
 }
