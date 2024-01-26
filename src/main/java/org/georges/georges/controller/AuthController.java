@@ -73,13 +73,13 @@ public String processRegister(User user){
 
                 userConnecte = existingUser;
                 model.addAttribute("membreConnecte", userConnecte);
-                return "redirect:/index";
+                return "redirect:/";
             } else {
                 model.addAttribute("error", true);
                 return "login";
             }
         } else {
-            return "redirect:/register";
+            return "redirect:/auth/register";
         }
     }
 

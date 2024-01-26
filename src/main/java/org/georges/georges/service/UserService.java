@@ -87,4 +87,13 @@
             userRepository.save(user);
             return user;
         }
+        public List<User> getAllUsers() {
+            return userRepository.findAll();
+        }
+        public void deleteUserByEmail(String Email){
+            userRepository.deleteByEmail(Email);
+        }
+        public User deleteUserById(int id){
+            return userRepository.deleteById(id);
+        }
     }

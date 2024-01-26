@@ -51,8 +51,10 @@ public class SecurityConfig {
         http
                 .authorizeRequests()
                 .requestMatchers("/login").permitAll()
+                .requestMatchers("/api/user/**").permitAll()
                 .requestMatchers("/**").permitAll()
                 .requestMatchers("/admin/**").hasAnyRole("ADMIN")
+                .anyRequest().authenticated()
                 .and()
                 .formLogin()
                     .loginPage("/login") // Spécifiez l'URL de votre page de connexion personnalisée
