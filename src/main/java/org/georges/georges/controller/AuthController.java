@@ -50,13 +50,9 @@ public String processRegister(User user){
     String psswdEncoded = passwordEncoder.encode(user.getPassword());
     user.setPassword(psswdEncoded);
     if (userRepository.existsByPseudo(user.getPseudo())) {
-        // Gérer le cas où le pseudo est déjà pris (lever une exception, renvoyer un message d'erreur, etc.)
         return "login";
     }
 
-    if (user.getRoles() == null || user.getRoles().isEmpty()) {
-        user.setRoles(Arrays.asList("ROLE_USER"));
-    }
     userRepository.save(user);
         return "register_success";
 }

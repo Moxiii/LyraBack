@@ -10,6 +10,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 //import org.springframework.security.web.SecurityFilterChain;
 
 //import static org.springframework.security.config.Customizer.withDefaults;
@@ -49,6 +50,10 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+                .csrf()
+                .ignoringRequestMatchers("/api/**")
+                    .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()) // Utilisation de CookieCsrfTokenRepository
+                .and()
                 .authorizeRequests()
                 .requestMatchers("/login").permitAll()
                 .requestMatchers("/api/user/**").permitAll()

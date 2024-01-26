@@ -1,17 +1,23 @@
 package org.georges.georges.pojos;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import org.hibernate.annotations.ColumnDefault;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
 @Entity
 public class User {
-
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JsonBackReference
+    private UserRole userRole;
     @NotBlank(message = "Le champ nom n'est pas renseigné")
     private String nom;
     @NotBlank(message = "Le champ pseudo n'est pas renseigné")
@@ -27,30 +33,25 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ColumnDefault(value = "'ROLE_USER'")
-    @ElementCollection
-    private List<String> roles;
+    private static final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-    public User(String nom, String pseudo, String email, String password, Date dateInscription, List<String> roles) {
+    public User(String nom, String pseudo, String email, String password, Date dateInscription, UserRole userRole) {
         this.nom = nom;
         this.pseudo = pseudo;
         this.email = email;
-        this.password = password;
+        this.password = passwordEncoder.encode(password);
         this.dateInscription = dateInscription;
-        this.roles = roles;
+        this.userRole = userRole;
     }
 
-// todo add role for conversation 
-    public User() {
+public User(){}
 
+    public UserRole getUserRole() {
+        return userRole;
     }
 
-    public List<String> getRoles() {
-        return roles;
-    }
-
-    public void setRoles(List<String> roles) {
-        this.roles = roles;
+    public void setUserRole(UserRole userRole) {
+        this.userRole = userRole;
     }
 
     public Long getId() {
@@ -100,13 +101,5 @@ public class User {
 
     public Date getDateInscription() {
         return dateInscription;
-    }
-
-    //auto exec role injection :
-    @PrePersist
-    public void prePersist() {
-        if (roles == null || roles.isEmpty()) {
-            roles = Arrays.asList("ROLE_USER");
-        }
     }
 }
