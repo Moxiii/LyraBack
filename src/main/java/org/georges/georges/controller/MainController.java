@@ -38,6 +38,8 @@ public class MainController {
                 model.addAttribute("pseudo", username);
                 logger.warn("User '{}' is on index controller", username);
             }
+        }else {
+            logger.warn("Anonymous user !");
         }
         return "index";
     }

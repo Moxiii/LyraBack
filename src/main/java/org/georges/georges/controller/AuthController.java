@@ -1,5 +1,7 @@
 package org.georges.georges.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import org.georges.georges.pojos.User;
 import org.georges.georges.pojos.UserRole;
 import org.georges.georges.repository.UserRepository;
@@ -10,6 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -30,6 +35,8 @@ import java.util.Date;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.logging.Logger;
+
+import static org.springframework.security.web.context.HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY;
 
 
 @RequestMapping("/auth")
@@ -86,7 +93,7 @@ public String processRegister(User user){
         return "register_success";
 }
     @PostMapping(path = {"/login"})
-    public String inscriptionSubmit(@ModelAttribute("user") User user, BindingResult bindingResult, Model model) {
+    public String inscriptionSubmit(@ModelAttribute("user") User user, BindingResult bindingResult, Model model , HttpServletRequest req) {
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         // Vérifier si l'utilisateur existe dans votre système
         logger.info("Attempting to authenticate user: {}", user.getPseudo());
@@ -103,6 +110,16 @@ public String processRegister(User user){
                 try {
                     // Utilisez l'AuthenticationManager pour authentifier l'utilisateur
                     Authentication authentication = authenticationManager.authenticate(token);
+                    if (authentication != null && authentication.isAuthenticated()) {
+                        // L'utilisateur est authentifié, vous pouvez accéder aux détails d'authentification
+                        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+                        logger.info("User is authenticated: {}", userDetails.getUsername());
+                        SecurityContext sc = SecurityContextHolder.getContext();
+                        sc.setAuthentication(authentication);
+                        HttpSession session = req.getSession(true);
+                        session.setAttribute(SPRING_SECURITY_CONTEXT_KEY, sc);
+                    }
+
 
                     // Ajoutez des logs pour indiquer que l'authentification a réussi
                     logger.info("Authentication successful for user: {}", user.getPseudo());

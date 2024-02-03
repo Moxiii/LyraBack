@@ -6,10 +6,12 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.server.authentication.AuthenticationWebFilter;
 
 
 @Configuration
@@ -39,7 +41,7 @@ public class SecurityConfig  {
                 .requestMatchers("/api/user/**").permitAll()
                 //.requestMatchers("/","/index").authenticated()
                 .requestMatchers("/admin/**").hasAnyRole("admin")
-                //.anyRequest().authenticated()
+                .anyRequest().authenticated()
                 .and()
                 .formLogin()
                     .loginPage("/auth/login") // Spécifiez l'URL de votre page de connexion personnalisée
@@ -48,11 +50,12 @@ public class SecurityConfig  {
                     .failureUrl("/custom-login?error=true")
                     .permitAll()
                 .and()
-                .logout()
-                .logoutSuccessUrl("/auth/logout")
-                .invalidateHttpSession(true)
-                .deleteCookies("JSESSIONID")
-                .permitAll();
+                    .logout()
+                    .logoutSuccessUrl("/auth/logout")
+                    .invalidateHttpSession(true)
+                    .deleteCookies("JSESSIONID")
+                    .permitAll();
+
         return http.build();
     }
 }
