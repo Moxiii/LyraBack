@@ -1,4 +1,4 @@
-package org.georges.georges.api;
+package org.georges.georges.Api;
 
 import org.georges.georges.pojos.User;
 import org.georges.georges.repository.UserRepository;

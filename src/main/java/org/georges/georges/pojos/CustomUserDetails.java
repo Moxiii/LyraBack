@@ -5,20 +5,19 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 
-
 public class CustomUserDetails implements UserDetails {
     private final String username;
     private final String password;
-
 
     public CustomUserDetails(String username, String password) {
         this.username = username;
         this.password = password;
     }
 
-
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
+        // Retournez les rôles/granted authorities de l'utilisateur s'il y en a
+        // Exemple fictif : return Arrays.asList(new SimpleGrantedAuthority("ROLE_USER"));
         return null;
     }
 
@@ -34,21 +33,21 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public boolean isAccountNonExpired() {
-        return false;
+        return true; // Mettez à true si le compte n'expire jamais
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return false;
+        return true; // Mettez à true si le compte n'est jamais verrouillé
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return false;
+        return true; // Mettez à true si les informations d'identification ne expirent jamais
     }
 
     @Override
     public boolean isEnabled() {
-        return false;
+        return true; // Mettez à true si le compte est activé
     }
 }

@@ -1,4 +1,4 @@
-package org.georges.georges.api;
+package org.georges.georges.Api;
 
 import org.georges.georges.pojos.User;
 import org.georges.georges.repository.UserRepository;
@@ -9,14 +9,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
-
+@RequestMapping("api/user")
 @RestController
-@RequestMapping("/api/user")
 public class UserApiController {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     @Autowired
@@ -41,7 +38,7 @@ public class UserApiController {
     public ResponseEntity<String> updateUser(@PathVariable Long id , @RequestBody User userToUpdate) {
     User existingUser = userRepository.findById(id).orElse(null);
     if (existingUser != null) {
-        existingUser.setNom(userToUpdate.getNom());
+        existingUser.setName(userToUpdate.getName());
         //existingUser.setUserRole(userToUpdate.getUserRole());
         userRepository.save(existingUser);
         return new ResponseEntity<>("User mis à jour avec succès", HttpStatus.OK);

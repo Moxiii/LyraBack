@@ -1,9 +1,15 @@
 package org.georges.georges.controller;
 
 import org.georges.georges.pojos.User;
+import org.georges.georges.pojos.UserRole;
 import org.georges.georges.repository.UserRepository;
+import org.georges.georges.repository.UserRoleRepository;
 import org.georges.georges.service.UserService;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -12,14 +18,22 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.security.authentication.AuthenticationManager;
+
+
+import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
+
+import java.time.LocalDateTime;
+import java.util.Date;
 
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.logging.Logger;
 
 
-
-@Controller
 @RequestMapping("/auth")
+@Controller
 public class AuthController {
     Logger log = Logger.getLogger(AuthController.class.getName());
     @Autowired
@@ -27,17 +41,23 @@ public class AuthController {
     @Autowired
     private UserService userService;
     private User userConnecte;
+    @Autowired
+    private UserRoleRepository userRoleRepository;
 
-    @GetMapping(path = {"/", "/index"})
-    public String index() {
+    @Autowired
+    private AuthenticationManager authenticationManager;
+    private final org.slf4j.Logger logger = LoggerFactory.getLogger(this.getClass());
 
-        return "index";
-    }
+
 
     @GetMapping(path = {"/login"})
     public String login(Model model) {
         model.addAttribute("user", new User());
         return "login";
+    }
+    @GetMapping("/logout")
+    public String logout() {
+        return "redirect:/auth/login";
     }
 @GetMapping(path = {"/register"})
 public String register(Model model){
@@ -52,6 +72,15 @@ public String processRegister(User user){
     if (userRepository.existsByPseudo(user.getPseudo())) {
         return "login";
     }
+    SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
+    String formattedDate = dateFormat.format(new Date());
+    user.setDateInscription(formattedDate);
+    Optional<UserRole> defaultRoleOptional = userRoleRepository.findById(2L);
+
+    if (defaultRoleOptional.isPresent()) {
+        UserRole defaultRole = defaultRoleOptional.get();
+        user.setUserRole(defaultRole);
+    }
 
     userRepository.save(user);
         return "register_success";
@@ -60,16 +89,34 @@ public String processRegister(User user){
     public String inscriptionSubmit(@ModelAttribute("user") User user, BindingResult bindingResult, Model model) {
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         // Vérifier si l'utilisateur existe dans votre système
+        logger.info("Attempting to authenticate user: {}", user.getPseudo());
         User existingUser = userService.findByUsername(user.getPseudo());
         // Définir manuellement la valeur de pseudo si elle est null
 
         if (existingUser != null) {
-            // L'utilisateur existe, vérifier le mot de passe
+            // L'utilisateur existe, vérifiez le mot de passe
             if (passwordEncoder.matches(user.getPassword(), existingUser.getPassword())) {
 
-                userConnecte = existingUser;
-                model.addAttribute("membreConnecte", userConnecte);
-                return "redirect:/";
+                // Créez un token d'authentification
+                UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(existingUser.getPseudo(), user.getPassword());
+
+                try {
+                    // Utilisez l'AuthenticationManager pour authentifier l'utilisateur
+                    Authentication authentication = authenticationManager.authenticate(token);
+
+                    // Ajoutez des logs pour indiquer que l'authentification a réussi
+                    logger.info("Authentication successful for user: {}", user.getPseudo());
+
+                    // L'utilisateur est authentifié, continuez avec le reste du traitement
+                    userConnecte = existingUser;
+                    model.addAttribute("membreConnecte", userConnecte);
+                    return "redirect:/";
+                } catch (AuthenticationException e) {
+                    logger.warn("Authentication failed for user: {}", user.getPseudo(), e);
+                    // L'authentification a échoué, redirigez vers la page de connexion avec un message d'erreur
+                    model.addAttribute("error", true);
+                    return "login";
+                }
             } else {
                 model.addAttribute("error", true);
                 return "login";

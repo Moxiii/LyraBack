@@ -3,16 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <title>Register</title>
+    <link rel="icon" href="data:,">
 </head>
 <body>
 <h1>Register</h1>
 
 <form method="post" th:action="@{/auth/process_register}" th:object="${user}">
-    <label for="pseudo">Nom d'utilisateur :</label>
+    <label for="pseudo">Pseudo :</label>
     <input autofocus id="pseudo" name="pseudo" th:field="*{pseudo}" required type="text"/>
 
-    <label for="name">Nom d'utilisateur :</label>
-    <input autofocus id="name" name="pseudo" th:field="*{nom}" required type="text"/>
+    <label for="name">Name :</label>
+    <input autofocus id="name" name="name" th:field="*{name}" required type="text"/>
     <label for="email">Email:</label>
     <input type="email" id="email" th:field="*{email}" required>
 

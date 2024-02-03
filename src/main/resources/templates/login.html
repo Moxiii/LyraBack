@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link rel="icon" href="data:,">
     <title>Login</title>
 </head>
 <body>
@@ -16,6 +17,7 @@
 </form>
 <div class="home">
     <a th:href="@{/}">return home</a>
+    <h3><a th:href="@{/auth/register}">Register</a></h3>
 </div>
 
 <div th:if="${param.error}">
