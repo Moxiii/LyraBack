@@ -9,9 +9,15 @@ public class CustomUserDetails implements UserDetails {
     private final String username;
     private final String password;
 
-    public CustomUserDetails(String username, String password) {
+    public User getUser() {
+        return user;
+    }
+
+    private final User user;
+    public CustomUserDetails(String username, String password , User user) {
         this.username = username;
         this.password = password;
+        this.user = user;
     }
 
     @Override

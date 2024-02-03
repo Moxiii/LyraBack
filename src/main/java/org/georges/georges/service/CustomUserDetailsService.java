@@ -29,7 +29,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         }
 
         // Créez et retournez une instance de UserDetails (par exemple, CustomUserDetails)
-        return new CustomUserDetails(user.getEmail(), user.getPassword());
+        return new CustomUserDetails(user.getEmail(), user.getPassword(),user);
     }
 }
 

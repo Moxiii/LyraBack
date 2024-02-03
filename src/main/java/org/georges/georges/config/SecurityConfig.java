@@ -33,13 +33,13 @@ public class SecurityConfig  {
         http
                 .csrf()
                 .ignoringRequestMatchers("/api/**")
-                    .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()) // Utilisation de CookieCsrfTokenRepository
+                    //.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()) // Utilisation de CookieCsrfTokenRepository
+                .ignoringRequestMatchers("/chat/**")
                 .and()
                 .authorizeRequests()
                 .requestMatchers("/auth/login" , "/auth/register").permitAll()
                 .requestMatchers("/favicon.ico").permitAll()
                 .requestMatchers("/api/user/**").permitAll()
-                //.requestMatchers("/","/index").authenticated()
                 .requestMatchers("/admin/**").hasAnyRole("admin")
                 .anyRequest().authenticated()
                 .and()

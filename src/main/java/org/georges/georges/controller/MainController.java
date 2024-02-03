@@ -26,15 +26,13 @@ public class MainController {
 
     @GetMapping(path = {"/", "/index"})
     public String index(Model model) {
-        logger.info("user in index controller ");
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         logger.info("Authentication object: {}", authentication);
         if (authentication != null && !(authentication instanceof AnonymousAuthenticationToken) && authentication.isAuthenticated() ) {
             Object principal = authentication.getPrincipal();
-            logger.warn("User soon auth");
             if (principal instanceof CustomUserDetails) {
                 CustomUserDetails userDetails = (CustomUserDetails) principal;
-                String username = userDetails.getUsername();
+                String username = userDetails.getUser().getPseudo();
                 model.addAttribute("pseudo", username);
                 logger.warn("User '{}' is on index controller", username);
             }

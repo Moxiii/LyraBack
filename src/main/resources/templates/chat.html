@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Chat</title>
+</head>
+<body>
+<h1>Chat</h1>
+
+<!-- Affichez la liste des messages -->
+<div th:each="message : ${messages}">
+    <p th:text="${message.sender.name + ': ' + message.prompt}"></p>
+</div>
+
+<!-- Formulaire pour envoyer un nouveau message -->
+<form action="/chat/send-message" method="post">
+    <input type="text" name="prompt" placeholder="Votre message" required>
+    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+    <button type="submit">Envoyer</button>
+</form>
+</body>
+</html>

@@ -4,13 +4,14 @@
     <title>Home</title>
 </head>
 <body>
-<h2>Welcome Home!</h2>
+<h1>Welcome home : <span th:text="${pseudo}"></span> </h1>
 <div class="container">
-    <h1>Welcome home : <span th:text="${pseudo}"></span> </h1>
+
     <h3><a th:href="@{/auth/register}">Register</a></h3>
     <h3><a th:href="@{/auth/login}">Login</a></h3>
     <h3><a th:href="@{/auth/logout}">logout</a></h3>
     <h3><a th:href="@{/api/user/getAll}">get al users </a></h3>
+    <h3><a th:href="@{/chat/message}">messages </a></h3>
 </div>
 
 </body>
