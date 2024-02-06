@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>participants</title>
+</head>
+<body>
+<div th:each="participant : ${participants}">
+    <p th:text="${participant.name + ' (' + participant.email + ')'}"></p>
+    <form action="/chat/send-message" method="post">
+        <input type="hidden" name="participantId" th:value="${participant.id}">
+        <input type="text" name="prompt" placeholder="Votre message">
+        <input type="submit" value="Envoyer">
+    </form>
+</div>
+</body>
+</html>

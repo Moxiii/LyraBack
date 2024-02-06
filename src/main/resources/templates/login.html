@@ -8,7 +8,7 @@
 <h2>Login</h2>
 <form method="post" th:action="@{/auth/login}" th:object="${user}">
     <label for="pseudo">Nom d'utilisateur :</label>
-    <input autofocus id="pseudo" name="pseudo" th:field="*{pseudo}" required type="text"/>
+    <input autofocus id="pseudo" name="pseudo" th:field="*{username}" required type="text"/>
 
     <label for="password">Mot de passe :</label>
     <input id="password" name="password" th:field="*{password}" required type="password"/>

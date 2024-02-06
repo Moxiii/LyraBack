@@ -76,7 +76,7 @@ public String processRegister(User user){
     BCryptPasswordEncoder passwordEncoder= new BCryptPasswordEncoder();
     String psswdEncoded = passwordEncoder.encode(user.getPassword());
     user.setPassword(psswdEncoded);
-    if (userRepository.existsByPseudo(user.getPseudo())) {
+    if (userRepository.existsByUsername(user.getUsername()) | userRepository.existsByEmail(user.getEmail())) {
         return "login";
     }
     SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
@@ -96,8 +96,8 @@ public String processRegister(User user){
     public String inscriptionSubmit(@ModelAttribute("user") User user, BindingResult bindingResult, Model model , HttpServletRequest req) {
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         // Vérifier si l'utilisateur existe dans votre système
-        logger.info("Attempting to authenticate user: {}", user.getPseudo());
-        User existingUser = userService.findByUsername(user.getPseudo());
+        logger.info("Attempting to authenticate user: {}", user.getUsername());
+        User existingUser = userService.findByUsername(user.getUsername());
         // Définir manuellement la valeur de pseudo si elle est null
 
         if (existingUser != null) {
@@ -105,7 +105,7 @@ public String processRegister(User user){
             if (passwordEncoder.matches(user.getPassword(), existingUser.getPassword())) {
 
                 // Créez un token d'authentification
-                UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(existingUser.getPseudo(), user.getPassword());
+                UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(existingUser.getUsername(), user.getPassword());
 
                 try {
                     // Utilisez l'AuthenticationManager pour authentifier l'utilisateur
@@ -122,14 +122,14 @@ public String processRegister(User user){
 
 
                     // Ajoutez des logs pour indiquer que l'authentification a réussi
-                    logger.info("Authentication successful for user: {}", user.getPseudo());
+                    logger.info("Authentication successful for user: {}", user.getUsername());
 
                     // L'utilisateur est authentifié, continuez avec le reste du traitement
                     userConnecte = existingUser;
                     model.addAttribute("membreConnecte", userConnecte);
                     return "redirect:/";
                 } catch (AuthenticationException e) {
-                    logger.warn("Authentication failed for user: {}", user.getPseudo(), e);
+                    logger.warn("Authentication failed for user: {}", user.getUsername(), e);
                     // L'authentification a échoué, redirigez vers la page de connexion avec un message d'erreur
                     model.addAttribute("error", true);
                     return "login";

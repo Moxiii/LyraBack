@@ -6,6 +6,7 @@ import org.georges.georges.pojos.Message;
 import org.georges.georges.pojos.User;
 import org.georges.georges.repository.UserRepository;
 import org.georges.georges.service.MessageService;
+import org.georges.georges.service.UserService;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -27,6 +28,9 @@ public class ConversationController {
     private MessageService messageService ;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private UserService userService;
+
     @GetMapping("/message")
     public String chat(Model model){
         User currentUser = SecurityUtils.getCurrentUser();
@@ -49,26 +53,28 @@ public class ConversationController {
         }
 
     @PostMapping("/send-message")
-    public String sendMessage(@RequestParam("prompt") String prompt, Model model) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails) {
-            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-            User currentUser = userDetails.getUser();
-
-            // Logique pour envoyer le message
-
-
+    public String sendMessage(
+            @RequestParam("participantId") Long participantId,
+            @RequestParam("prompt") String prompt,
+            Model model) {
+        User currentUser = SecurityUtils.getCurrentUser();
+        if (currentUser != null ) {
             // Après avoir envoyé le message, récupérez à nouveau la liste des messages et mettez à jour le modèle
             List<Message> messages = messageService.getMessagesForCurrentUser();
+
             if (messages != null) {
+                User receiver  = userService.getUserById(participantId);
+                if (receiver == null){
+                    return "redirect:/chat/message";
+                }
                 // Ajouter le nouveau message à la liste existante
-                messageService.sendMessage(currentUser, currentUser, prompt);
+                messageService.sendMessage(currentUser, receiver, prompt);
 
                 model.addAttribute("messages", messages);
 
                 logger.info("Le message est {}:" ,messages);
                 logger.info("Le prompt est {}",prompt);
-                logger.info("de {}: " , currentUser.getPseudo());
+                logger.info("de {}: " , currentUser.getUsername());
             } else {
                 logger.warn("No message");
             }
@@ -77,6 +83,18 @@ public class ConversationController {
         } else {
             // Gérez le cas où l'authentification n'est pas correcte
             return "redirect:/login"; // Redirigez vers la page de connexion, par exemple
+        }
+    }
+
+    @PostMapping("/search-participants")
+    public String searchParticipant(@RequestParam("query")  String query ,Model model ){
+        User currentUser = SecurityUtils.getCurrentUser();
+        if (currentUser != null ) {
+            List<User> participants = userService.searchParticipants(query);
+            model.addAttribute("participants", participants);
+            return "participants";
+        }else {
+            return "redirect:/";
         }
     }
 }

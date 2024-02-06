@@ -10,7 +10,7 @@
 
 <form method="post" th:action="@{/auth/process_register}" th:object="${user}">
     <label for="pseudo">Pseudo :</label>
-    <input autofocus id="pseudo" name="pseudo" th:field="*{pseudo}" required type="text"/>
+    <input autofocus id="pseudo" name="pseudo" th:field="*{username}" required type="text"/>
 
     <label for="name">Name :</label>
     <input autofocus id="name" name="name" th:field="*{name}" required type="text"/>

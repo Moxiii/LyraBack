@@ -42,4 +42,8 @@ public class Conversation {
 
     @OneToMany(mappedBy = "conversation", cascade = CascadeType.ALL)
     private List<Message> messages = new ArrayList<>();
+
+    public Conversation save(Conversation conversation) {
+        return null ;
+    }
 }

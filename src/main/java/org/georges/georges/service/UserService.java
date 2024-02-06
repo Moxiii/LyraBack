@@ -6,10 +6,7 @@
     import org.springframework.security.core.authority.SimpleGrantedAuthority;
     import org.springframework.stereotype.Service;
 
-    import java.util.ArrayList;
-    import java.util.Date;
-    import java.util.Hashtable;
-    import java.util.List;
+    import java.util.*;
     import java.util.stream.Collectors;
 
 
@@ -23,7 +20,7 @@
         }
 
         public User findByUsername(String username) {
-            User user = userRepository.findByPseudo(username);
+            User user = userRepository.findByUsername(username);
                 return user;
         }
 
@@ -32,5 +29,21 @@
         }
         public void  deleteUserById(Long userid){
              userRepository.deleteById(userid);
+        }
+
+        public List<User> searchParticipants(String query) {
+               User userByName = userRepository.findByUsername(query);
+            if (userByName != null) {
+                return Collections.singletonList(userByName);
+            }
+
+            // Recherche par nom ou e-mail partiel
+            List<User> usersByNameOrEmail = userRepository.findByUsernameContainingOrEmailContaining(query, query);
+            return usersByNameOrEmail;
+        }
+
+        public User getUserById(Long id) {
+            User user = userRepository.getById(id);
+            return user;
         }
     }

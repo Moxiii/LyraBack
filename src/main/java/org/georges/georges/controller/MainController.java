@@ -32,7 +32,7 @@ public class MainController {
             Object principal = authentication.getPrincipal();
             if (principal instanceof CustomUserDetails) {
                 CustomUserDetails userDetails = (CustomUserDetails) principal;
-                String username = userDetails.getUser().getPseudo();
+                String username = userDetails.getUser().getUsername();
                 model.addAttribute("pseudo", username);
                 logger.warn("User '{}' is on index controller", username);
             }

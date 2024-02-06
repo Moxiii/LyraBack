@@ -37,7 +37,7 @@ public class SecurityConfig  {
                 .ignoringRequestMatchers("/chat/**")
                 .and()
                 .authorizeRequests()
-                .requestMatchers("/auth/login" , "/auth/register").permitAll()
+                .requestMatchers("/auth/login" , "/auth/register", "/auth/process_register").permitAll()
                 .requestMatchers("/favicon.ico").permitAll()
                 .requestMatchers("/api/user/**").permitAll()
                 .requestMatchers("/admin/**").hasAnyRole("admin")

@@ -18,5 +18,13 @@
     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
     <button type="submit">Envoyer</button>
 </form>
+<form action="/chat/search-participants" method="post">
+    <input type="text" name="query" placeholder="Rechercher un participant">
+    <input type="submit" value="Rechercher">
+</form>
+
+
+
+<a th:href="@{/}">return home</a>
 </body>
 </html>

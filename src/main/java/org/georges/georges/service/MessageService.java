@@ -1,6 +1,7 @@
 package org.georges.georges.service;
 
 import org.georges.georges.controller.AuthController;
+import org.georges.georges.pojos.Conversation;
 import org.georges.georges.pojos.Message;
 import org.georges.georges.pojos.User;
 import org.georges.georges.repository.MessageRepository;
@@ -49,7 +50,7 @@ public class MessageService {
     public List<Message> getMessagesForCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String currentUsername = authentication.getName();
-        User currentUser = userRepository.findByPseudo(currentUsername);
+        User currentUser = userRepository.findByUsername(currentUsername);
 
         // Récupérez tous les messages associés à l'utilisateur actuel (en tant qu'expéditeur ou destinataire)
         List<Message> sentMessages = messageRepository.findBySender(currentUser);
@@ -71,5 +72,8 @@ public class MessageService {
 
         // Enregistrez le message dans la base de données
         messageRepository.save(message);
+    }
+    public void addMessagetoConversation(Message message , Conversation conversation){
+        message.setConversation(conversation);
     }
 }

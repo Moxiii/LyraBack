@@ -17,8 +17,8 @@ public class User {
     private UserRole userRole;
     @NotBlank(message = "Le champ nom n'est pas renseigné")
     private String name;
-    @NotBlank(message = "Le champ pseudo n'est pas renseigné")
-    private String pseudo;
+    @NotBlank(message = "Le champ Username n'est pas renseigné")
+    private String username;
     @NotBlank(message = "Le champ email n'est pas renseigné")
     @Email(message = "L'email n'est pas valide")
     private String email;
@@ -32,9 +32,9 @@ public class User {
 
     private static final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-    public User(String name, String pseudo, String email, String password, String dateInscription, UserRole userRole) {
+    public User(String name, String username, String email, String password, String dateInscription, UserRole userRole) {
         this.name = name;
-        this.pseudo = pseudo;
+        this.username = username;
         this.email = email;
         this.password = passwordEncoder.encode(password);
         this.dateInscription = dateInscription;
@@ -68,8 +68,8 @@ public User(){}
         this.name = name;
     }
 
-    public void setPseudo(String pseudo) {
-        this.pseudo = pseudo;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public void setEmail(String email) {
@@ -84,8 +84,8 @@ public User(){}
         this.dateInscription = dateInscription;
     }
 
-    public String getPseudo() {
-        return pseudo;
+    public String getUsername() {
+        return username;
     }
 
     public String getEmail() {
