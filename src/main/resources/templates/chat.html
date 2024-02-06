@@ -8,7 +8,7 @@
 <h1>Chat</h1>
 
 <!-- Affichez la liste des messages -->
-<div th:each="message : ${messages}">
+<div th:each="message : ${messages}" >
     <p th:text="${message.sender.name + ': ' + message.prompt}"></p>
 </div>
 

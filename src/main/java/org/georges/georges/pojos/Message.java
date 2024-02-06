@@ -74,6 +74,7 @@ public class Message {
                 ", conversation=" + conversation +
                 ", prompt='" + prompt + '\'' +
                 ", receiver=" + receiver +
+                ",sender="+sender+
                 ", timestamp=" + timestamp +
                 '}';
     }
