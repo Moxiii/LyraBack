@@ -9,6 +9,8 @@ import org.georges.georges.service.MessageService;
 import org.georges.georges.service.UserService;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -30,6 +32,8 @@ public class ConversationController {
     private UserRepository userRepository;
     @Autowired
     private UserService userService;
+
+
 
     @GetMapping("/message")
     public String chat(Model model){
@@ -96,5 +100,10 @@ public class ConversationController {
         }else {
             return "redirect:/";
         }
+    }
+
+    @MessageMapping("/private-message")
+    public Message receivePrivateMessage(@Payload Message message){
+        return message;
     }
 }

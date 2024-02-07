@@ -28,23 +28,29 @@ public class MessageService {
         this.messageRepository = messageRepository;
         this.userRepository = userRepository;
     }
+
+
+
     public List<Message> getMessagesBetweenUsers(Long senderId, Long receiverId) {
         return messageRepository.findBySenderIdAndReceiverIdOrderByTimestampAsc(senderId, receiverId);
     }
-    public void saveMessage(Message message) {
+    public Message saveMessage(Message message) {
         // Assurez-vous que les utilisateurs existent dans la base de données
         Optional<User> optionalSender = userRepository.findById(message.getSender().getId());
         Optional<User> optionalReceiver = userRepository.findById(message.getReceiver().getId());
 
-        optionalSender.ifPresent(sender -> {
-            optionalReceiver.ifPresent(receiver -> {
-                message.setSender(sender);
-                message.setReceiver(receiver);
-                message.setTimestamp(new Date());
+        if (optionalSender.isPresent() && optionalReceiver.isPresent()) {
+            message.setSender(optionalSender.get());
+            message.setReceiver(optionalReceiver.get());
+            message.setTimestamp(new Date());
 
-                messageRepository.save(message);
-            });
-        });
+            // Sauvegarder le message dans la base de données
+            return messageRepository.save(message);
+        } else {
+            // Gérer le cas où l'un des utilisateurs n'existe pas
+            // ou renvoyer null ou jeter une exception, selon votre logique métier
+            return null;
+        }
     }
 
     public List<Message> getMessagesForCurrentUser() {

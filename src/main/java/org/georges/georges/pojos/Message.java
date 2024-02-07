@@ -1,21 +1,44 @@
 package org.georges.georges.pojos;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
 
 import java.util.Date;
 
 @Entity
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Message {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
+    }
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User sender;
     @ManyToOne
     @JoinColumn(name = "receiver_id")
     private User receiver;
-
+private Status status;
     public User getReceiver() {
         return receiver;
     }
@@ -56,14 +79,14 @@ public class Message {
         this.timestamp = timestamp;
     }
 
-    private String prompt;
+    private String content;
 
-    public String getPrompt() {
-        return prompt;
+    public String getContent() {
+        return content;
     }
 
-    public void setPrompt(String prompt) {
-        this.prompt = prompt;
+    public void setContent(String content) {
+        this.content = content;
     }
 
     // string format  :
@@ -72,10 +95,17 @@ public class Message {
         return "Message{" +
                 "id=" + id +
                 ", conversation=" + conversation +
-                ", prompt='" + prompt + '\'' +
+                ", content='" + content + '\'' +
                 ", receiver=" + receiver +
                 ",sender="+sender+
                 ", timestamp=" + timestamp +
                 '}';
+    }
+
+    public Long getReceiverId() {
+        if (receiver != null) {
+            return receiver.getId();
+        }
+        return null;
     }
 }

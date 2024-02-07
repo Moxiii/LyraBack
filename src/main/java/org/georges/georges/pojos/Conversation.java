@@ -1,6 +1,9 @@
 package org.georges.georges.pojos;
 import jakarta.persistence.*;
 import jakarta.persistence.Entity;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
 
 import java.util.HashSet;
 import java.util.List;
@@ -22,7 +25,13 @@ public class Conversation {
 
     private Set<User> participants = new HashSet<>();
 
+    public String getConversationId() {
+        return id.toString();
+    }
 
+    public void setConversationId(Long id) {
+        this.id = id;
+    }
 
     public Set<User> getParticipants() {
         return participants;
