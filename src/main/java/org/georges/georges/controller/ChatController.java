@@ -66,11 +66,11 @@ public class ChatController {
             // Gérer le cas où l'un des utilisateurs n'existe pas
             return;
         }
-
         // Créer un objet Message et l'enregistrer
         User sender = optionalSender.get();
         User receiver = optionalReceiver.get();
         Message message = new Message(sender, receiver, content);
+
         message.setTimestamp(new Date()); // Définir le timestamp
 
         // Enregistrez le message dans la base de données
@@ -80,7 +80,9 @@ public class ChatController {
             simpMessagingtemplate.convertAndSendToUser(receiver.getId().toString(), "queue/messages", ChatNotification.builder()
                     .id(savedMessage.getId())
                     .senderId(savedMessage.getSender().getId())
+                    .senderName(savedMessage.getSender().getName())
                     .receiverId(savedMessage.getReceiver().getId())
+                    .receiverName(savedMessage.getReceiver().getName())
                     .content(savedMessage.getContent())
                     .build()
             );

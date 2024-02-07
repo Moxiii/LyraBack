@@ -51,10 +51,11 @@
         stompClient = Stomp.over(socket);
         stompClient.connect({}, function (frame) {
             console.log('Connected: ' + frame);
-            stompClient.subscribe('/user/queue/messages', function (message) {
+            stompClient.subscribe('/user/13/queue/messages', function (message) {
                 console.log('Received message: ' + message);
                 showMessage(JSON.parse(message.body));
             });
+            console.log('Subscribed to /user/13/queue/messages');
         });
     }
 
@@ -71,7 +72,7 @@
     // Afficher le message reçu
     function showMessage(message) {
         console.log("Received message: " + JSON.stringify(message));
-        $('#messageList').append('<li class="list-group-item">' + message.content + '</li>');
+        $('#messageList').append('<li class="list-group-item">' +message.senderName +":"+ message.content + '</li>');
     }
 
     $(function () {
