@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Chat Application</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-6">
+            <h2>Send Message</h2>
+            <form id="messageForm">
+                    <input type="hidden" id="currentUser" th:value="${currentUserId}" />
+                <p>User ID: <span th:text="${currentUserId}"></span></p>
+
+                <div class="form-group">
+                    <label for="receiverId">Receiver ID:</label>
+                    <input type="text" id="receiverId" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="content">Message:</label>
+                    <textarea id="content" class="form-control" rows="4" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Send</button>
+            </form>
+        </div>
+        <div class="col-md-6">
+            <h2>Received Messages</h2>
+            <ul id="messageList" class="list-group">
+                <!-- Messages will be displayed here -->
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap JS and jQuery -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<!-- WebSocket JS -->
+<script  src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
+<script t src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+<script>
+    var stompClient = null;
+
+    // Se connecter au point de terminaison WebSocket
+    function connect() {
+        var socket = new SockJS('/ws');
+        stompClient = Stomp.over(socket);
+        stompClient.connect({}, function (frame) {
+            console.log('Connected: ' + frame);
+            stompClient.subscribe('/user/queue/messages', function (message) {
+                console.log('Received message: ' + message);
+                showMessage(JSON.parse(message.body));
+            });
+        });
+    }
+
+    // Envoyer un message via WebSocket
+    function sendMessage() {
+        var senderId = parseInt($('#currentUser').val());
+        var receiverId = parseInt($('#receiverId').val());
+        var content = $('#content').val();
+        var message = { user_id: senderId, receiver_id: receiverId, content: content };
+        console.log('Sending message: ' + JSON.stringify(message));
+        stompClient.send("/app/chat/process", {}, JSON.stringify(message));
+    }
+
+    // Afficher le message reçu
+    function showMessage(message) {
+        console.log("Received message: " + JSON.stringify(message));
+        $('#messageList').append('<li class="list-group-item">' + message.content + '</li>');
+    }
+
+    $(function () {
+        $('#messageForm').on('submit', function (e) {
+            e.preventDefault();
+            sendMessage();
+        });
+        connect();
+    });
+
+
+</script>
+
+</body>
+</html>

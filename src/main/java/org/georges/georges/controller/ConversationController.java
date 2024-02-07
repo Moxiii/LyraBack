@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
-@RequestMapping("/chat/")
+
 @Controller
 public class ConversationController {
     private final org.slf4j.Logger logger = LoggerFactory.getLogger(this.getClass());

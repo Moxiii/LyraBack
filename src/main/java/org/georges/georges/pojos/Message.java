@@ -1,16 +1,18 @@
 package org.georges.georges.pojos;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.Date;
-
+@Getter
+@Setter
 @Entity
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
+
 public class Message {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,14 +25,8 @@ public class Message {
     public void setId(Long id) {
         this.id = id;
     }
+    private String content;
 
-    public Status getStatus() {
-        return status;
-    }
-
-    public void setStatus(Status status) {
-        this.status = status;
-    }
 
     @ManyToOne
     @JoinColumn(name = "user_id")
@@ -38,57 +34,20 @@ public class Message {
     @ManyToOne
     @JoinColumn(name = "receiver_id")
     private User receiver;
-private Status status;
-    public User getReceiver() {
-        return receiver;
-    }
-
-    public void setReceiver(User receiver) {
-        this.receiver = receiver;
-    }
 
     @ManyToOne
     @JoinColumn(name = "conversation_id")
     private Conversation conversation;
 
     @Temporal(TemporalType.TIMESTAMP)
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "UTC")
+    @JsonFormat(pattern = "dd-MM-YYYY HH:mm:ss", timezone = "UTC")
     private Date timestamp;
 
-    public User getSender() {
-        return sender;
-    }
-
-    public void setSender(User sender) {
+    public Message(User sender, User receiver, String content) {
         this.sender = sender;
-    }
-
-    public Conversation getConversation() {
-        return conversation;
-    }
-
-    public void setConversation(Conversation conversation) {
-        this.conversation = conversation;
-    }
-
-    public Date getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(Date timestamp) {
-        this.timestamp = timestamp;
-    }
-
-    private String content;
-
-    public String getContent() {
-        return content;
-    }
-
-    public void setContent(String content) {
+        this.receiver = receiver;
         this.content = content;
     }
-
     // string format  :
     @Override
     public String toString() {
@@ -102,10 +61,5 @@ private Status status;
                 '}';
     }
 
-    public Long getReceiverId() {
-        if (receiver != null) {
-            return receiver.getId();
-        }
-        return null;
-    }
+
 }

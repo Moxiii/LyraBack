@@ -1,5 +1,6 @@
 package org.georges.georges.controller;
 
+import org.georges.georges.config.SecurityUtils;
 import org.georges.georges.pojos.CustomUserDetails;
 import org.georges.georges.pojos.User;
 import org.georges.georges.service.UserService;
@@ -40,6 +41,12 @@ public class MainController {
             logger.warn("Anonymous user !");
         }
         return "index";
+    }
+    @GetMapping("/websocket")
+    public  String ChatPage(Model model){
+        User currentUser = SecurityUtils.getCurrentUser();
+        model.addAttribute("currentUserId", currentUser.getId());
+        return "websocket";
     }
     }
 

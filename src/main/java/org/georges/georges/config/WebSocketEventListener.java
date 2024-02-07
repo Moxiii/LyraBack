@@ -13,14 +13,5 @@ import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 @Slf4j
 public class WebSocketEventListener {
 
-    public void handleWebSocketDisconnectListener(SessionDisconnectEvent event){
-        StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
-        String username =  (String) headerAccessor.getSessionAttributes().get("username");
-        if (username !=null){
-            log.info("User disconnected : {}" + username);
-            var chatMessage = Message.builder()
-                    .status(Status.Offline)
-                    .build();
-        }
-    }
+
 }

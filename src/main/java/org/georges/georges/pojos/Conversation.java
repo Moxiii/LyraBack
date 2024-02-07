@@ -12,6 +12,35 @@ import java.util.ArrayList;
 
 @Entity
 public class Conversation {
+    @Column(name = "sender_id")
+    private Long senderId;
+
+    public Long getSenderId() {
+        return senderId;
+    }
+
+    public void setSenderId(Long senderId) {
+        this.senderId = senderId;
+    }
+
+    public Long getReceiverId() {
+        return receiverId;
+    }
+
+    public void setReceiverId(Long receiverId) {
+        this.receiverId = receiverId;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    @Column(name = "receiver_id")
+    private Long receiverId;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -21,6 +50,7 @@ public class Conversation {
             joinColumns = @JoinColumn(name = "conversation_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
+
 
 
     private Set<User> participants = new HashSet<>();

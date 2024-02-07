@@ -38,7 +38,7 @@ public class SecurityConfig  {
                 .and()
                 .authorizeRequests()
                 .requestMatchers("/auth/login" , "/auth/register", "/auth/process_register").permitAll()
-                .requestMatchers("/favicon.ico").permitAll()
+                .requestMatchers("favicon.ico").denyAll()
                 .requestMatchers("/api/user/**").permitAll()
                 .requestMatchers("/admin/**").hasAnyRole("admin")
                 .anyRequest().authenticated()

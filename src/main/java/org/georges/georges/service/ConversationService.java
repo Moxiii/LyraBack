@@ -24,7 +24,7 @@ private final MessageRepository messageRepository;
     }
 
     public List<Message> findChatMessages(Long senderId, Long recipientId) {
-        Optional<Conversation> conversationOptional = conversationRepository.findBySenderIdAndRecipientId(senderId, recipientId);
+        Optional<Conversation> conversationOptional = conversationRepository.findBySenderIdAndReceiverId(senderId, recipientId);
 
         if (conversationOptional.isPresent()) {
             Conversation conversation = conversationOptional.get();
@@ -36,7 +36,7 @@ private final MessageRepository messageRepository;
     }
 
     public Optional<String> getConversationId(Long senderId, Long receiverId, boolean createNewConvIfNotExists) {
-        Optional<Conversation> conversationOptional = conversationRepository.findBySenderIdAndreceiverId(senderId, receiverId);
+        Optional<Conversation> conversationOptional = conversationRepository.findBySenderIdAndReceiverId(senderId, receiverId);
 
         if (conversationOptional.isPresent()) {
             // Renvoyer l'identifiant de la conversation s'il existe
@@ -76,5 +76,8 @@ private final MessageRepository messageRepository;
             // Gérer le cas où l'un des utilisateurs n'existe pas
             throw new IllegalArgumentException("Sender or receiver not found");
         }
+    }
+    public List<Message> getAllMessagesByReceiverId(Long receiverId) {
+        return messageRepository.findByReceiverIdOrderByTimestampAsc(receiverId);
     }
 }

@@ -1,5 +1,6 @@
 package org.georges.georges.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.georges.georges.controller.AuthController;
 import org.georges.georges.pojos.Conversation;
 import org.georges.georges.pojos.Message;
@@ -16,10 +17,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
-
+@Slf4j
 @Service
 public class MessageService {
-    Logger log = Logger.getLogger(AuthController.class.getName());
+
     private final MessageRepository messageRepository;
     private final UserRepository userRepository;
 
@@ -31,24 +32,30 @@ public class MessageService {
 
 
 
-    public List<Message> getMessagesBetweenUsers(Long senderId, Long receiverId) {
+       public List<Message> getMessagesBetweenUsers(Long senderId, Long receiverId) {
         return messageRepository.findBySenderIdAndReceiverIdOrderByTimestampAsc(senderId, receiverId);
     }
     public Message saveMessage(Message message) {
         // Assurez-vous que les utilisateurs existent dans la base de données
-        Optional<User> optionalSender = userRepository.findById(message.getSender().getId());
-        Optional<User> optionalReceiver = userRepository.findById(message.getReceiver().getId());
+        if (message.getSender() != null && message.getReceiver() != null) {
+            Optional<User> optionalSender = userRepository.findById(message.getSender().getId());
+            Optional<User> optionalReceiver = userRepository.findById(message.getReceiver().getId());
 
-        if (optionalSender.isPresent() && optionalReceiver.isPresent()) {
-            message.setSender(optionalSender.get());
-            message.setReceiver(optionalReceiver.get());
-            message.setTimestamp(new Date());
+            if (optionalSender.isPresent() && optionalReceiver.isPresent()) {
+                message.setSender(optionalSender.get());
+                message.setReceiver(optionalReceiver.get());
+                message.setTimestamp(new Date());
 
-            // Sauvegarder le message dans la base de données
-            return messageRepository.save(message);
+                // Sauvegarder le message dans la base de données
+                return messageRepository.save(message);
+            } else {
+                log.warn("Le sender est ou le receiver nest pas present ");
+                return null;
+            }
         } else {
-            // Gérer le cas où l'un des utilisateurs n'existe pas
+            // Gérer le cas où l'un des expéditeurs ou des destinataires est null
             // ou renvoyer null ou jeter une exception, selon votre logique métier
+            log.warn("Le sender est ou le receiver est vide ");
             return null;
         }
     }
@@ -68,12 +75,12 @@ public class MessageService {
 
         return allMessages;
     }
-    public void sendMessage(User sender, User receiver, String prompt) {
+    public void sendMessage(User sender, User receiver, String content) {
         // Créez une instance de Message
         Message message = new Message();
         message.setSender(sender);
         message.setReceiver(receiver);
-        message.setPrompt(prompt);
+        message.setContent(content);
         message.setTimestamp(new Date());
 
         // Enregistrez le message dans la base de données
