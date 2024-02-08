@@ -2,8 +2,10 @@
 
     import org.georges.georges.pojos.User;
     import org.georges.georges.repository.UserRepository;
+    import org.springframework.beans.factory.annotation.Autowired;
     import org.springframework.security.core.GrantedAuthority;
     import org.springframework.security.core.authority.SimpleGrantedAuthority;
+    import org.springframework.security.crypto.password.PasswordEncoder;
     import org.springframework.stereotype.Service;
 
     import java.util.*;
@@ -14,7 +16,8 @@
     public class UserService {
         private final UserRepository userRepository;
 
-
+@Autowired
+private PasswordEncoder passwordEncoder;
         public UserService(UserRepository userRepository) {
             this.userRepository = userRepository;
         }
@@ -45,5 +48,16 @@
         public User getUserById(Long id) {
             User user = userRepository.getById(id);
             return user;
+        }
+
+        public User createUser(User user) {
+            // Encoder le mot de passe brut
+            String encodedPassword = passwordEncoder.encode(user.getPassword());
+
+            // Définir le mot de passe encodé sur l'utilisateur
+            user.setPassword(encodedPassword);
+
+            // Sauvegarder l'utilisateur dans la base de données
+            return userRepository.save(user);
         }
     }

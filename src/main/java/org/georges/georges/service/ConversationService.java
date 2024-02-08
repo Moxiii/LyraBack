@@ -1,5 +1,6 @@
 package org.georges.georges.service;
 
+import jakarta.transaction.Transactional;
 import org.georges.georges.pojos.Conversation;
 import org.georges.georges.pojos.Message;
 import org.georges.georges.pojos.User;
@@ -40,12 +41,12 @@ private final MessageRepository messageRepository;
 
         if (conversationOptional.isPresent()) {
             // Renvoyer l'identifiant de la conversation s'il existe
-            return conversationOptional.map(conversation -> conversation.getConversationId());
+            return conversationOptional.map(conversation -> conversation.getId().toString());
         } else {
             if (createNewConvIfNotExists) {
                 // Créer une nouvelle conversation et renvoyer son identifiant
                 Conversation newConversation= createConversation(senderId, receiverId);
-                return Optional.of(newConversation.getConversationId().toString());
+                return Optional.of(newConversation.getId().toString());
             } else {
                 // Aucune conversation trouvée et ne pas créer de nouvelle conversation
                 return Optional.empty();
@@ -80,4 +81,48 @@ private final MessageRepository messageRepository;
     public List<Message> getAllMessagesByReceiverId(Long receiverId) {
         return messageRepository.findByReceiverIdOrderByTimestampAsc(receiverId);
     }
-}
+
+    public Conversation createOrGetConversation(Set<Long> participantIds) {
+        // Rechercher toutes les conversations impliquant ces participants
+        List<Conversation> existingConversations = findConversationsByParticipantIds(participantIds);
+
+        if (!existingConversations.isEmpty()) {
+            // Si des conversations existent déjà, renvoyer la première conversation trouvée
+            return existingConversations.get(0);
+        } else {
+            // Si aucune conversation n'existe, créer une nouvelle conversation
+            Conversation newConversation = new Conversation();
+            newConversation.setParticipants(new HashSet<>());
+
+            // Ajouter les participants à la conversation
+            for (Long participantId : participantIds) {
+                Optional<User> participant = userRepository.findById(participantId);
+                participant.ifPresent(user -> newConversation.getParticipants().add(user));
+            }
+
+            // Enregistrer la conversation dans la base de données
+            return conversationRepository.save(newConversation);
+        }
+    }
+
+
+    public List<Conversation> findConversationsByParticipantId(Long userId) {
+        // Recherchez toutes les conversations où l'utilisateur est l'expéditeur ou le destinataire
+        return conversationRepository.findBySenderIdOrReceiverId(Collections.singleton(userId));
+    }
+
+
+    @Transactional
+    public List<Conversation> findConversationsByParticipantIds(Set<Long> participantIds) {
+        // Recherchez les utilisateurs en fonction de leurs identifiants
+        List<User> participants = userRepository.findAllById(participantIds);
+
+        // Recherchez toutes les conversations impliquant ces participants
+        return conversationRepository.findBySenderIdOrReceiverId(participantIds);
+    }
+
+    private List<Message> findMessagesByParticipants(Set<Long> participantIds) {
+        // Recherchez tous les messages entre les participants
+        return messageRepository.findBySenderIdInAndReceiverIdIn(participantIds, participantIds);
+
+    }}

@@ -3,10 +3,13 @@ package org.georges.georges.pojos;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.data.annotation.Id;
 
 import java.util.List;
-
+@Getter
+@Setter
 @Entity
 public class UserRole {
     @OneToMany(mappedBy = "userRole" , fetch = FetchType.LAZY)
@@ -28,29 +31,7 @@ public class UserRole {
     }
     public UserRole(){}
 
-    public String getNom() {
-        return role;
-    }
 
-    public void setNom(String role) {
-        this.role = role;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
     public List<User> getUserList() {
         return userList;
     }

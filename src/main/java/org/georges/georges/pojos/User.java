@@ -5,13 +5,20 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.Set;
 
 
+@Getter
+@Setter
 @Entity
 public class User {
+    @ManyToMany(mappedBy = "participants")
+    private Set<Conversation> conversations;
     @ManyToOne(fetch = FetchType.LAZY)
     @JsonBackReference
     private UserRole userRole;
@@ -43,61 +50,11 @@ public class User {
 
 public User(){}
 
-    public UserRole getUserRole() {
-        return userRole;
-    }
-
-    public void setUserRole(UserRole userRole) {
-        this.userRole = userRole;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = Long.valueOf(id);
-    }
-
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setUsername(String username) {
+    public User(String username, String mail, String rawPassword) {
         this.username = username;
+        this.email = mail;
+        this.password = rawPassword;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public void setDateInscription(String dateInscription) {
-        this.dateInscription = dateInscription;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public String getDateInscription() {
-        return dateInscription;
-    }
 }
 

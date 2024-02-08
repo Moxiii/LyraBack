@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Set;
 
 @Repository
 public interface MessageRepository extends JpaRepository<Message, Long> {
@@ -15,4 +16,5 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
     List<Message> findBySender(User currentUser);
 
     List<Message> findByReceiver(User currentUser);
+    List<Message> findBySenderIdInAndReceiverIdIn(Set<Long> participantIds, Set<Long> participantIds1);
 }
