@@ -22,7 +22,10 @@ private PasswordEncoder passwordEncoder;
             User user = userRepository.findByUsername(username);
                 return user;
         }
-
+        public User findByEmail(String email) {
+            User user = userRepository.findByEmail(email);
+            return user;
+        }
         public void deleteUserByEmail(String Email){
             userRepository.deleteByEmail(Email);
         }

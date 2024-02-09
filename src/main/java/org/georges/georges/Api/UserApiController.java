@@ -1,25 +1,41 @@
 package org.georges.georges.Api;
 
+import jakarta.servlet.http.HttpSession;
+import lombok.extern.slf4j.Slf4j;
 import org.georges.georges.User.User;
 import org.georges.georges.User.UserRole.UserRepository;
+import org.georges.georges.User.UserRole.UserRole;
 import org.georges.georges.User.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+
+import static org.springframework.security.web.context.HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY;
+@Slf4j
 @RequestMapping("api/user")
 @RestController
 public class UserApiController {
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+
     @Autowired
     private UserService userService;
     @Autowired
     private UserRepository userRepository;
+
     @GetMapping("/getAll")
     public List<User> getAllUsers() {
         List<User> allUser = userRepository.findAll();
@@ -57,18 +73,6 @@ public class UserApiController {
         }
     }
 
- @PostMapping("/create")
- public ResponseEntity<String> createUser(@RequestBody User user){
-        try{
-            BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-            String encodedPassword = passwordEncoder.encode(user.getPassword());
-            user.setPassword(encodedPassword);
-            userRepository.save(user);
-            return new ResponseEntity<>("User creer avec sucess"  , HttpStatus.CREATED);
-        }catch (Exception e){
-            e.printStackTrace();
-            return new ResponseEntity<>("Erreur dans la creation de l'user "  , HttpStatus.INTERNAL_SERVER_ERROR);
-        }
- }
+
 }
 

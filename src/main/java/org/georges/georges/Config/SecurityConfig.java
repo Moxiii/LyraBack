@@ -9,6 +9,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.firewall.StrictHttpFirewall;
 
 
 @Configuration
@@ -24,31 +25,37 @@ public class SecurityConfig  {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();}
-
+    @Bean
+    public StrictHttpFirewall httpFirewall() {
+        StrictHttpFirewall firewall = new StrictHttpFirewall();
+        firewall.setAllowSemicolon(true); // Autoriser le point-virgule dans les URLs
+        return firewall;
+    }
     @Bean
     public SecurityFilterChain securityfilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf()
-                .ignoringRequestMatchers("/api/**")
+                    .ignoringRequestMatchers("/api/**")
+                    //.ignoringRequestMatchers(request -> request.getServletPath().contains("jsessionid"))
                     //.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()) // Utilisation de CookieCsrfTokenRepository
                 .ignoringRequestMatchers("/chat/**")
                 .and()
                 .authorizeRequests()
-                .requestMatchers("/auth/login" , "/auth/register", "/auth/process_register").permitAll()
+                .requestMatchers("/private/**").permitAll()
                 .requestMatchers("favicon.ico").denyAll()
-                .requestMatchers("/api/user/**").permitAll()
+                .requestMatchers("/api/**").permitAll()
                 .requestMatchers("/admin/**").hasAnyRole("admin")
                 .anyRequest().authenticated()
                 .and()
                 .formLogin()
-                    .loginPage("/auth/login") // Spécifiez l'URL de votre page de connexion personnalisée
+                    .loginPage("/private/auth/login" ) // Spécifiez l'URL de votre page de connexion personnalisée
                     .loginProcessingUrl("/process-login")
                     .defaultSuccessUrl("/index")
                     .failureUrl("/custom-login?error=true")
                     .permitAll()
                 .and()
                     .logout()
-                    .logoutSuccessUrl("/auth/logout")
+                    .logoutSuccessUrl("/private/auth/logout")
                     .invalidateHttpSession(true)
                     .deleteCookies("JSESSIONID")
                     .permitAll();

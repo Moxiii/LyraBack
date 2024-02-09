@@ -36,7 +36,7 @@ import java.util.logging.Logger;
 import static org.springframework.security.web.context.HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY;
 
 
-@RequestMapping("/auth")
+@RequestMapping("private/auth")
 @Controller
 public class AuthController {
     Logger log = Logger.getLogger(AuthController.class.getName());
@@ -61,7 +61,7 @@ public class AuthController {
     }
     @GetMapping("/logout")
     public String logout() {
-        return "redirect:/auth/login";
+        return "redirect:/private/auth/login";
     }
 @GetMapping(path = {"/register"})
 public String register(Model model){
@@ -79,7 +79,7 @@ public String processRegister(User user){
     SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
     String formattedDate = dateFormat.format(new Date());
     user.setDateInscription(formattedDate);
-    Optional<UserRole> defaultRoleOptional = userRoleRepository.findById(2L);
+    Optional<UserRole> defaultRoleOptional = userRoleRepository.findById(1L);
 
     if (defaultRoleOptional.isPresent()) {
         UserRole defaultRole = defaultRoleOptional.get();
@@ -136,7 +136,7 @@ public String processRegister(User user){
                 return "login";
             }
         } else {
-            return "redirect:/auth/register";
+            return "redirect:/private/auth/register";
         }
     }
 

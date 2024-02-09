@@ -8,7 +8,7 @@
 <body>
 <h1>Register</h1>
 
-<form method="post" th:action="@{/auth/process_register}" th:object="${user}">
+<form method="post" th:action="@{/private/auth/process_register}" th:object="${user}">
     <label for="pseudo">Pseudo :</label>
     <input autofocus id="pseudo" name="pseudo" th:field="*{username}" required type="text"/>
 
