@@ -1,10 +1,10 @@
 package org.georges.georges.test.Message;
 
-import org.georges.georges.pojos.Message;
-import org.georges.georges.pojos.User;
-import org.georges.georges.repository.MessageRepository;
-import org.georges.georges.repository.UserRepository;
-import org.georges.georges.service.MessageService;
+import org.georges.georges.Message.Message;
+import org.georges.georges.User.User;
+import org.georges.georges.Message.MessageRepository;
+import org.georges.georges.User.UserRole.UserRepository;
+import org.georges.georges.Message.MessageService;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;

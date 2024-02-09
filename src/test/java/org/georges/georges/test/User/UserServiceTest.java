@@ -1,8 +1,8 @@
 package org.georges.georges.test.User;
 
-import org.georges.georges.pojos.User;
-import org.georges.georges.repository.UserRepository;
-import org.georges.georges.service.UserService;
+import org.georges.georges.User.User;
+import org.georges.georges.User.UserRole.UserRepository;
+import org.georges.georges.User.UserService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -10,8 +10,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
-import java.util.Collections;
-import java.util.List;
 
 @ExtendWith(MockitoExtension.class)
 public class UserServiceTest {

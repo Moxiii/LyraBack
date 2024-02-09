@@ -1,14 +1,10 @@
 package org.georges.georges.test.User;
 
-import org.georges.georges.pojos.User;
-import org.georges.georges.repository.UserRepository;
-import org.georges.georges.service.UserService;
-import org.junit.jupiter.api.BeforeEach;
+import org.georges.georges.User.User;
+import org.georges.georges.User.UserRole.UserRepository;
+import org.georges.georges.User.UserService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -16,9 +12,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import static org.mockito.Mockito.*;
-import static org.junit.jupiter.api.Assertions.*;
-import java.util.HashSet;
-import java.util.Set;
+
 @SpringBootTest
 @ExtendWith(MockitoExtension.class)
 class UserTest {

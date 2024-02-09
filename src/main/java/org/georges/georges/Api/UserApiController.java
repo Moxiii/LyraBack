@@ -1,8 +1,8 @@
 package org.georges.georges.Api;
 
-import org.georges.georges.pojos.User;
-import org.georges.georges.repository.UserRepository;
-import org.georges.georges.service.UserService;
+import org.georges.georges.User.User;
+import org.georges.georges.User.UserRole.UserRepository;
+import org.georges.georges.User.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

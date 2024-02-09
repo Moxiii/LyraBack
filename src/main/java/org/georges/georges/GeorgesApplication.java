@@ -1,14 +1,14 @@
 package org.georges.georges;
 
-import org.georges.georges.pojos.UserRole;
-import org.georges.georges.repository.UserRoleRepository;
+import org.georges.georges.User.UserRole.UserRole;
+import org.georges.georges.User.UserRole.UserRoleRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.bind.annotation.RestController;
-import org.georges.georges.pojos.User;
-import org.georges.georges.repository.UserRepository;
+import org.georges.georges.User.User;
+import org.georges.georges.User.UserRole.UserRepository;
 
 
 @RestController
