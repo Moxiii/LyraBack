@@ -3,12 +3,13 @@ package org.georges.georges.Auth;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
+import org.georges.georges.Config.JwtUtil;
+import org.georges.georges.Response.LoginRes;
 import org.georges.georges.User.User;
 import org.georges.georges.User.UserRole.UserRole;
 import org.georges.georges.User.UserRole.UserRepository;
 import org.georges.georges.User.UserRole.UserRoleRepository;
 import org.georges.georges.User.UserService;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -32,7 +33,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import java.util.Optional;
-import java.util.logging.Logger;
 
 import static org.springframework.security.web.context.HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY;
 
@@ -51,7 +51,8 @@ public class AuthController {
 
     @Autowired
     private AuthenticationManager authenticationManager;
-
+    @Autowired
+    private JwtUtil jwtUtil;
 
 
     @GetMapping(path = {"/login"})
@@ -119,6 +120,8 @@ public String processRegister(User user){
                         SecurityContext sc = SecurityContextHolder.getContext();
                         sc.setAuthentication(authentication);
                         HttpSession session = req.getSession(true);
+                        String jwtToken = jwtUtil.createToken(user);
+                        LoginRes loginRes = new LoginRes(userDetails.getUsername(), jwtToken);
                         session.setAttribute(SPRING_SECURITY_CONTEXT_KEY, sc);
                     }
 

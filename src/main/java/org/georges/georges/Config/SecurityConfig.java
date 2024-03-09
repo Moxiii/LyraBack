@@ -1,11 +1,14 @@
 package org.georges.georges.Config;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -16,10 +19,17 @@ import org.springframework.security.web.firewall.StrictHttpFirewall;
 @EnableWebSecurity
 
 public class SecurityConfig  {
+    @Autowired
+    private final UserDetailsService userDetailsService;
+
+    public SecurityConfig(UserDetailsService userDetailsService) {
+        this.userDetailsService = userDetailsService;
+    }
+
     @Bean
-    public AuthenticationManager authManager(HttpSecurity http) throws Exception {
+    public AuthenticationManager authManager(HttpSecurity http , PasswordEncoder passwordEncoder) throws Exception {
         AuthenticationManagerBuilder authenticationManagerBuilder = http.getSharedObject(AuthenticationManagerBuilder.class);
-        authenticationManagerBuilder.inMemoryAuthentication().withUser("user").password("password").roles("ADMIN");
+        authenticationManagerBuilder.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder);
         return authenticationManagerBuilder.build();
     }
     @Bean
@@ -31,6 +41,7 @@ public class SecurityConfig  {
         firewall.setAllowSemicolon(true); // Autoriser le point-virgule dans les URLs
         return firewall;
     }
+    @SuppressWarnings("deprecation")
     @Bean
     public SecurityFilterChain securityfilterChain(HttpSecurity http) throws Exception {
         http
@@ -46,6 +57,8 @@ public class SecurityConfig  {
                 .requestMatchers("/api/**").permitAll()
                 .requestMatchers("/admin/**").hasAnyRole("admin")
                 .anyRequest().authenticated()
+                .and()
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .formLogin()
                     .loginPage("/private/auth/login" ) // Spécifiez l'URL de votre page de connexion personnalisée
