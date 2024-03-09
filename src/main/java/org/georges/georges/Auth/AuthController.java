@@ -122,7 +122,9 @@ public String processRegister(User user){
                         HttpSession session = req.getSession(true);
                         String jwtToken = jwtUtil.createToken(user);
                         LoginRes loginRes = new LoginRes(userDetails.getUsername(), jwtToken);
+                        log.info("Le JWT est : {} ", jwtToken);
                         session.setAttribute(SPRING_SECURITY_CONTEXT_KEY, sc);
+                        model.addAttribute("jwtToken", jwtToken);
                     }
 
 

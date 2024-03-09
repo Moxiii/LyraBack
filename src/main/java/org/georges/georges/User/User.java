@@ -25,15 +25,9 @@ public class User {
     @ManyToOne(fetch = FetchType.LAZY)
     @JsonBackReference
     private UserRole userRole;
-    @NotBlank(message = "Le champ nom n'est pas renseigné")
     private String name;
-    @NotBlank(message = "Le champ Username n'est pas renseigné")
     private String username;
-    @NotBlank(message = "Le champ email n'est pas renseigné")
-    @Email(message = "L'email n'est pas valide")
     private String email;
-    @NotBlank(message = "Le champ password n'est pas renseigné")
-    @Size(min = 6, message = "Le password doit avoir au moins 6 caractères")
     private String password;
     private String dateInscription;
     @Id
@@ -52,12 +46,6 @@ public class User {
     }
 
 public User(){}
-
-    public User(String username, String mail, String rawPassword) {
-        this.username = username;
-        this.email = mail;
-        this.password = rawPassword;
-    }
 
 }
 

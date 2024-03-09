@@ -4,6 +4,8 @@ package org.georges.georges.Auth;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
+import org.georges.georges.Config.JwtUtil;
+import org.georges.georges.Response.LoginRes;
 import org.georges.georges.User.User;
 import org.georges.georges.User.UserRole.UserRepository;
 import org.georges.georges.User.UserRole.UserRole;
@@ -21,10 +23,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -43,7 +44,7 @@ public class AuthApiController {
     private AuthenticationManager authenticationManager;
 
     @Autowired
-    private HttpServletRequest request;
+    private JwtUtil jwtUtil;
 
     @PostMapping("/register")
     public ResponseEntity<String> createUser(@RequestBody User user){
@@ -64,24 +65,24 @@ public class AuthApiController {
         }
     }
 
-    @PostMapping(path = "/login")
-    public ResponseEntity<String> login(@RequestBody User user) {
+    @PostMapping(path = {"/login"})
+    @ResponseBody
+    public ResponseEntity<?> inscriptionSubmit(@RequestBody User user, HttpServletRequest req) {
+        log.info("L'user est :{}",user);
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         // Vérifier si l'utilisateur existe dans votre système
-        log.info("Attempting to authenticate user: {}", user.getEmail());
+        log.info("Attempting to authenticate user: {}", user.getEmail()) ;
         User existingUser = null;
-        if (user.getUsername().contains("@")) {
-            existingUser = userService.findByEmail(user.getUsername());
+        if (user.getEmail().contains("@")) {
+            existingUser = userService.findByEmail(user.getEmail());
         } else {
-            existingUser = userService.findByUsername(user.getUsername());
+            existingUser = userService.findByUsername(user.getEmail());
         }
-        // Définir manuellement la valeur de pseudo si elle est null
 
         if (existingUser != null) {
             // L'utilisateur existe, vérifiez le mot de passe
             if (passwordEncoder.matches(user.getPassword(), existingUser.getPassword())) {
                 // Créez un token d'authentification
-
                 UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(existingUser.getUsername(), user.getPassword());
 
                 try {
@@ -93,27 +94,27 @@ public class AuthApiController {
                         log.info("User is authenticated: {}", userDetails.getUsername());
                         SecurityContext sc = SecurityContextHolder.getContext();
                         sc.setAuthentication(authentication);
-                        HttpSession session = request.getSession(true);
-                        session.setAttribute(SPRING_SECURITY_CONTEXT_KEY, sc);
+                        HttpSession session = req.getSession(true);
+                        String jwtToken = jwtUtil.createToken(user);
+
+                        // Retournez le token JWT dans la réponse
+                        return ResponseEntity.ok(new LoginRes(userDetails.getUsername(), jwtToken));
                     }
-
-                    // Ajoutez des logs pour indiquer que l'authentification a réussi
-                    log.info("Authentication successful for user: {}", existingUser.getUsername());
-
-                    // L'utilisateur est authentifié
-                    return ResponseEntity.ok("User authenticated successfully.");
                 } catch (AuthenticationException e) {
-                    log.warn("Authentication failed for user: {}", user.getEmail(), e);
-                    // L'authentification a échoué
-                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Authentication failed.");
+                    log.warn("Authentication failed for user: {}", user.getUsername(), e);
+                    // L'authentification a échoué, retournez une erreur dans la réponse
+                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Authentication failed");
                 }
             } else {
-                // Mot de passe incorrect
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Incorrect password.");
+                // Le mot de passe est incorrect, retournez une erreur dans la réponse
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Incorrect password");
             }
         } else {
-            // Utilisateur non trouvé
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
+            // L'utilisateur n'existe pas, retournez une erreur dans la réponse
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
         }
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal server error");
     }
+
+
 }

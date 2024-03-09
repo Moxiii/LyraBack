@@ -58,7 +58,7 @@ public class SecurityConfig  {
                 .requestMatchers("/admin/**").hasAnyRole("admin")
                 .anyRequest().authenticated()
                 .and()
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
                 .and()
                 .formLogin()
                     .loginPage("/private/auth/login" ) // Spécifiez l'URL de votre page de connexion personnalisée
