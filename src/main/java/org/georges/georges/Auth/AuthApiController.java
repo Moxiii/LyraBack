@@ -69,7 +69,12 @@ public class AuthApiController {
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         // Vérifier si l'utilisateur existe dans votre système
         log.info("Attempting to authenticate user: {}", user.getEmail());
-        User existingUser = userService.findByEmail(user.getEmail());
+        User existingUser = null;
+        if (user.getUsername().contains("@")) {
+            existingUser = userService.findByEmail(user.getUsername());
+        } else {
+            existingUser = userService.findByUsername(user.getUsername());
+        }
         // Définir manuellement la valeur de pseudo si elle est null
 
         if (existingUser != null) {

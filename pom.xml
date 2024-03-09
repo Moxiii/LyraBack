@@ -89,7 +89,10 @@
             <artifactId>spring-messaging</artifactId>
             <version>6.1.1</version>
         </dependency>
-
+        <dependency>
+            <groupId>com.rabbitmq</groupId>
+            <artifactId>amqp-client</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

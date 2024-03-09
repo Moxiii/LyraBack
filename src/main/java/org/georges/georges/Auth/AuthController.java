@@ -2,6 +2,7 @@ package org.georges.georges.Auth;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import lombok.extern.slf4j.Slf4j;
 import org.georges.georges.User.User;
 import org.georges.georges.User.UserRole.UserRole;
 import org.georges.georges.User.UserRole.UserRepository;
@@ -35,11 +36,11 @@ import java.util.logging.Logger;
 
 import static org.springframework.security.web.context.HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY;
 
-
+@Slf4j
 @RequestMapping("private/auth")
 @Controller
 public class AuthController {
-    Logger log = Logger.getLogger(AuthController.class.getName());
+
     @Autowired
     private UserRepository userRepository;
     @Autowired
@@ -50,7 +51,6 @@ public class AuthController {
 
     @Autowired
     private AuthenticationManager authenticationManager;
-    private final org.slf4j.Logger logger = LoggerFactory.getLogger(this.getClass());
 
 
 
@@ -93,8 +93,13 @@ public String processRegister(User user){
     public String inscriptionSubmit(@ModelAttribute("user") User user, BindingResult bindingResult, Model model , HttpServletRequest req) {
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         // Vérifier si l'utilisateur existe dans votre système
-        logger.info("Attempting to authenticate user: {}", user.getUsername());
-        User existingUser = userService.findByUsername(user.getUsername());
+        log.info("Attempting to authenticate user: {}", user.getUsername());
+        User existingUser = null;
+        if (user.getUsername().contains("@")) {
+            existingUser = userService.findByEmail(user.getUsername());
+        } else {
+            existingUser = userService.findByUsername(user.getUsername());
+        }
         // Définir manuellement la valeur de pseudo si elle est null
 
         if (existingUser != null) {
@@ -110,7 +115,7 @@ public String processRegister(User user){
                     if (authentication != null && authentication.isAuthenticated()) {
                         // L'utilisateur est authentifié, vous pouvez accéder aux détails d'authentification
                         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-                        logger.info("User is authenticated: {}", userDetails.getUsername());
+                        log.info("User is authenticated: {}", userDetails.getUsername());
                         SecurityContext sc = SecurityContextHolder.getContext();
                         sc.setAuthentication(authentication);
                         HttpSession session = req.getSession(true);
@@ -119,14 +124,14 @@ public String processRegister(User user){
 
 
                     // Ajoutez des logs pour indiquer que l'authentification a réussi
-                    logger.info("Authentication successful for user: {}", user.getUsername());
+                    log.info("Authentication successful for user: {}", user.getUsername());
 
                     // L'utilisateur est authentifié, continuez avec le reste du traitement
                     userConnecte = existingUser;
                     model.addAttribute("membreConnecte", userConnecte);
                     return "redirect:/";
                 } catch (AuthenticationException e) {
-                    logger.warn("Authentication failed for user: {}", user.getUsername(), e);
+                    log.warn("Authentication failed for user: {}", user.getUsername(), e);
                     // L'authentification a échoué, redirigez vers la page de connexion avec un message d'erreur
                     model.addAttribute("error", true);
                     return "login";
