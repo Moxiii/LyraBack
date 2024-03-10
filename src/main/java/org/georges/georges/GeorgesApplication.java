@@ -13,7 +13,7 @@ import org.georges.georges.User.User;
 import org.georges.georges.User.UserRole.UserRepository;
 
 
-@RestController
+
 @SpringBootApplication
 public class GeorgesApplication {
     private final UserRepository userRepository;

@@ -18,6 +18,7 @@ import java.util.concurrent.TimeUnit;
 public class JwtUtil {
     private final SecretKey SECRET_KEY = Keys.secretKeyFor(SignatureAlgorithm.HS256);
 
+
     private final long TOKEN_VALIDITY = 60*60*1000;
     private final String TOKEN_HEADER = "Authorization";
     private final String TOKEN_PREFIX = "Bearer ";
@@ -31,7 +32,6 @@ public class JwtUtil {
 
 public String createToken(User user){
         Claims claims = Jwts.claims().setSubject(user.getUsername()).build();
-        //claims.put("Username", user.getUsername());
         Date tokenCreateTime = new Date();
         Date tokenValidity = new Date(tokenCreateTime.getTime() + TimeUnit.MINUTES.toMillis(TOKEN_VALIDITY));
         String token =  Jwts.builder()
@@ -40,38 +40,17 @@ public String createToken(User user){
                 .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
                 .compact();
         log.info("le token est {}" , token);
+        log.info("La  clee secrete pour creer le token est :{}",SECRET_KEY);
         return token;
 }
 
     private Claims parseJwtClaims(String token) {
+    log.info("LES CLAIMS SONT :{}", jwtParser.parseSignedClaims(token).getBody());
         return jwtParser.parseClaimsJws(token).getBody();
     }
-public String resoleToken(HttpServletRequest req){
-        String bearerToken = req.getHeader(TOKEN_HEADER);
-        if(bearerToken != null && bearerToken.startsWith(TOKEN_PREFIX)){
-        return bearerToken.substring(TOKEN_PREFIX.length());
 
-        }
-        return null;
-}
 
-public Claims resolveToken(HttpServletRequest req){
-        try{
-            String token = resoleToken(req);
-            if(token != null){
-                return parseJwtClaims(token);
-            }
-                return null;
-        }
-        catch (ExpiredJwtException ex){
-            req.setAttribute("expired" , ex.getMessage());
-            throw ex;
-        }
-        catch (Exception ex){
-            req.setAttribute("expired" , ex.getMessage());
-            throw ex;
-        }
-    }
+
     public Boolean validateClaims(Claims claims) throws AuthenticationException{
     try{
         return claims.getExpiration().after(new Date());
@@ -80,8 +59,42 @@ public Claims resolveToken(HttpServletRequest req){
         }
     }
 
-    public String getEmail(Claims claims){
-        return claims.getSubject();
+
+
+    public boolean validateToken(String token) {
+    log.info("TOKEN A VALIDER :{}", token);
+    log.info("La clee pour valider le token est :{}" , SECRET_KEY);
+    try{
+        Claims claims = Jwts.parser().setSigningKey(SECRET_KEY).build().parseSignedClaims(token).getPayload();
+        log.info("Le PARSER : {}" , Jwts.parser().setSigningKey(SECRET_KEY).build().parseSignedClaims(token).getPayload());
+        log.info("Informations extraites du token : {}", claims);
+
+        // Vérifiez si le token est expiré
+        Date expirationDate = claims.getExpiration();
+        Date currentDate = new Date();
+        log.info("Date d'expiration du token : {}", expirationDate);
+        log.info("Date actuelle : {}", currentDate);
+        if (expirationDate.before(currentDate)) {
+            log.warn("Le token est expiré !");
+            return false;
+        }
+        return true;
+    }catch (JwtException | IllegalArgumentException e ){
+        log.warn("Le token a une erreur :{}" , e.getMessage());
+        return false;
+    }
+    }
+    public String extractTokenFromRequest(HttpServletRequest request) {
+        String bearerToken = request.getHeader(TOKEN_HEADER);
+        if(bearerToken != null && bearerToken.startsWith(TOKEN_PREFIX)){
+            log.warn("Le SAINT token est :{}" , bearerToken.substring(TOKEN_PREFIX.length()));
+            return bearerToken.substring(TOKEN_PREFIX.length());
+        }return null;
     }
 
+    public String extractUsername(String token) {
+    Claims claims = parseJwtClaims(token);
+    log.info("Le nom extrait est :{}" , claims.getSubject());
+    return claims.getSubject();
+    }
 }

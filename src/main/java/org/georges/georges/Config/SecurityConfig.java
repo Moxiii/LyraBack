@@ -12,6 +12,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.firewall.StrictHttpFirewall;
 
 
@@ -22,16 +24,19 @@ public class SecurityConfig  {
     @Autowired
     private final UserDetailsService userDetailsService;
 
-    public SecurityConfig(UserDetailsService userDetailsService) {
+    private final JwtUtil jwtUtil;
+    public SecurityConfig(UserDetailsService userDetailsService, JwtUtil jwtUtil) {
         this.userDetailsService = userDetailsService;
+        this.jwtUtil = jwtUtil;
     }
 
     @Bean
-    public AuthenticationManager authManager(HttpSecurity http , PasswordEncoder passwordEncoder) throws Exception {
+    public AuthenticationManager authManager(HttpSecurity http ) throws Exception {
         AuthenticationManagerBuilder authenticationManagerBuilder = http.getSharedObject(AuthenticationManagerBuilder.class);
-        authenticationManagerBuilder.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder);
+        authenticationManagerBuilder.userDetailsService(userDetailsService);
         return authenticationManagerBuilder.build();
     }
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();}
@@ -58,14 +63,16 @@ public class SecurityConfig  {
                 .requestMatchers("/admin/**").hasAnyRole("admin")
                 .anyRequest().authenticated()
                 .and()
+                .addFilterAfter(new jwtAuthenticationFilter( jwtUtil , userDetailsService), UsernamePasswordAuthenticationFilter.class)
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
                 .and()
                 .formLogin()
-                    .loginPage("/private/auth/login" ) // Spécifiez l'URL de votre page de connexion personnalisée
+                    .loginPage("/api/auth/login" ) // Spécifiez l'URL de votre page de connexion personnalisée
                     .loginProcessingUrl("/process-login")
                     .defaultSuccessUrl("/index")
                     .failureUrl("/custom-login?error=true")
                     .permitAll()
+                .successHandler(new SavedRequestAwareAuthenticationSuccessHandler())
                 .and()
                     .logout()
                     .logoutSuccessUrl("/private/auth/logout")
@@ -75,6 +82,8 @@ public class SecurityConfig  {
 
         return http.build();
     }
+
+
 }
 
 

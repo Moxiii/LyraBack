@@ -11,8 +11,6 @@ import java.util.List;
 @Service
 public class UserApiService {
     @Autowired
-    private UserService UserService;
-    @Autowired
     private UserRepository userRepository;
 
     public List<User> getAllUsers() {
