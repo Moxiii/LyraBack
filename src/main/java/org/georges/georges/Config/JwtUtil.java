@@ -32,6 +32,8 @@ public class JwtUtil {
 
 public String createToken(User user){
         Claims claims = Jwts.claims().setSubject(user.getUsername()).build();
+        log.info("User username for token creation is :{}" , user.getUsername());
+        log.info("Le nom injecter dans le token est :{}" , claims.getSubject());
         Date tokenCreateTime = new Date();
         Date tokenValidity = new Date(tokenCreateTime.getTime() + TimeUnit.MINUTES.toMillis(TOKEN_VALIDITY));
         String token =  Jwts.builder()
@@ -78,9 +80,17 @@ public String createToken(User user){
             log.warn("Le token est expiré !");
             return false;
         }
+        log.info("TOKEN VALIDER !");
         return true;
-    }catch (JwtException | IllegalArgumentException e ){
-        log.warn("Le token a une erreur :{}" , e.getMessage());
+    }catch (JwtException e) {
+        log.warn("Le token a une erreur : {}", e.getMessage());
+        // Journaliser la trace complète de l'exception pour un débogage plus approfondi si nécessaire
+        log.debug("Trace complète de l'exception : ", e);
+        return false;
+    } catch (IllegalArgumentException e) {
+        log.warn("L'argument du token est invalide : {}", e.getMessage());
+        // Journaliser la trace complète de l'exception pour un débogage plus approfondi si nécessaire
+        log.debug("Trace complète de l'exception : ", e);
         return false;
     }
     }

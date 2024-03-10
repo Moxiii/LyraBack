@@ -71,12 +71,13 @@ public class AuthApiController {
         log.info("L'user est :{}",user);
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         // Vérifier si l'utilisateur existe dans votre système
-        log.info("Attempting to authenticate user: {}", user.getEmail()) ;
+        log.info("Attempting to authenticate user w/ mail: {}", user.getEmail()) ;
+        log.info("Attempting to authenticate user w/ username: {}", user.getUsername()) ;
         User existingUser = null;
-        if (user.getEmail().contains("@")) {
+        if (user.getEmail() != null) {
             existingUser = userService.findByEmail(user.getEmail());
-        } else {
-            existingUser = userService.findByUsername(user.getEmail());
+        } else if (user.getUsername()!=null){
+            existingUser = userService.findByUsername(user.getUsername());
         }
 
         if (existingUser != null) {

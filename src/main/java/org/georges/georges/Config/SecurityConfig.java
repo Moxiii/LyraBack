@@ -63,7 +63,7 @@ public class SecurityConfig  {
                 .requestMatchers("/admin/**").hasAnyRole("admin")
                 .anyRequest().authenticated()
                 .and()
-                .addFilterAfter(new jwtAuthenticationFilter( jwtUtil , userDetailsService), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new jwtAuthenticationFilter( jwtUtil , userDetailsService), UsernamePasswordAuthenticationFilter.class)
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
                 .and()
                 .formLogin()

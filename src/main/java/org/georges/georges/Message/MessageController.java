@@ -25,7 +25,9 @@ public class MessageController {
 private MessageRepository messageRepository;
 @Autowired
 private JwtUtil jwtUtil;
-private UserRepository userRepository;
+@Autowired
+private UserRepository  userRepository;
+
     @PostMapping("/sendMessage")
     public void sendMessage(@RequestBody Message message){
         try (Connection connection = RabbitmqConnection.getConnection();
@@ -59,7 +61,7 @@ private UserRepository userRepository;
             if (jwtUtil != null && jwtUtil.validateToken(token)) {
                 // Extraire l'identifiant de l'utilisateur du jeton
                 String username = jwtUtil.extractUsername(token);
-                log.info("Lusername du token est : {]",username);
+                log.info("Lusername du token est : {}",username);
                 // Utilisez l'identifiant de l'utilisateur pour récupérer les messages
                 User currentUser = userRepository.findByUsername(username);
                 List<Message> messages = messageRepository.findBySender(currentUser);
