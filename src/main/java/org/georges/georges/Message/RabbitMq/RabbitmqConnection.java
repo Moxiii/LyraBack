@@ -1,4 +1,4 @@
-package org.georges.georges.Conversation.RabbitMq;
+package org.georges.georges.Message.RabbitMq;
 
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;

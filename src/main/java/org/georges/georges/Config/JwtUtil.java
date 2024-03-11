@@ -7,15 +7,17 @@ import lombok.extern.slf4j.Slf4j;
 import org.georges.georges.User.User;
 
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 @Slf4j
 @Component
 public class JwtUtil {
+    private final Map<String , String> tokenMap = new ConcurrentHashMap<>();
     private final SecretKey SECRET_KEY = Keys.secretKeyFor(SignatureAlgorithm.HS256);
 
 
@@ -106,5 +108,16 @@ public String createToken(User user){
     Claims claims = parseJwtClaims(token);
     log.info("Le nom extrait est :{}" , claims.getSubject());
     return claims.getSubject();
+    }
+
+    public String getValidToken(String username){
+        String storedToken = tokenMap.get(username);
+        if(storedToken != null && validateToken(storedToken)){
+            return storedToken;
+        }
+        return null;
+    }
+    public void addToken(String username , String token){
+        tokenMap.put(username , token);
     }
 }

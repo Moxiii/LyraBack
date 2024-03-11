@@ -1,5 +1,6 @@
 package org.georges.georges.Config;
 
+import org.georges.georges.User.CustomUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -8,7 +9,6 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -22,18 +22,17 @@ import org.springframework.security.web.firewall.StrictHttpFirewall;
 
 public class SecurityConfig  {
     @Autowired
-    private final UserDetailsService userDetailsService;
+    private CustomUserDetailsService customUserDetailsService;
+    @Autowired
+    private JwtUtil jwtUtil;
 
-    private final JwtUtil jwtUtil;
-    public SecurityConfig(UserDetailsService userDetailsService, JwtUtil jwtUtil) {
-        this.userDetailsService = userDetailsService;
-        this.jwtUtil = jwtUtil;
-    }
+
+
 
     @Bean
     public AuthenticationManager authManager(HttpSecurity http ) throws Exception {
         AuthenticationManagerBuilder authenticationManagerBuilder = http.getSharedObject(AuthenticationManagerBuilder.class);
-        authenticationManagerBuilder.userDetailsService(userDetailsService);
+        authenticationManagerBuilder.userDetailsService(customUserDetailsService);
         return authenticationManagerBuilder.build();
     }
 
@@ -46,7 +45,7 @@ public class SecurityConfig  {
         firewall.setAllowSemicolon(true); // Autoriser le point-virgule dans les URLs
         return firewall;
     }
-    @SuppressWarnings("deprecation")
+    @SuppressWarnings("deprecated")
     @Bean
     public SecurityFilterChain securityfilterChain(HttpSecurity http) throws Exception {
         http
@@ -63,7 +62,7 @@ public class SecurityConfig  {
                 .requestMatchers("/admin/**").hasAnyRole("admin")
                 .anyRequest().authenticated()
                 .and()
-                .addFilterBefore(new jwtAuthenticationFilter( jwtUtil , userDetailsService), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new jwtAuthenticationFilter( jwtUtil , customUserDetailsService ), UsernamePasswordAuthenticationFilter.class)
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
                 .and()
                 .formLogin()

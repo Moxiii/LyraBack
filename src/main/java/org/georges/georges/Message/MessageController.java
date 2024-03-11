@@ -5,8 +5,7 @@ import com.rabbitmq.client.Connection;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.georges.georges.Config.JwtUtil;
-import org.georges.georges.Config.SecurityUtils;
-import org.georges.georges.Conversation.RabbitMq.RabbitmqConnection;
+import org.georges.georges.Message.RabbitMq.RabbitmqConnection;
 import org.georges.georges.User.User;
 import org.georges.georges.User.UserRole.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
-import static org.georges.georges.Conversation.RabbitMq.MessageReceiver.EXCHANGE_NAME;
+import static org.georges.georges.Message.RabbitMq.MessageReceiver.EXCHANGE_NAME;
 @Slf4j
 @RestController
 @RequestMapping("api/chat")
@@ -29,24 +28,36 @@ private JwtUtil jwtUtil;
 private UserRepository  userRepository;
 
     @PostMapping("/sendMessage")
-    public void sendMessage(@RequestBody Message message){
+    public ResponseEntity<?> sendMessage(@RequestBody Message message){
         try (Connection connection = RabbitmqConnection.getConnection();
              Channel channel = connection.createChannel()) {
+            Long id = message.getId();
             String content = message.getContent();
             String sender = message.getSender().getUsername();
-            String recivier = message.getReceiver().getUsername();
+            String receiver = message.getReceiver().getUsername();
+
+            // Vérifier si l'utilisateur destinataire existe dans la base de données
+            User recipient = userRepository.findByUsername("test");
+            if (recipient == null) {
+                // Si l'utilisateur destinataire n'existe pas, renvoyer une erreur
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Recipient user does not exist");
+            }
 
             // Envoyer le message via RabbitMQ
             channel.exchangeDeclare(EXCHANGE_NAME, "direct");
-            channel.basicPublish(EXCHANGE_NAME, recivier, null, content.getBytes("UTF-8"));
+            channel.basicPublish(EXCHANGE_NAME, receiver, null, content.getBytes("UTF-8"));
 
-            //todo Enregistrer le message dans la base de données
-            messageRepository.save(message);
+            // Enregistrer le message dans la base de données
+            //messageRepository.save(message);
+
+            return ResponseEntity.ok("Message sent successfully");
         } catch (Exception e) {
             e.printStackTrace();
             // Gérer les erreurs de connexion RabbitMQ ou de base de données
-            }
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to send message");
         }
+    }
+
     @GetMapping("/messages")
     @ResponseBody
     public ResponseEntity<?> getAllMessages(HttpServletRequest request) {

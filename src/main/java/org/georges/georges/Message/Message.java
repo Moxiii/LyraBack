@@ -3,8 +3,9 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
-import org.georges.georges.User.User;
 import org.georges.georges.Conversation.Conversation;
+import org.georges.georges.User.User;
+
 
 import java.util.Date;
 @Getter

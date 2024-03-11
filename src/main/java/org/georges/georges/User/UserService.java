@@ -11,9 +11,6 @@
     @Service
     public class UserService {
         private final UserRepository userRepository;
-
-@Autowired
-private PasswordEncoder passwordEncoder;
         public UserService(UserRepository userRepository) {
             this.userRepository = userRepository;
         }
@@ -49,14 +46,5 @@ private PasswordEncoder passwordEncoder;
             return user;
         }
 
-        public User createUser(User user) {
-            // Encoder le mot de passe brut
-            String encodedPassword = passwordEncoder.encode(user.getPassword());
 
-            // Définir le mot de passe encodé sur l'utilisateur
-            user.setPassword(encodedPassword);
-
-            // Sauvegarder l'utilisateur dans la base de données
-            return userRepository.save(user);
-        }
     }
