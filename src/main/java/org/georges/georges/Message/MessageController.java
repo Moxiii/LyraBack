@@ -5,6 +5,8 @@ import com.rabbitmq.client.Connection;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.georges.georges.Config.JwtUtil;
+import org.georges.georges.Message.RabbitMq.MessageReceiver;
+import org.georges.georges.Message.RabbitMq.MessageSender;
 import org.georges.georges.Message.RabbitMq.RabbitmqConnection;
 import org.georges.georges.User.User;
 import org.georges.georges.User.UserRole.UserRepository;
@@ -35,20 +37,19 @@ private UserRepository  userRepository;
             String content = message.getContent();
             String sender = message.getSender().getUsername();
             String receiver = message.getReceiver().getUsername();
-
+            log.info("Message id : {}" , id);
+            log.info("Message receiver : {}" , receiver);
+            log.info("Message sender : {}" , sender);
+            log.info("Message content : {}" , content);
             // Vérifier si l'utilisateur destinataire existe dans la base de données
-            User recipient = userRepository.findByUsername("test");
+            User recipient = userRepository.findByUsername(receiver);
             if (recipient == null) {
                 // Si l'utilisateur destinataire n'existe pas, renvoyer une erreur
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Recipient user does not exist");
             }
 
             // Envoyer le message via RabbitMQ
-            channel.exchangeDeclare(EXCHANGE_NAME, "direct");
-            channel.basicPublish(EXCHANGE_NAME, receiver, null, content.getBytes("UTF-8"));
-
-            // Enregistrer le message dans la base de données
-            //messageRepository.save(message);
+            MessageSender.sendDirectMessage(receiver,content);
 
             return ResponseEntity.ok("Message sent successfully");
         } catch (Exception e) {
@@ -60,7 +61,7 @@ private UserRepository  userRepository;
 
     @GetMapping("/messages")
     @ResponseBody
-    public ResponseEntity<?> getAllMessages(HttpServletRequest request) {
+    public ResponseEntity<?> getAllMessages(HttpServletRequest request) throws Exception {
         String authorizationHeader = request.getHeader("Authorization");
 
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
@@ -85,6 +86,15 @@ private UserRepository  userRepository;
                     messageInfo.put("sender", message.getSender().getUsername());
                     result.add(messageInfo);
                 }
+//                try {
+//                    MessageReceiver.receiveDirectMessages((consumerTag, delivery) -> {
+//                        String messageContent = new String(delivery.getBody(), "UTF-8");
+//                        String senderUsername = delivery.getEnvelope().getRoutingKey();
+//                        messages.add(new Message(senderUsername, currentUser.getUsername(), messageContent));
+//                    });
+//                } catch (Exception e) {
+//                    log.error("Failed to receive direct messages: {}", e.getMessage());
+//                }
 
                 return ResponseEntity.ok(result);
             }
