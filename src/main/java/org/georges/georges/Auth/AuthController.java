@@ -6,11 +6,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.georges.georges.Config.JwtUtil;
 import org.georges.georges.Response.LoginRes;
 import org.georges.georges.User.User;
-import org.georges.georges.User.UserRole.UserRole;
 import org.georges.georges.User.UserRole.UserRepository;
+import org.georges.georges.User.UserRole.UserRole;
 import org.georges.georges.User.UserRole.UserRoleRepository;
 import org.georges.georges.User.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -25,13 +26,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.security.authentication.AuthenticationManager;
-
 
 import java.text.SimpleDateFormat;
-
 import java.util.Date;
-
 import java.util.Optional;
 
 import static org.springframework.security.web.context.HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY;

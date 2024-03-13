@@ -1,10 +1,12 @@
 package org.georges.georges.Message;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.georges.georges.Config.JwtUtil;
+import org.georges.georges.Message.RabbitMq.MessageHandler;
 import org.georges.georges.Message.RabbitMq.MessageReceiver;
 import org.georges.georges.Message.RabbitMq.MessageSender;
 import org.georges.georges.Message.RabbitMq.RabbitmqConnection;
@@ -29,27 +31,27 @@ private JwtUtil jwtUtil;
 @Autowired
 private UserRepository  userRepository;
 
-    @PostMapping("/sendMessage")
-    public ResponseEntity<?> sendMessage(@RequestBody Message message){
+    @PostMapping("/sendPrivateMessage")
+    public ResponseEntity<?> sendPrivateMessage(@RequestBody Message message){
         try (Connection connection = RabbitmqConnection.getConnection();
              Channel channel = connection.createChannel()) {
             Long id = message.getId();
             String content = message.getContent();
-            String sender = message.getSender().getUsername();
-            String receiver = message.getReceiver().getUsername();
+            User sender = userRepository.findByUsername(message.getSender().getUsername());
+            User receiver = userRepository.findByUsername(message.getReceiver().getUsername());
             log.info("Message id : {}" , id);
-            log.info("Message receiver : {}" , receiver);
-            log.info("Message sender : {}" , sender);
+            log.info("Messages sender id :{}" , sender.getId());
+            log.info("Message receiver id :{}" , receiver.getId());
             log.info("Message content : {}" , content);
             // Vérifier si l'utilisateur destinataire existe dans la base de données
-            User recipient = userRepository.findByUsername(receiver);
-            if (recipient == null) {
+
+            if (receiver == null) {
                 // Si l'utilisateur destinataire n'existe pas, renvoyer une erreur
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Recipient user does not exist");
             }
 
             // Envoyer le message via RabbitMQ
-            MessageSender.sendDirectMessage(receiver,content);
+            MessageSender.sendDirectMessage(sender.getId(),receiver.getId(),content);
 
             return ResponseEntity.ok("Message sent successfully");
         } catch (Exception e) {
@@ -58,7 +60,11 @@ private UserRepository  userRepository;
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to send message");
         }
     }
-
+@PostMapping("/sendGroupMessage")
+@ResponseBody
+public ResponseEntity<?> sendGroupMessage(@RequestBody Message message){
+    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Collections.singletonMap("error", "Unauthorized"));
+}
     @GetMapping("/messages")
     @ResponseBody
     public ResponseEntity<?> getAllMessages(HttpServletRequest request) throws Exception {
@@ -84,6 +90,7 @@ private UserRepository  userRepository;
                     Map<String, Object> messageInfo = new HashMap<>();
                     messageInfo.put("content", message.getContent());
                     messageInfo.put("sender", message.getSender().getUsername());
+                    messageInfo.put("receiver" , message.getReceiver().getUsername());
                     result.add(messageInfo);
                 }
 
@@ -96,4 +103,59 @@ private UserRepository  userRepository;
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Collections.singletonMap("error", "Unauthorized"));
     }
 
+
+
+    @PostMapping("/receivePrivateMessages")
+    public ResponseEntity<?> receivePrivateMessages(@RequestBody Message message , HttpServletRequest request) {
+        String authorizationHeader = request.getHeader("Authorization");
+
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            String token = authorizationHeader.substring(7); // Supprimer le préfixe "Bearer "
+            if (jwtUtil != null && jwtUtil.validateToken(token)) {
+                // Extraire l'identifiant de l'utilisateur du jeton
+                String username = jwtUtil.extractUsername(token);
+                log.info("Lusername du token est : {}", username);
+                try {
+                    // Définir le gestionnaire de messages pour enregistrer automatiquement les messages en base de données
+                    MessageHandler messageHandler = new MessageHandler() {
+                        @Override
+                        public void handleMessage(String messageContent) {
+                            try {
+                                // Désérialiser le contenu du message en un objet Message
+                                ObjectMapper mapper = new ObjectMapper();
+                                Message message = mapper.readValue(messageContent, Message.class);
+                                log.info("received message : {}" , message);
+
+                                // Extraire les informations du message
+                               // Long senderId = Long.parseLong(message.getSender().getId());
+                               // Long receiverId = Long.parseLong(message.getReceiver().getId());
+                                //String content = message.getContent();
+
+                                // Enregistrer le message en base de données
+                                // Assurez-vous que votre MessageRepository est injecté (autowired) dans cette classe
+                                //messageRepository.save(new Message(senderId, receiverId, content));
+
+                                log.info("Message enregistré en base de données avec succès.");
+                            } catch (Exception e) {
+                                log.error("Erreur lors de la sauvegarde du message en base de données : {}", e.getMessage());
+                            }
+                        }
+                    };
+                    User sender = userRepository.findByUsername(message.getSender().getUsername());
+                    User receiver = userRepository.findByUsername(message.getReceiver().getUsername());
+                    // Démarrer la réception des messages privés
+                    Long senderId = sender.getId();
+                    Long receiverId = receiver.getId();
+                    MessageReceiver.receiveDirectMessages(senderId, receiverId, messageHandler);
+
+                    return ResponseEntity.ok("Receiving private messages started successfully");
+                } catch (Exception e) {
+                    log.error("Failed to start receiving private messages: {}", e.getMessage());
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to start receiving private messages");
+                }
+            }
+
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Collections.singletonMap("error", "Unauthorized"));
+    }
 }
