@@ -76,7 +76,7 @@ private UserRepository  userRepository;
                 log.info("Lusername du token est : {}",username);
                 // Utilisez l'identifiant de l'utilisateur pour récupérer les messages
                 User currentUser = userRepository.findByUsername(username);
-                List<Message> messages = messageRepository.findBySender(currentUser);
+                List<Message> messages = messageRepository.findBySenderOrReceiver(currentUser , currentUser);
 
                 // Générer la réponse avec les messages
                 List<Map<String, Object>> result = new ArrayList<>();
@@ -86,15 +86,7 @@ private UserRepository  userRepository;
                     messageInfo.put("sender", message.getSender().getUsername());
                     result.add(messageInfo);
                 }
-//                try {
-//                    MessageReceiver.receiveDirectMessages((consumerTag, delivery) -> {
-//                        String messageContent = new String(delivery.getBody(), "UTF-8");
-//                        String senderUsername = delivery.getEnvelope().getRoutingKey();
-//                        messages.add(new Message(senderUsername, currentUser.getUsername(), messageContent));
-//                    });
-//                } catch (Exception e) {
-//                    log.error("Failed to receive direct messages: {}", e.getMessage());
-//                }
+
 
                 return ResponseEntity.ok(result);
             }
