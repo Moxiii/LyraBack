@@ -12,6 +12,7 @@ import org.georges.georges.Message.RabbitMq.MessageSender;
 import org.georges.georges.Message.RabbitMq.RabbitmqConnection;
 import org.georges.georges.User.User;
 import org.georges.georges.User.UserRole.UserRepository;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
-import static org.georges.georges.Message.RabbitMq.MessageReceiver.EXCHANGE_NAME;
+
 @Slf4j
 @RestController
 @RequestMapping("api/chat")
@@ -32,7 +33,15 @@ private JwtUtil jwtUtil;
 private UserRepository  userRepository;
 
     @PostMapping("/sendPrivateMessage")
-    public ResponseEntity<?> sendPrivateMessage(@RequestBody Message message){
+    public ResponseEntity<?> sendPrivateMessage(@RequestBody Message message , HttpServletRequest request){
+        String authorizationHeader = request.getHeader("Authorization");
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            String token = authorizationHeader.substring(7); // Supprimer le préfixe "Bearer "
+            log.info("TOKEN AUTHORIZED");
+            // Valider le jeton JWT
+            log.info("JWTUTILS :{}" , jwtUtil);
+            log.info("VALIDATE TOKEN : {}" , jwtUtil.validateToken(token));
+            if (jwtUtil != null && jwtUtil.validateToken(token)) {
         try (Connection connection = RabbitmqConnection.getConnection();
              Channel channel = connection.createChannel()) {
             Long id = message.getId();
@@ -52,6 +61,8 @@ private UserRepository  userRepository;
 
             // Envoyer le message via RabbitMQ
             MessageSender.sendDirectMessage(sender.getId(),receiver.getId(),content);
+            //save message
+
 
             return ResponseEntity.ok("Message sent successfully");
         } catch (Exception e) {
@@ -59,6 +70,11 @@ private UserRepository  userRepository;
             // Gérer les erreurs de connexion RabbitMQ ou de base de données
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to send message");
         }
+    }
+        }
+        log.info("NO TOKEN OR INVALID TOKEN");
+        // Si le jeton n'est pas valide ou s'il est absent, renvoyer un code d'erreur
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Collections.singletonMap("error", "Unauthorized"));
     }
 @PostMapping("/sendGroupMessage")
 @ResponseBody
@@ -124,7 +140,7 @@ public ResponseEntity<?> sendGroupMessage(@RequestBody Message message){
                                 // Désérialiser le contenu du message en un objet Message
                                 ObjectMapper mapper = new ObjectMapper();
                                 Message message = mapper.readValue(messageContent, Message.class);
-                                log.info("received message : {}" , message);
+                                log.info("received message : {}" , mapper.readValue(messageContent, Message.class));
 
                                 // Extraire les informations du message
                                // Long senderId = Long.parseLong(message.getSender().getId());
@@ -158,4 +174,7 @@ public ResponseEntity<?> sendGroupMessage(@RequestBody Message message){
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Collections.singletonMap("error", "Unauthorized"));
     }
+
+
+
 }

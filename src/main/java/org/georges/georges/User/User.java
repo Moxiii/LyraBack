@@ -2,9 +2,6 @@ package org.georges.georges.User;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 import org.georges.georges.Conversation.Conversation;
@@ -12,7 +9,7 @@ import org.georges.georges.User.UserRole.UserRole;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.util.Date;
+import java.util.List;
 import java.util.Set;
 
 
@@ -33,7 +30,8 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
+    @OneToMany(mappedBy = "user")
+    private List<UserQueue> queues;
     private static final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public User(String name, String username, String email, String password, String dateInscription, UserRole userRole) {
@@ -45,7 +43,9 @@ public class User {
         this.userRole = userRole;
     }
 
-public User(){}
+public User(){
+
+}
 
 }
 
