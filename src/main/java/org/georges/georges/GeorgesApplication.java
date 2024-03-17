@@ -1,5 +1,6 @@
 package org.georges.georges;
 
+import org.georges.georges.Config.RabbitMQConfig;
 import org.georges.georges.Message.Message;
 import org.georges.georges.Message.MessageRepository;
 import org.georges.georges.User.UserRole.UserRole;
@@ -18,6 +19,7 @@ import java.util.Date;
 
 @SpringBootApplication
 public class GeorgesApplication {
+    RabbitMQConfig rabbitMQConfig = new RabbitMQConfig();
     private final UserRepository userRepository;
     private final UserRoleRepository userRoleRepository;
 

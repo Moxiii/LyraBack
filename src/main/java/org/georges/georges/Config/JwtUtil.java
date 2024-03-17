@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.georges.georges.User.User;
 
+import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Component;
 
@@ -34,8 +35,6 @@ public class JwtUtil {
 
 public String createToken(User user){
         Claims claims = Jwts.claims().setSubject(user.getUsername()).build();
-        log.info("User username for token creation is :{}" , user.getUsername());
-        log.info("Le nom injecter dans le token est :{}" , claims.getSubject());
         Date tokenCreateTime = new Date();
         Date tokenValidity = new Date(tokenCreateTime.getTime() + TimeUnit.MINUTES.toMillis(TOKEN_VALIDITY));
         String token =  Jwts.builder()
@@ -43,13 +42,10 @@ public String createToken(User user){
                 .setExpiration(tokenValidity)
                 .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
                 .compact();
-        log.info("le token est {}" , token);
-        log.info("La  clee secrete pour creer le token est :{}",SECRET_KEY);
         return token;
 }
 
     private Claims parseJwtClaims(String token) {
-    log.info("LES CLAIMS SONT :{}", jwtParser.parseSignedClaims(token).getBody());
         return jwtParser.parseClaimsJws(token).getBody();
     }
 
@@ -66,23 +62,14 @@ public String createToken(User user){
 
 
     public boolean validateToken(String token) {
-    log.info("TOKEN A VALIDER :{}", token);
-    log.info("La clee pour valider le token est :{}" , SECRET_KEY);
     try{
         Claims claims = Jwts.parser().setSigningKey(SECRET_KEY).build().parseSignedClaims(token).getPayload();
-        log.info("Le PARSER : {}" , Jwts.parser().setSigningKey(SECRET_KEY).build().parseSignedClaims(token).getPayload());
-        log.info("Informations extraites du token : {}", claims);
-
         // Vérifiez si le token est expiré
         Date expirationDate = claims.getExpiration();
         Date currentDate = new Date();
-        log.info("Date d'expiration du token : {}", expirationDate);
-        log.info("Date actuelle : {}", currentDate);
         if (expirationDate.before(currentDate)) {
-            log.warn("Le token est expiré !");
             return false;
         }
-        log.info("TOKEN VALIDER !");
         return true;
     }catch (JwtException e) {
         log.warn("Le token a une erreur : {}", e.getMessage());
@@ -99,14 +86,18 @@ public String createToken(User user){
     public String extractTokenFromRequest(HttpServletRequest request) {
         String bearerToken = request.getHeader(TOKEN_HEADER);
         if(bearerToken != null && bearerToken.startsWith(TOKEN_PREFIX)){
-            log.warn("Le SAINT token est :{}" , bearerToken.substring(TOKEN_PREFIX.length()));
             return bearerToken.substring(TOKEN_PREFIX.length());
         }return null;
     }
-
+    public String extractTokenFromServerRequest(ServerHttpRequest request) {
+        String bearerToken = request.getHeaders().getFirst(TOKEN_HEADER);
+        if (bearerToken != null && bearerToken.startsWith(TOKEN_PREFIX)) {
+            return bearerToken.substring(TOKEN_PREFIX.length());
+        }
+        return null;
+    }
     public String extractUsername(String token) {
     Claims claims = parseJwtClaims(token);
-    log.info("Le nom extrait est :{}" , claims.getSubject());
     return claims.getSubject();
     }
 

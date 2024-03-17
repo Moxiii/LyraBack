@@ -6,13 +6,11 @@ import com.rabbitmq.client.Connection;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.georges.georges.Config.JwtUtil;
-import org.georges.georges.Message.RabbitMq.MessageHandler;
-import org.georges.georges.Message.RabbitMq.MessageReceiver;
-import org.georges.georges.Message.RabbitMq.MessageSender;
-import org.georges.georges.Message.RabbitMq.RabbitmqConnection;
+import org.georges.georges.Message.RabbitMq.*;
 import org.georges.georges.User.User;
 import org.georges.georges.User.UserRole.UserRepository;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,7 +29,10 @@ private MessageRepository messageRepository;
 private JwtUtil jwtUtil;
 @Autowired
 private UserRepository  userRepository;
-
+@Autowired
+private RabbitTemplate rabbitTemplate;
+@Autowired
+MessageSender messageSender;
     @PostMapping("/sendPrivateMessage")
     public ResponseEntity<?> sendPrivateMessage(@RequestBody Message message , HttpServletRequest request){
         String authorizationHeader = request.getHeader("Authorization");
@@ -58,9 +59,9 @@ private UserRepository  userRepository;
                 // Si l'utilisateur destinataire n'existe pas, renvoyer une erreur
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Recipient user does not exist");
             }
-
+                String queueName = new GenerateQueueName().privateQueueName(sender.getId(), receiver.getId());
             // Envoyer le message via RabbitMQ
-            MessageSender.sendDirectMessage(sender.getId(),receiver.getId(),content);
+            messageSender.sendDirectMessage(sender.getId(), receiver.getId() , message.getContent());
             //save message
 
 

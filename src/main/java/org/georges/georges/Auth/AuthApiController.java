@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.georges.georges.Config.JwtUtil;
+import org.georges.georges.Config.TokenManager;
 import org.georges.georges.Response.LoginRes;
 import org.georges.georges.User.User;
 import org.georges.georges.User.UserRole.UserRepository;
@@ -45,7 +46,8 @@ public class AuthApiController {
 
     @Autowired
     private JwtUtil jwtUtil;
-
+@Autowired
+private TokenManager tokenManager;
     @PostMapping("/register")
     public ResponseEntity<String> createUser(@RequestBody User user) {
         try {
@@ -68,11 +70,9 @@ public class AuthApiController {
     @PostMapping(path = {"/login"})
     @ResponseBody
     public ResponseEntity<?> inscriptionSubmit(@RequestBody User user, HttpServletRequest req) {
-        log.info("L'user est :{}", user);
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         // Vérifier si l'utilisateur existe dans votre système
-        log.info("Attempting to authenticate user w/ mail: {}", user.getEmail());
-        log.info("Attempting to authenticate user w/ username: {}", user.getUsername());
+
         User existingUser = null;
         if (user.getEmail() != null) {
             existingUser = userService.findByEmail(user.getEmail());
@@ -83,12 +83,10 @@ public class AuthApiController {
         if (existingUser != null) {
             // L'utilisateur existe, vérifiez le mot de passe
             if (passwordEncoder.matches(user.getPassword(), existingUser.getPassword())) {
-                String validToken = jwtUtil.getValidToken(existingUser.getUsername());
+                String validToken = tokenManager.getValidToken(existingUser.getUsername());
                 if (validToken != null) {
-                    log.info("Token valid assigned to {}", existingUser.getUsername());
                     return ResponseEntity.ok(new LoginRes(existingUser.getUsername(), validToken));
                 } else {
-                    log.info("No valid token for {}" , existingUser.getUsername() );
                     // Créez un token d'authentification
                     UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(existingUser.getUsername(), user.getPassword());
 
@@ -98,14 +96,13 @@ public class AuthApiController {
                         if (authentication != null && authentication.isAuthenticated()) {
                             // L'utilisateur est authentifié, vous pouvez accéder aux détails d'authentification
                             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-                            log.info("User is authenticated: {}", userDetails.getUsername());
                             SecurityContext sc = SecurityContextHolder.getContext();
                             sc.setAuthentication(authentication);
                             HttpSession session = req.getSession(true);
                             String jwtToken = jwtUtil.createToken(user);
-                            jwtUtil.addToken(user.getUsername(), jwtToken);
+                            tokenManager.addToken(user.getUsername(), jwtToken);
                             // Retournez le token JWT dans la réponse
-                            return ResponseEntity.ok(new LoginRes(userDetails.getUsername(), jwtToken));
+                            return ResponseEntity.ok(new LoginRes(existingUser.getUsername(), jwtToken));
                         }
                     } catch (AuthenticationException e) {
                         log.warn("Authentication failed for user: {}", user.getUsername(), e);

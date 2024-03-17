@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-@RequestMapping("/contact")
+@RequestMapping("api/chat/contact")
 @RestController
 public class ContactController {
     @Autowired

@@ -8,6 +8,9 @@ public class RabbitmqConnection {
     public static Connection getConnection() throws Exception{
         ConnectionFactory factory = new ConnectionFactory();
         factory.setHost(HOST);
+        factory.setPassword("guest");
+        factory.setPort(5672);
+        factory.setUsername("guest");
         return factory.newConnection();
     }
 }

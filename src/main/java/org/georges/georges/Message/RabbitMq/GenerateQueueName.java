@@ -12,8 +12,7 @@ import java.util.List;
 @Slf4j
 @Component
 public class GenerateQueueName {
-@Autowired
-private RabbitQueueService rabbitQueueService;
+RabbitQueueService rabbitQueueService = new RabbitQueueService();
 
 
     public List<String>  getAllQueueNames() {
@@ -34,8 +33,7 @@ private RabbitQueueService rabbitQueueService;
     Long largerId = Math.max(senderId,receiverId);
     String QUEUE_NAME = "private_"+smallerId+largerId;
     try {
-        RabbitQueueService rabbitQueueService1 = new RabbitQueueService();
-        rabbitQueueService1.addNewQueue(QUEUE_NAME , null, null);
+        rabbitQueueService.addNewQueue(QUEUE_NAME , "private_message", QUEUE_NAME);
     }
     catch (Exception e){
         log.info("Failed to add queue");
