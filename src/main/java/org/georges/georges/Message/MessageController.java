@@ -30,7 +30,7 @@ private JwtUtil jwtUtil;
 @Autowired
 private UserRepository  userRepository;
 @Autowired
-private RabbitTemplate rabbitTemplate;
+private GenerateQueueName generateQueueName;
 @Autowired
 MessageSender messageSender;
     @PostMapping("/sendPrivateMessage")
@@ -61,6 +61,7 @@ MessageSender messageSender;
             }
                 String queueName = new GenerateQueueName().privateQueueName(sender.getId(), receiver.getId());
             // Envoyer le message via RabbitMQ
+
             messageSender.sendDirectMessage(sender.getId(), receiver.getId() , message.getContent());
             //save message
 
@@ -175,7 +176,6 @@ public ResponseEntity<?> sendGroupMessage(@RequestBody Message message){
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Collections.singletonMap("error", "Unauthorized"));
     }
-
 
 
 }

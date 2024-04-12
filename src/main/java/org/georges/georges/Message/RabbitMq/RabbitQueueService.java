@@ -2,30 +2,23 @@ package org.georges.georges.Message.RabbitMq;
 
 import com.nimbusds.jose.shaded.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
+import org.georges.georges.Message.RabbitMq.RabbitMQConfig;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.listener.AbstractMessageListenerContainer;
 import org.springframework.amqp.rabbit.listener.RabbitListenerEndpointRegistry;
-import org.springframework.context.ApplicationContext;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
 public class RabbitQueueService {
 
-private final RabbitAdmin rabbitAdmin;
-private final RabbitListenerEndpointRegistry rabbitListenerEndpointRegistry;
-
-private final ApplicationContext context ;
-public RabbitQueueService(RabbitAdmin rabbitAdmin , RabbitListenerEndpointRegistry rabbitListenerEndpointRegistry , ApplicationContext context){
-    this.rabbitAdmin = rabbitAdmin;
-    this.rabbitListenerEndpointRegistry = rabbitListenerEndpointRegistry;
-    this.context = context;
-}
-
-
-
+RabbitMQConfig rabbitMQConfig = new RabbitMQConfig();
+@Autowired
+        RabbitAdmin rabbitAdmin;
+RabbitListenerEndpointRegistry rabbitListenerEndpointRegistry = new RabbitListenerEndpointRegistry();
 
     public void addNewQueue(String queueName, String exchangeName, String routingKey) {
         Queue queue = new Queue(queueName , true , false,false);
@@ -36,20 +29,16 @@ public RabbitQueueService(RabbitAdmin rabbitAdmin , RabbitListenerEndpointRegist
                 routingKey,
                 null
         );
-        rabbitAdmin.declareQueue(queue);
-        rabbitAdmin.declareBinding(binding);
+        rabbitMQConfig.rabbitAdmin().declareQueue(queue);
+        rabbitMQConfig.rabbitAdmin().declareBinding(binding);
         this.addQueueToListener(exchangeName,queueName);
-        log.info("Queue added succesfully");
+        log.info("Queue added succesfuly");
     }
 
 
     public void addQueueToListener(String listenerId, String queueName) {
         log.info("adding queue : " + queueName + " to listener with id : " + listenerId);
-        log.info("Queue exist on  {} : {}" , listenerId ,checkQueueExistOnListener(listenerId,queueName) );
-        log.warn("Checking contenerId {}," ,getMessageListenerContainerById(listenerId));
-        RabbitListenerEndpointRegistry listenerRegistery = context.getBean(RabbitListenerEndpointRegistry.class);
         if (!checkQueueExistOnListener(listenerId,queueName)) {
-
             this.getMessageListenerContainerById(listenerId).addQueueNames(queueName);
             log.info("queue push to listener ");
         } else {
@@ -63,7 +52,7 @@ public RabbitQueueService(RabbitAdmin rabbitAdmin , RabbitListenerEndpointRegist
         if (checkQueueExistOnListener(listenerId,queueName)) {
             this.getMessageListenerContainerById(listenerId).removeQueueNames(queueName);
             log.info("deleting queue from rabbit management");
-            this.rabbitAdmin.deleteQueue(queueName);
+            //this.rabbitAdmin.deleteQueue(queueName);
         } else {
             log.info("given queue name : " + queueName + " not exist on given listener id : " + listenerId);
         }
@@ -100,7 +89,6 @@ public RabbitQueueService(RabbitAdmin rabbitAdmin , RabbitListenerEndpointRegist
 
     public AbstractMessageListenerContainer getMessageListenerContainerById(String listenerId) {
         log.info("getting message listener container by id : " + listenerId);
-        log.info("Value of listener :{}" , this.rabbitListenerEndpointRegistry.getListenerContainer(listenerId));
         return ((AbstractMessageListenerContainer) this.rabbitListenerEndpointRegistry.getListenerContainer(listenerId));
     }
 }
