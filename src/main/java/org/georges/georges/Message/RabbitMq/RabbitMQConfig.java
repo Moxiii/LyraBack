@@ -1,18 +1,21 @@
-package org.georges.georges.Config;
+package org.georges.georges.Message.RabbitMq;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.EnableRabbit;
 import org.springframework.amqp.rabbit.annotation.RabbitListenerConfigurer;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
+import org.springframework.amqp.rabbit.config.SimpleRabbitListenerEndpoint;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 // com.rabbitmq.client.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.rabbit.listener.RabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.listener.RabbitListenerEndpointRegistrar;
 import org.springframework.amqp.rabbit.listener.RabbitListenerEndpointRegistry;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -41,11 +44,14 @@ public Jackson2JsonMessageConverter producerJackson2MessageConverter(){
     }
     @Bean
     public RabbitAdmin rabbitAdmin() {
-        return new RabbitAdmin(connectionFactory());
+        RabbitAdmin rabbitAdmin = new RabbitAdmin(connectionFactory());
+        rabbitAdmin.setAutoStartup(true);
+        return rabbitAdmin;
     }
 
     @Bean
-    public RabbitListenerEndpointRegistry rabbitListenerEndpointRegistry() {return new RabbitListenerEndpointRegistry();}
+    public RabbitListenerEndpointRegistry rabbitListenerEndpointRegistry() {
+        return new RabbitListenerEndpointRegistry();}
 
     @Bean
     public DefaultMessageHandlerMethodFactory messageHandlerMethodFactory() {
@@ -60,7 +66,7 @@ public Jackson2JsonMessageConverter producerJackson2MessageConverter(){
 
 
     @Bean
-    public ConnectionFactory connectionFactory() {
+    public CachingConnectionFactory connectionFactory() {
         CachingConnectionFactory connectionFactory = new CachingConnectionFactory();
         connectionFactory.setHost("localhost");
         connectionFactory.setPort(5672);
@@ -68,6 +74,7 @@ public Jackson2JsonMessageConverter producerJackson2MessageConverter(){
         connectionFactory.setPassword("guest");
         return connectionFactory;
     }
+
     @Override
     public void configureRabbitListeners(final RabbitListenerEndpointRegistrar registrar) {
         SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
@@ -79,6 +86,8 @@ public Jackson2JsonMessageConverter producerJackson2MessageConverter(){
         registrar.setEndpointRegistry(rabbitListenerEndpointRegistry());
         registrar.setMessageHandlerMethodFactory(messageHandlerMethodFactory());
     }
+
+
 
 }
 

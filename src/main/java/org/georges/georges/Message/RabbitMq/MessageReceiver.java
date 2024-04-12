@@ -45,6 +45,8 @@ public class MessageReceiver {
             }
         }, consumerTag -> {
             // handle cancellation
+            channel.basicCancel(QUEUE_NAME);
+            connection.close();
         });
     }
 
