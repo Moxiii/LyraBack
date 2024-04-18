@@ -15,7 +15,7 @@ public class RabbitmqConnection {
     public static Connection getConnection() throws Exception{
 
         ConnectionFactory factory = new ConnectionFactory();
-        factory.setHost("192.168.1.74");
+        factory.setHost("localhost");
         factory.setPassword("guest");
         factory.setPort(5672);
         factory.setUsername("guest");
