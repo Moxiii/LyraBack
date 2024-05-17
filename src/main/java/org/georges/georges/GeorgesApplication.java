@@ -21,20 +21,24 @@ public class GeorgesApplication {
     public static void main(String[] args) {
         SpringApplication.run(GeorgesApplication.class, args);
     }
+
     RabbitMQConfig rabbitMQConfig = new RabbitMQConfig();
     private final UserRepository userRepository;
     private final UserRoleRepository userRoleRepository;
 
     private final MessageRepository messageRepository;
-    public GeorgesApplication(UserRepository userRepository , UserRoleRepository userRoleRepository, MessageRepository messageRepository) {
+
+    public GeorgesApplication(UserRepository userRepository, UserRoleRepository userRoleRepository,
+            MessageRepository messageRepository) {
         this.userRepository = userRepository;
         this.userRoleRepository = userRoleRepository;
         this.messageRepository = messageRepository;
     }
 
     @Bean
-    public CommandLineRunner defaultDataInitializer(){
+    public CommandLineRunner defaultDataInitializer() {
         return args -> {
+<<<<<<< HEAD
             if (userRepository.count()==0){
                 UserRole user = new UserRole("user","user",1L);
                 user= userRoleRepository.save(user);
@@ -44,8 +48,20 @@ public class GeorgesApplication {
                 userRepository.save(moxi);
                 userRepository.save(test);
                 userRepository.save(martindrvt);
+=======
+            if (userRepository.count() == 0) {
+                UserRole user = new UserRole("user", "user", 1L);
+                user = userRoleRepository.save(user);
+                User moxi = new User("moxi", "moxi", "moxi@moxi.com", "ee", "10-10-2001", user);
+                User test = new User("test", "test", "test@e.e", "ee", "10-10-2001", user);
+                User martindvt = new User("martindvt", "martindvt", "test@e.e", "ee", "10-10-2001", user);
+
+                userRepository.save(moxi);
+                userRepository.save(test);
+                userRepository.save(martindvt);
+>>>>>>> f590161 (debugging for start)
             }
-            if(messageRepository.count()==0){
+            if (messageRepository.count() == 0) {
                 User moxi = userRepository.findByUsername("moxi");
                 User test = userRepository.findByUsername("test");
                 Date curentTimeStamp = new Date();
@@ -66,8 +82,5 @@ public class GeorgesApplication {
             }
         };
     }
-
-
-
 
 }
