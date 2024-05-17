@@ -15,7 +15,6 @@ import org.georges.georges.User.UserRepository;
 
 import java.util.Date;
 
-@ComponentScan("org.georges.georges")
 @SpringBootApplication
 public class GeorgesApplication {
     public static void main(String[] args) {
@@ -38,28 +37,15 @@ public class GeorgesApplication {
     @Bean
     public CommandLineRunner defaultDataInitializer() {
         return args -> {
-<<<<<<< HEAD
             if (userRepository.count()==0){
                 UserRole user = new UserRole("user","user",1L);
                 user= userRoleRepository.save(user);
                 User moxi = new User("moxi","moxi","moxi@moxi.com","ee","10-10-2001",user);
                 User test = new User("test","test","test@e.e","ee","10-10-2001",user);;
-                User martindrvt = new User("martin","martindrvt","test@e.e","ee","10-10-2001",user);;
+                User martindrvt = new User("martin","martindvt","test@e.e","ee","10-10-2001",user);;
                 userRepository.save(moxi);
                 userRepository.save(test);
                 userRepository.save(martindrvt);
-=======
-            if (userRepository.count() == 0) {
-                UserRole user = new UserRole("user", "user", 1L);
-                user = userRoleRepository.save(user);
-                User moxi = new User("moxi", "moxi", "moxi@moxi.com", "ee", "10-10-2001", user);
-                User test = new User("test", "test", "test@e.e", "ee", "10-10-2001", user);
-                User martindvt = new User("martindvt", "martindvt", "test@e.e", "ee", "10-10-2001", user);
-
-                userRepository.save(moxi);
-                userRepository.save(test);
-                userRepository.save(martindvt);
->>>>>>> f590161 (debugging for start)
             }
             if (messageRepository.count() == 0) {
                 User moxi = userRepository.findByUsername("moxi");

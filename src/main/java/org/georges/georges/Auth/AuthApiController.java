@@ -69,7 +69,7 @@ private TokenManager tokenManager;
     public ResponseEntity<?> inscriptionSubmit(@RequestBody User user, HttpServletRequest req) {
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         // Vérifier si l'utilisateur existe dans votre système
-
+        
         User existingUser = null;
         if (user.getEmail() != null) {
             existingUser = userService.findByEmail(user.getEmail().toLowerCase());
