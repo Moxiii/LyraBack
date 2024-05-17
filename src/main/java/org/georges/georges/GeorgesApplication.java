@@ -11,7 +11,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.georges.georges.User.User;
-import org.georges.georges.User.UserRole.UserRepository;
+import org.georges.georges.User.UserRepository;
 
 import java.util.Date;
 
@@ -40,8 +40,10 @@ public class GeorgesApplication {
                 user= userRoleRepository.save(user);
                 User moxi = new User("moxi","moxi","moxi@moxi.com","ee","10-10-2001",user);
                 User test = new User("test","test","test@e.e","ee","10-10-2001",user);;
+                User martindrvt = new User("martin","martindrvt","test@e.e","ee","10-10-2001",user);;
                 userRepository.save(moxi);
                 userRepository.save(test);
+                userRepository.save(martindrvt);
             }
             if(messageRepository.count()==0){
                 User moxi = userRepository.findByUsername("moxi");

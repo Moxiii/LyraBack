@@ -4,7 +4,7 @@ import jakarta.transaction.Transactional;
 import org.georges.georges.Message.Message;
 import org.georges.georges.User.User;
 import org.georges.georges.Message.MessageRepository;
-import org.georges.georges.User.UserRole.UserRepository;
+import org.georges.georges.User.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.*;

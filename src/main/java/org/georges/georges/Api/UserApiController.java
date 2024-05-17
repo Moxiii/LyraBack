@@ -1,31 +1,16 @@
 package org.georges.georges.Api;
 
-import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.georges.georges.User.User;
-import org.georges.georges.User.UserRole.UserRepository;
-import org.georges.georges.User.UserRole.UserRole;
+import org.georges.georges.User.UserRepository;
 import org.georges.georges.User.UserService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 
-import static org.springframework.security.web.context.HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY;
 @Slf4j
 @RequestMapping("api/user")
 @RestController
@@ -66,10 +51,10 @@ public class UserApiController {
     public ResponseEntity<String> deleteUserById(@PathVariable Long id) {
         try {
             userService.deleteUserById(id);
-            return new ResponseEntity<>("Avis supprimé avec succès", HttpStatus.OK);
+            return new ResponseEntity<>("User supprimé avec succès", HttpStatus.OK);
         } catch (Exception e) {
             e.printStackTrace();
-            return new ResponseEntity<>("Erreur lors de la suppression de l'avis", HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>("Erreur lors de la suppression de l'user", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
