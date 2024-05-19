@@ -1,8 +1,7 @@
 package org.georges.georges.Api;
 
 import org.georges.georges.User.User;
-import org.georges.georges.User.UserRole.UserRepository;
-import org.georges.georges.User.UserService;
+import org.georges.georges.User.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

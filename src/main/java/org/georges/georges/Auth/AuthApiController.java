@@ -8,7 +8,7 @@ import org.georges.georges.Config.JwtUtil;
 import org.georges.georges.Config.TokenManager;
 import org.georges.georges.Response.LoginRes;
 import org.georges.georges.User.User;
-import org.georges.georges.User.UserRole.UserRepository;
+import org.georges.georges.User.UserRepository;
 import org.georges.georges.User.UserRole.UserRole;
 import org.georges.georges.User.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,14 +24,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import static org.springframework.security.web.context.HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY;
 @Slf4j
 @RestController
 @RequestMapping("api/auth")
@@ -72,12 +69,12 @@ private TokenManager tokenManager;
     public ResponseEntity<?> inscriptionSubmit(@RequestBody User user, HttpServletRequest req) {
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         // Vérifier si l'utilisateur existe dans votre système
-
+        
         User existingUser = null;
         if (user.getEmail() != null) {
-            existingUser = userService.findByEmail(user.getEmail());
+            existingUser = userService.findByEmail(user.getEmail().toLowerCase());
         } else if (user.getUsername() != null) {
-            existingUser = userService.findByUsername(user.getUsername());
+            existingUser = userService.findByUsername(user.getUsername().toLowerCase());
         }
 
         if (existingUser != null) {

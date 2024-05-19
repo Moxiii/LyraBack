@@ -29,12 +29,5 @@ private RabbitMQConfig rabbitMQConfig = new RabbitMQConfig();
         rabbitTemplate.convertAndSend("private_message",QUEUE_NAME,formattedMessage);
         eventPublisher.publishEvent(new MessageSendEvent(message));
     }
-    public void sendGroupMessage(String message) throws Exception {
-        String  QUEUE_NAME = "groupChatQueue";
-        try (Connection connection = RabbitmqConnection.getConnection();
-             Channel channel = connection.createChannel()) {
-            channel.queueDeclare(QUEUE_NAME, false, false, false, null);
-            channel.basicPublish("", QUEUE_NAME, null, message.getBytes("UTF-8"));
-        }
-    }
+
 }

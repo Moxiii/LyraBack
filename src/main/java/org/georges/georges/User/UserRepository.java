@@ -1,4 +1,4 @@
-package org.georges.georges.User.UserRole;
+package org.georges.georges.User;
 
 import org.georges.georges.User.User;
 import org.springframework.data.jpa.repository.JpaRepository;

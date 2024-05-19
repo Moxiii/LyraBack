@@ -3,7 +3,7 @@ package org.georges.georges.Message;
 import lombok.extern.slf4j.Slf4j;
 import org.georges.georges.Conversation.Conversation;
 import org.georges.georges.User.User;
-import org.georges.georges.User.UserRole.UserRepository;
+import org.georges.georges.User.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
