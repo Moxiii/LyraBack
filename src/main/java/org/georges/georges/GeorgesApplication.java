@@ -74,10 +74,10 @@ public class GeorgesApplication {
             if (todoRepository.count() == 0) {
                 Task task1 = new Task();
                 task1.setDescription("Task 1 description");
-
+                task1.setCompleted(false);
                 Task task2 = new Task();
                 task2.setDescription("Task 2 description");
-
+                task2.setCompleted(true);
                 Todo todo = new Todo();
                 todo.setTitle("Sample Todo");
                 todo.setTask(Arrays.asList(task1, task2));
