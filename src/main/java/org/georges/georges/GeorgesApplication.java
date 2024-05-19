@@ -3,16 +3,19 @@ package org.georges.georges;
 import org.georges.georges.Message.RabbitMq.RabbitMQConfig;
 import org.georges.georges.Message.Message;
 import org.georges.georges.Message.MessageRepository;
+import org.georges.georges.Todo.Tasks.Task;
+import org.georges.georges.Todo.Todo;
+import org.georges.georges.Todo.TodoRepository;
 import org.georges.georges.User.UserRole.UserRole;
 import org.georges.georges.User.UserRole.UserRoleRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.georges.georges.User.User;
 import org.georges.georges.User.UserRepository;
 
+import java.util.Arrays;
 import java.util.Date;
 
 @SpringBootApplication
@@ -26,12 +29,14 @@ public class GeorgesApplication {
     private final UserRoleRepository userRoleRepository;
 
     private final MessageRepository messageRepository;
+    private final TodoRepository todoRepository;
 
     public GeorgesApplication(UserRepository userRepository, UserRoleRepository userRoleRepository,
-            MessageRepository messageRepository) {
+                              MessageRepository messageRepository, TodoRepository todoRepository) {
         this.userRepository = userRepository;
         this.userRoleRepository = userRoleRepository;
         this.messageRepository = messageRepository;
+        this.todoRepository = todoRepository;
     }
 
     @Bean
@@ -65,6 +70,22 @@ public class GeorgesApplication {
                 messageRepository.save(message1);
                 messageRepository.save(message2);
                 messageRepository.save(message3);
+            }
+            if (todoRepository.count() == 0) {
+                Task task1 = new Task();
+                task1.setDescription("Task 1 description");
+
+                Task task2 = new Task();
+                task2.setDescription("Task 2 description");
+
+                Todo todo = new Todo();
+                todo.setTitle("Sample Todo");
+                todo.setTask(Arrays.asList(task1, task2));
+
+                task1.setTodo(todo);
+                task2.setTodo(todo);
+
+                todoRepository.save(todo);
             }
         };
     }
