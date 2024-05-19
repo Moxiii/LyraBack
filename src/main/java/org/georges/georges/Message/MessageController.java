@@ -9,7 +9,7 @@ import org.georges.georges.Config.JwtUtil;
 import org.georges.georges.Message.RabbitMq.*;
 import org.georges.georges.User.User;
 import org.georges.georges.User.UserRepository;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,13 +28,13 @@ private MessageRepository messageRepository;
 private JwtUtil jwtUtil;
 @Autowired
 private UserRepository  userRepository;
-@Autowired
-private GenerateQueueName generateQueueName;
+
 @Autowired
 MessageSender messageSender;
     @PostMapping("/sendPrivateMessage")
     public ResponseEntity<?> sendPrivateMessage(@RequestBody Message message , HttpServletRequest request){
         String authorizationHeader = request.getHeader("Authorization");
+        log.info("Message header : "+authorizationHeader);
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             String token = authorizationHeader.substring(7); // Supprimer le préfixe "Bearer "
             log.info("TOKEN AUTHORIZED");
@@ -77,11 +77,7 @@ MessageSender messageSender;
         // Si le jeton n'est pas valide ou s'il est absent, renvoyer un code d'erreur
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Collections.singletonMap("error", "Unauthorized"));
     }
-@PostMapping("/sendGroupMessage")
-@ResponseBody
-public ResponseEntity<?> sendGroupMessage(@RequestBody Message message){
-    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Collections.singletonMap("error", "Unauthorized"));
-}
+
     @GetMapping("/messages")
     @ResponseBody
     public ResponseEntity<?> getAllMessages(HttpServletRequest request) throws Exception {

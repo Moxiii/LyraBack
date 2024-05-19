@@ -1,7 +1,11 @@
 package org.georges.georges.Todo;
 
+import jakarta.persistence.EntityManager;
+import jakarta.transaction.SystemException;
+import jakarta.transaction.UserTransaction;
 import org.georges.georges.Todo.Tasks.Task;
 import org.georges.georges.Todo.Tasks.TaskRepository;
+import org.georges.georges.User.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,5 +20,7 @@ public class TodoService {
     private TaskRepository taskRepository;
 @Autowired
     private TodoRepository todoRepository;
+@Autowired
+    private EntityManager entityManager;
 
 }

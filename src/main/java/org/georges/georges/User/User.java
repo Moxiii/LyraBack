@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.georges.georges.Conversation.Conversation;
+import org.georges.georges.Todo.Todo;
 import org.georges.georges.User.UserRole.UserRole;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -32,6 +33,9 @@ public class User {
     private Long id;
     @OneToMany(mappedBy = "user")
     private List<UserQueue> queues;
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "user_id")
+    private List<Todo> todos;
     private static final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public User(String name, String username, String email, String password, String dateInscription, UserRole userRole) {
