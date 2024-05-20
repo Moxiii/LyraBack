@@ -34,7 +34,7 @@ public class MessageReceiver {
                 ObjectMapper mapper = new ObjectMapper();
                 Message message = mapper.readValue(messageContent, Message.class);
                 log.info("Contenu du mapper : {}" , mapper);
-                log.info("Contenu du messqge deserialiser : {}" , message);
+                log.info("Contenu du message deserialiser : {}" , message);
 
                 // Enregistrer le message en base de données
                 //messageRepository.save(message);

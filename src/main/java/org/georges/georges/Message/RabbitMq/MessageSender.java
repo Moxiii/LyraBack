@@ -24,7 +24,7 @@ private RabbitMQConfig rabbitMQConfig = new RabbitMQConfig();
         String QUEUE_NAME = generateQueueName.privateQueueName(senderId, receiverId);
         String senderIdString = String.valueOf(senderId);
         String receiverIdString = String.valueOf(receiverId);
-        String formattedMessage = String.format("{\"sender\": \"%s\", \"receiver\": \"%s\", \"content\": \"%s\"}",
+            String formattedMessage = String.format("{\"sender\": \"%s\", \"receiver\": \"%s\", \"content\": \"%s\"}",
                 senderIdString, receiverIdString, message);
         rabbitTemplate.convertAndSend("private_message",QUEUE_NAME,formattedMessage);
         eventPublisher.publishEvent(new MessageSendEvent(message));

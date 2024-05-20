@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.georges.georges.Config.JwtUtil;
 import org.georges.georges.Todo.Tasks.Task;
 import org.georges.georges.Todo.Tasks.TaskService;
+import org.georges.georges.User.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

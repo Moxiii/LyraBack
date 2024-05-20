@@ -15,17 +15,7 @@ public class GenerateQueueName {
 RabbitQueueService rabbitQueueService = new RabbitQueueService();
 
 
-    public List<String>  getAllQueueNames() {
-        List<String> queueName = new ArrayList<>();
-        User currentUser = SecurityUtils.getCurrentUser();
-        if(currentUser != null ){
-            List<UserQueue> userQueue = currentUser.getQueues();
-            for (UserQueue queue : userQueue){
-                queueName.add(queue.getName());
-            }
-        }
-        return queueName;
-    }
+
 
     public String privateQueueName(Long senderId , Long receiverId){
 
