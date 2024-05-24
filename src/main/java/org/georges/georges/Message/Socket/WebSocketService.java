@@ -45,7 +45,7 @@ public class WebSocketService {
         message.setContent(messageContent);
         message.setTimestamp(new Date());
 
-        messageRepository.save(message); // Sauvegarde du message dans la base de données
+        messageRepository.save(message);
 
         try {
             String queueName = "messageQueue";
