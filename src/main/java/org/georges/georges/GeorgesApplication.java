@@ -1,5 +1,6 @@
 package org.georges.georges;
 
+import lombok.extern.slf4j.Slf4j;
 import org.georges.georges.Message.RabbitMq.RabbitMQConfig;
 import org.georges.georges.Message.Message;
 import org.georges.georges.Message.MessageRepository;
@@ -15,9 +16,10 @@ import org.springframework.context.annotation.Bean;
 import org.georges.georges.User.User;
 import org.georges.georges.User.UserRepository;
 
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
-
+@Slf4j
 @SpringBootApplication
 public class GeorgesApplication {
     public static void main(String[] args) {
@@ -41,15 +43,23 @@ public class GeorgesApplication {
     @Bean
     public CommandLineRunner defaultDataInitializer() {
         return args -> {
+            Date aujourdhui = new Date();
+            SimpleDateFormat formatedDate = new SimpleDateFormat("dd-MM-yyyy");
+            String dateString = formatedDate.format(aujourdhui);
+            log.info("formated date" + dateString);
             if (userRepository.count()==0){
-                UserRole user = new UserRole("user","user",1L);
-                user= userRoleRepository.save(user);
-                User moxi = new User("moxi","moxi","moxi@moxi.com","ee","10-10-2001",user);
-                User test = new User("test","test","test@e.e","ee","10-10-2001",user);;
-                User martindrvt = new User("martin","martindvt","test@e.e","ee","10-10-2001",user);;
+                UserRole user = new UserRole("user","user",1l);
+                UserRole georgesRole = new UserRole("georges","georges",2l);
+               user = userRoleRepository.save(user);
+               georgesRole = userRoleRepository.save(georgesRole);
+                User goerges = new User("georges" , "georges" , "georges.app.sav@gmail.com","ee",dateString , georgesRole);
+                User moxi = new User("moxi","moxi","moxi@moxi.com","ee",dateString,user);
+                User test = new User("test","test","test@e.e","ee",dateString,user);;
+                User martindrvt = new User("martin","martindvt","test@e.e","ee",dateString,user);;
                 userRepository.save(moxi);
                 userRepository.save(test);
                 userRepository.save(martindrvt);
+                userRepository.save(goerges);
             }
             if (messageRepository.count() == 0) {
                 User moxi = userRepository.findByUsername("moxi");

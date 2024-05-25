@@ -40,9 +40,6 @@ public class WebSocketService {
         messageRepository.save(message);
 
         try {
-            String formattedMessage = objectMapper.writeValueAsString(message);
-            String queueName = "/queue/" + senderId;
-            messagingTemplate.convertAndSend(queueName, formattedMessage);
         } catch (Exception e) {
             e.printStackTrace();
         }
