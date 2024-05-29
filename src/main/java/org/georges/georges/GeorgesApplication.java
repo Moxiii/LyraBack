@@ -91,6 +91,7 @@ public class GeorgesApplication {
                 todo.setTitle("Sample Todo");
                 todo.setTask(Arrays.asList(task1, task2));
                User moxi = userRepository.findByUsername("moxi");
+               todo.setUser(moxi);
                 task1.setTodo(todo);
                 task2.setTodo(todo);
                 todoRepository.save(todo);
