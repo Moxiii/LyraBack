@@ -1,3 +1,4 @@
+
 package org.georges.georges.Config;
 
 import org.georges.georges.User.CustomUserDetailsService;
@@ -18,22 +19,22 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.firewall.StrictHttpFirewall;
-
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
 
 @Configuration
 @EnableWebSecurity
+public class SecurityConfig {
 
-public class SecurityConfig  {
     @Autowired
     private CustomUserDetailsService customUserDetailsService;
+
     @Autowired
     private JwtUtil jwtUtil;
 
-
-
-
     @Bean
-    public AuthenticationManager authManager(HttpSecurity http ) throws Exception {
+    public AuthenticationManager authManager(HttpSecurity http) throws Exception {
         AuthenticationManagerBuilder authenticationManagerBuilder = http.getSharedObject(AuthenticationManagerBuilder.class);
         authenticationManagerBuilder.userDetailsService(customUserDetailsService);
         return authenticationManagerBuilder.build();
@@ -41,21 +42,23 @@ public class SecurityConfig  {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();}
+        return new BCryptPasswordEncoder();
+    }
+
     @Bean
     public StrictHttpFirewall httpFirewall() {
         StrictHttpFirewall firewall = new StrictHttpFirewall();
-        firewall.setAllowSemicolon(true); // Autoriser le point-virgule dans les URLs
+        firewall.setAllowSemicolon(true); // Allow semicolon in URLs
         return firewall;
     }
-    @SuppressWarnings("deprecated")
+
+    @SuppressWarnings("deprecation")
     @Bean
-    public SecurityFilterChain securityfilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                .cors().and()
                 .csrf()
-                    .ignoringRequestMatchers("/api/**")
-                    //.ignoringRequestMatchers(request -> request.getServletPath().contains("jsessionid"))
-                    //.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()) // Utilisation de CookieCsrfTokenRepository
+                .ignoringRequestMatchers("/api/**")
                 .ignoringRequestMatchers("/chat/**")
                 .and()
                 .authorizeRequests()
@@ -65,37 +68,42 @@ public class SecurityConfig  {
                 .requestMatchers("/admin/**").hasAnyRole("admin")
                 .anyRequest().authenticated()
                 .and()
-                .addFilterBefore(new jwtAuthenticationFilter( jwtUtil , customUserDetailsService ), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new jwtAuthenticationFilter(jwtUtil, customUserDetailsService), UsernamePasswordAuthenticationFilter.class)
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
                 .and()
                 .formLogin()
-                    .loginPage("/api/auth/login" ) // Spécifiez l'URL de votre page de connexion personnalisée
-                    .loginProcessingUrl("/process-login")
-                    .defaultSuccessUrl("/index")
-                    .failureUrl("/custom-login?error=true")
-                    .permitAll()
+                .loginPage("/api/auth/login") // Specify the URL of your custom login page
+                .loginProcessingUrl("/process-login")
+                .defaultSuccessUrl("/index")
+                .failureUrl("/custom-login?error=true")
+                .permitAll()
                 .successHandler(new SavedRequestAwareAuthenticationSuccessHandler())
                 .and()
-                    .logout()
-                    .logoutSuccessUrl("/private/auth/logout")
-                    .invalidateHttpSession(true)
-                    .deleteCookies("JSESSIONID")
-                    .permitAll()
+                .logout()
+                .logoutSuccessUrl("/private/auth/logout")
+                .invalidateHttpSession(true)
+                .deleteCookies("JSESSIONID")
+                .permitAll()
                 .and()
-                .oauth2ResourceServer((oauth2) -> oauth2
-                        .jwt(Customizer.withDefaults())
-                );
-
+                .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
 
         return http.build();
     }
 
     @Bean
     public JwtDecoder jwtDecoder() {
-        return JwtDecoders.fromIssuerLocation("https://my-auth-server.com");
+        return JwtDecoders.fromIssuerLocation("https://accounts.google.com");
     }
 
-
+    @Bean
+    public CorsFilter corsFilter() {
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowCredentials(true);
+        config.addAllowedOrigin("http://localhost:8081");
+        config.addAllowedHeader("*");
+        config.addAllowedMethod("*");
+        source.registerCorsConfiguration("/**", config);
+        return new CorsFilter(source);
+    }
 }
-
-
