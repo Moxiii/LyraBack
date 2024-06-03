@@ -31,6 +31,8 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Enumerated(EnumType.STRING)
+    private Provider provider;
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "user_id")
     private List<Todo> todos;
@@ -45,7 +47,21 @@ public class User {
         this.userRole = userRole;
     }
 
-public User(){
+    public User(String name, String email, String dateInscription) {
+        this.name = name;
+        this.email = email;
+        this.dateInscription = dateInscription;
+    }
+
+    public Provider getProvider() {
+        return provider;
+    }
+
+    public void setProvider(Provider provider) {
+        this.provider = provider;
+    }
+
+    public User(){
 
 }
 

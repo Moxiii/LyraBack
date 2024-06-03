@@ -1,6 +1,10 @@
 package org.georges.georges.Auth;
 
 
+import com.google.api.client.auth.oauth2.TokenRequest;
+import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.jackson2.JacksonFactory;
+import io.jsonwebtoken.io.IOException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +21,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
+
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContext;
@@ -26,7 +34,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.GeneralSecurityException;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
 
 @Slf4j
@@ -43,6 +53,11 @@ public class AuthApiController {
 
     @Autowired
     private JwtUtil jwtUtil;
+
+
+    private static final String CLIENT_ID = "1047364862184-5ht68ioumb1cnjmpivurtmvtnb7fkr4s.apps.googleusercontent.com\n";
+    private static final JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
+
 @Autowired
 private TokenManager tokenManager;
     @PostMapping("/register")
@@ -117,6 +132,8 @@ private TokenManager tokenManager;
         }
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal server error");
     }
+
+
 }
 
 
