@@ -58,9 +58,9 @@ public class GoogleAuthController {
     private JwtUtil jwtUtil;
 
 
-    private static final String CLIENT_ID = "1047364862184-5ht68ioumb1cnjmpivurtmvtnb7fkr4s.apps.googleusercontent.com\n";
+    private static final String CLIENT_ID = "1047364862184-5ht68ioumb1cnjmpivurtmvtnb7fkr4s.apps.googleusercontent.com";
     private static final JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
-    @GetMapping("/google")
+    @PostMapping("/google")
     public User googleLogin(@RequestBody TokenRequest tokenRequest) {
         String idTokenString = tokenRequest.getToken();
         GoogleIdTokenVerifier verifier;
