@@ -1,5 +1,7 @@
 package org.georges.georges.Config;
 
+import jakarta.servlet.http.HttpServletRequest;
+import org.georges.georges.Response.ErrorRes;
 import org.georges.georges.User.CustomUserDetails;
 import org.georges.georges.User.User;
 import org.springframework.security.core.Authentication;
@@ -17,5 +19,16 @@ public class SecurityUtils {
             }
         }
         return null;
+    }
+
+    public static boolean isAuthorized(HttpServletRequest request , JwtUtil jwtUtil){
+        String authorizationHeader = request.getHeader("Authorization");
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            String token = authorizationHeader.substring(7);
+            if (jwtUtil != null && jwtUtil.validateToken(token)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
