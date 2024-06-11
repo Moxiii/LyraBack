@@ -80,7 +80,7 @@ public class SecurityConfig {
                 .successHandler(new SavedRequestAwareAuthenticationSuccessHandler())
                 .and()
                 .logout()
-                .logoutSuccessUrl("/private/auth/logout")
+                .logoutSuccessUrl("/api/auth/logout")
                 .invalidateHttpSession(true)
                 .deleteCookies("JSESSIONID")
                 .permitAll()
