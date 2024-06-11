@@ -55,7 +55,7 @@ public class GeorgesApplication {
                 User goerges = new User("georges" , "georges" , "georges.app.sav@gmail.com","ee",dateString , georgesRole);
                 User moxi = new User("moxi","moxi","moxi@moxi.com","ee",dateString,user);
                 User test = new User("test","test","test@e.e","ee",dateString,user);;
-                User martindrvt = new User("martin","martindvt","test@e.e","ee",dateString,user);;
+                User martindrvt = new User("martin","martindvt","martin#martin.com","ee",dateString,user);;
                 userRepository.save(moxi);
                 userRepository.save(test);
                 userRepository.save(martindrvt);
