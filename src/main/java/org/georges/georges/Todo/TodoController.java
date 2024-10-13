@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.georges.georges.Config.JwtUtil;
 import org.georges.georges.Config.SecurityUtils;
+import org.georges.georges.Response.TodoRes;
 import org.georges.georges.Todo.Tasks.Task;
 import org.georges.georges.Todo.Tasks.TaskRepository;
 import org.georges.georges.Todo.Tasks.TaskService;
@@ -19,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @Slf4j
@@ -69,16 +71,23 @@ public ResponseEntity<?> getTodoByID(HttpServletRequest request , @PathVariable 
     return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("");
 }
 
-    @GetMapping("/get/todo/")
+    @GetMapping("/get/todo")
         public ResponseEntity<?>getTodosByUser(HttpServletRequest request){
-        String authorizationHeader = request.getHeader("Authorization");
-        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-            String token = authorizationHeader.substring(7);
-            log.info("TOKEN AUTHORIZED");
-            if (jwtUtil != null && jwtUtil.validateToken(token)) {
-           User currentUser = SecurityUtils.getCurrentUser();
+        String token = jwtUtil.extractTokenFromRequest(request);
+        if (token != null && jwtUtil.validateToken(token)) {
+            String username = jwtUtil.extractUsername(token);
+            User currentUser = userRepository.findByUsername(username);
+            if (currentUser != null) {
            List<Todo>todos = todoRepository.findAllByUser(currentUser);
-                return ResponseEntity.ok().body(todos);
+                log.info("Retrieved {} todos for user {}", todos.size(), username);
+                List<TodoRes> todoResponses = todos.stream().map(todo -> {
+                    TodoRes todoRes = new TodoRes();
+                    todoRes.setId(todo.getId());
+                    todoRes.setTitle(todo.getTitle());
+                    todoRes.setTask(todo.getTask());
+                    return todoRes;
+                        }).collect(Collectors.toList());
+                return ResponseEntity.ok().body(todoResponses);
 
             }
         }

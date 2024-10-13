@@ -1,6 +1,11 @@
 package org.georges.georges.Api;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.georges.georges.Config.JwtUtil;
+import org.georges.georges.Config.SecurityUtils;
+import org.georges.georges.Response.ErrorRes;
+import org.georges.georges.Response.UserProfileRes;
 import org.georges.georges.User.User;
 import org.georges.georges.User.UserRepository;
 import org.georges.georges.User.UserService;
@@ -20,6 +25,8 @@ public class UserApiController {
     private UserService userService;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private JwtUtil jwtUtil;
 
     @GetMapping("/getAll")
     public List<User> getAllUsers() {
@@ -58,6 +65,42 @@ public class UserApiController {
         }
     }
 
-
+//@GetMapping("/me")
+//    public ResponseEntity<?> getUserProfile(HttpServletRequest request) {
+//        boolean isAuth = SecurityUtils.isAuthorized(request , jwtUtil);
+//        if (isAuth == true) {
+//                User currentUser = SecurityUtils.getCurrentUser();
+//                if (currentUser != null) {
+//                    if (currentUser.getDescription() == null) {
+//                        currentUser.setDescription("Basic User of Gilbert");
+//                    }
+//                    UserProfileRes profileRes = new UserProfileRes(
+//                            currentUser.getUsername(),
+//                            currentUser.getEmail(),
+//                            currentUser.getDescription()
+//                    );
+//                    return new ResponseEntity<>(profileRes, HttpStatus.OK);
+//                }
+//            }
+//    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorRes(HttpStatus.UNAUTHORIZED, "User not found"));
+//}
+    @GetMapping("/me")
+    public ResponseEntity<?> getUserProfile(HttpServletRequest request) {
+        String token = jwtUtil.extractTokenFromRequest(request);
+        if (token != null && jwtUtil.validateToken(token)) {
+            String username = jwtUtil.extractUsername(token);
+            User currentUser = userRepository.findByUsername(username);
+            if (currentUser != null) {
+                if(currentUser.getDescription() == null){currentUser.setDescription("basic user of Gilbert");}
+                UserProfileRes profileRes = new UserProfileRes(
+                        currentUser.getUsername(),
+                        currentUser.getDescription(),
+                        currentUser.getEmail()
+                );
+                return new ResponseEntity<>(profileRes, HttpStatus.OK);
+            }
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorRes(HttpStatus.UNAUTHORIZED, "User not found"));
+    }
 }
 

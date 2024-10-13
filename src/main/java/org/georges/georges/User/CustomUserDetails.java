@@ -2,9 +2,12 @@ package org.georges.georges.User;
 
 import org.georges.georges.User.User;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 public class CustomUserDetails implements UserDetails {
     private final String username;
@@ -23,9 +26,9 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        // Retournez les rôles/granted authorities de l'utilisateur s'il y en a
-        // Exemple fictif : return Arrays.asList(new SimpleGrantedAuthority("ROLE_USER"));
-        return null;
+        List<SimpleGrantedAuthority> authorities = new ArrayList<>();
+        authorities.add(new SimpleGrantedAuthority("ROLE_USER")); // Exemple de rôle
+        return authorities;
     }
 
     @Override
