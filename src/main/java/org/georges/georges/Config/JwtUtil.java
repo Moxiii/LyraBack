@@ -6,8 +6,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.georges.georges.User.User;
 
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
@@ -32,11 +35,14 @@ public class JwtUtil {
 
     private final JwtParser jwtParser;
 
-
+@Bean
+public JwtDecoder jwtDecoder() {
+    return NimbusJwtDecoder.withSecretKey(SECRET_KEY).build();
+}
 public String createToken(User user){
         Claims claims = Jwts.claims().setSubject(user.getUsername()).build();
         Date tokenCreateTime = new Date();
-        Date tokenValidity = new Date(tokenCreateTime.getTime() + TimeUnit.MINUTES.toMillis(TOKEN_VALIDITY));
+        Date tokenValidity = new Date(tokenCreateTime.getTime() + TOKEN_VALIDITY);
         String token =  Jwts.builder()
                 .setClaims(claims)
                 .setExpiration(tokenValidity)
@@ -63,7 +69,10 @@ public String createToken(User user){
 
     public boolean validateToken(String token) {
     try{
-        Claims claims = Jwts.parser().setSigningKey(SECRET_KEY).build().parseSignedClaims(token).getPayload();
+        Claims claims = Jwts.parser()
+                .setSigningKey(SECRET_KEY).
+                build().parseClaimsJws(token)
+                .getPayload();
         // Vérifiez si le token est expiré
         Date expirationDate = claims.getExpiration();
         Date currentDate = new Date();

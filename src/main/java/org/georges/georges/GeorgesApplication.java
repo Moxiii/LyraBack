@@ -55,7 +55,9 @@ public class GeorgesApplication {
                 User goerges = new User("georges" , "georges" , "georges.app.sav@gmail.com","ee",dateString , georgesRole);
                 User moxi = new User("moxi","moxi","moxi@moxi.com","ee",dateString,user);
                 User test = new User("test","test","test@e.e","ee",dateString,user);;
-                User martindrvt = new User("martin","martindvt","martin#martin.com","ee",dateString,user);;
+                User martindrvt = new User("martin","martindvt","martin@martin.com","ee",dateString,user);
+                moxi.setDescription("backend Dev of Gilbert");
+                martindrvt.setDescription("CEO of the world");
                 userRepository.save(moxi);
                 userRepository.save(test);
                 userRepository.save(martindrvt);
@@ -81,20 +83,25 @@ public class GeorgesApplication {
                 messageRepository.save(message3);
             }
             if (todoRepository.count() == 0) {
-                Task task1 = new Task();
-                task1.setDescription("Task 1 description");
-                task1.setCompleted(false);
-                Task task2 = new Task();
-                task2.setDescription("Task 2 description");
-                task2.setCompleted(true);
+                Task task1 = new Task("Description 1 " , "test" , false);
+                Task task2 = new Task("Description 2 " , "test completed" , true);
+                Task task3 = new Task("Description 3 " , "test " , false);
+                Task task4 = new Task("Description 4 " , "test completed" , true);
                 Todo todo = new Todo();
+                Todo todo1 = new Todo();
+                todo1.setTitle("Todo 1");
                 todo.setTitle("Sample Todo");
                 todo.setTask(Arrays.asList(task1, task2));
+                todo1.setTask(Arrays.asList(task3,task4));
                User moxi = userRepository.findByUsername("moxi");
+               todo1.setUser(moxi);
                todo.setUser(moxi);
                 task1.setTodo(todo);
                 task2.setTodo(todo);
+                task3.setTodo(todo1);
+                task4.setTodo(todo1);
                 todoRepository.save(todo);
+                todoRepository.save(todo1);
             }
         };
     }

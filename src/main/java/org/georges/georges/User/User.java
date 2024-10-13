@@ -28,6 +28,7 @@ public class User {
     private String email;
     private String password;
     private String dateInscription;
+    private String Description;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

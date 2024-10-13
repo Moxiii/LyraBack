@@ -36,8 +36,8 @@ public class jwtAuthenticationFilter extends OncePerRequestFilter {
 
 /**
 * Token Filter
-* Le Filter fait en sorte de recuprer le token dans la requete puis il extrait le nom d'utilisateur >
- * si le token est bon on met le securitty context et on stock ce token j'usqua expiration (1h)
+* Le Filter fait en sorte de recuperer le token dans la requete puis il extrait le nom d'utilisateur >
+ * si le token est bon, on met le security context et ont stock ce token jusqu'à expiration (1h)
 * @Filter
  * @Token
  */
@@ -48,7 +48,9 @@ public class jwtAuthenticationFilter extends OncePerRequestFilter {
         log.info("Le  token validator renvoie :{}"  , token);
         if(token != null && jwtUtil.validateToken(token) ){
             String username = jwtUtil.extractUsername(token);
+            log.info("Le  username valide :{}" , username);
             UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
+            log.info("Le  userDetails valide :{} , {} , {}" , userDetails.getUsername() , userDetails.getPassword() , userDetails.getAuthorities());
             UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
             SecurityContextHolder.getContext().setAuthentication(authentication);
         }

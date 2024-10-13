@@ -62,7 +62,6 @@ public class SecurityConfig {
                 .ignoringRequestMatchers("/chat/**")
                 .and()
                 .authorizeRequests()
-                .requestMatchers("/private/**").permitAll()
                 .requestMatchers("favicon.ico").denyAll()
                 .requestMatchers("/api/**").permitAll()
                 .requestMatchers("/admin/**").hasAnyRole("admin")
@@ -90,9 +89,6 @@ public class SecurityConfig {
         return http.build();
     }
 
-    @Bean
-    public JwtDecoder jwtDecoder() {
-        return JwtDecoders.fromIssuerLocation("https://accounts.google.com");
-    }
+
 
 }
