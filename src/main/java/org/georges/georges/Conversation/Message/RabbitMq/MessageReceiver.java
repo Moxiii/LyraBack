@@ -1,11 +1,9 @@
-package org.georges.georges.Message.RabbitMq;
+package org.georges.georges.Conversation.Message.RabbitMq;
 import com.fasterxml.jackson.databind.ObjectMapper;
 //import com.nimbusds.oauth2.sdk.GeneralException;
 import com.rabbitmq.client.*;
-import com.sun.jdi.PrimitiveValue;
 import lombok.extern.slf4j.Slf4j;
-import org.georges.georges.Message.Message;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.georges.georges.Conversation.Message.Message;
 import org.springframework.stereotype.Component;
 
 @Slf4j

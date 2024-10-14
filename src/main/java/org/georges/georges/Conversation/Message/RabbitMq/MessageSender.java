@@ -1,6 +1,5 @@
-package org.georges.georges.Message.RabbitMq;
+package org.georges.georges.Conversation.Message.RabbitMq;
 
-import com.rabbitmq.client.*;
 import org.georges.georges.Config.MessageSendEvent;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;

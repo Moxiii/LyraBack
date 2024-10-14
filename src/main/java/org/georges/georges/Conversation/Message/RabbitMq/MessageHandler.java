@@ -1,4 +1,4 @@
-package org.georges.georges.Message.RabbitMq;
+package org.georges.georges.Conversation.Message.RabbitMq;
 
 @FunctionalInterface
 public interface MessageHandler {

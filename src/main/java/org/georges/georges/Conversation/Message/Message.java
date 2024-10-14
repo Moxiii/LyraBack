@@ -1,4 +1,4 @@
-package org.georges.georges.Message;
+package org.georges.georges.Conversation.Message;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;

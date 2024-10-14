@@ -1,4 +1,4 @@
-package org.georges.georges.Message.Socket;
+package org.georges.georges.Conversation.Message.Socket;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;

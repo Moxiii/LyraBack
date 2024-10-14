@@ -1,4 +1,4 @@
-package org.georges.georges.Message.Socket;
+package org.georges.georges.Conversation.Message.Socket;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;

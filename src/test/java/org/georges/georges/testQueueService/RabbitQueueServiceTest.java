@@ -1,6 +1,6 @@
 package org.georges.georges.testQueueService;
 
-import org.georges.georges.Message.RabbitMq.RabbitQueueService;
+import org.georges.georges.Conversation.Message.RabbitMq.RabbitQueueService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;

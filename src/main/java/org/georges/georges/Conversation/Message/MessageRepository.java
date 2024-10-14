@@ -1,4 +1,4 @@
-package org.georges.georges.Message;
+package org.georges.georges.Conversation.Message;
 
 import org.georges.georges.User.User;
 import org.springframework.data.jpa.repository.JpaRepository;

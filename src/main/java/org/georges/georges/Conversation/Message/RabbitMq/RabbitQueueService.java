@@ -1,8 +1,7 @@
-package org.georges.georges.Message.RabbitMq;
+package org.georges.georges.Conversation.Message.RabbitMq;
 
 import com.nimbusds.jose.shaded.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
-import org.georges.georges.Message.RabbitMq.RabbitMQConfig;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;

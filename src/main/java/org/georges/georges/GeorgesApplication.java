@@ -1,9 +1,9 @@
 package org.georges.georges;
 
 import lombok.extern.slf4j.Slf4j;
-import org.georges.georges.Message.RabbitMq.RabbitMQConfig;
-import org.georges.georges.Message.Message;
-import org.georges.georges.Message.MessageRepository;
+import org.georges.georges.Conversation.Message.MessageRepository;
+import org.georges.georges.Projets.Projets;
+import org.georges.georges.Projets.ProjetsRepository;
 import org.georges.georges.Todo.Tasks.Task;
 import org.georges.georges.Todo.Todo;
 import org.georges.georges.Todo.TodoRepository;
@@ -19,6 +19,8 @@ import org.georges.georges.User.UserRepository;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
+
 @Slf4j
 @SpringBootApplication
 public class GeorgesApplication {
@@ -31,13 +33,16 @@ public class GeorgesApplication {
 
     private final MessageRepository messageRepository;
     private final TodoRepository todoRepository;
+    private final ProjetsRepository projetsRepository;
 
     public GeorgesApplication(UserRepository userRepository, UserRoleRepository userRoleRepository,
-                              MessageRepository messageRepository, TodoRepository todoRepository) {
+                              MessageRepository messageRepository, TodoRepository todoRepository, ProjetsRepository projetsRepository) {
         this.userRepository = userRepository;
         this.userRoleRepository = userRoleRepository;
         this.messageRepository = messageRepository;
         this.todoRepository = todoRepository;
+
+        this.projetsRepository = projetsRepository;
     }
 
     @Bean
@@ -84,6 +89,15 @@ public class GeorgesApplication {
                 todoRepository.save(todo);
                 todoRepository.save(todo1);
             }
+            if(projetsRepository.count()==0){
+                User martindvt = userRepository.findByUsername("martindvt");
+                User moxi = userRepository.findByUsername("moxi");
+                List<User> users = Arrays.asList(moxi, martindvt);
+                List<String> links = Arrays.asList("https://www.google.com/" , "https://github.com/Martindvttt/wiveapp");
+                Projets wive = new Projets("wive" , "Un super projet de fout" ,links  , users );
+                projetsRepository.save(wive);
+            }
+
         };
     }
 

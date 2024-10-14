@@ -1,14 +1,8 @@
-package org.georges.georges.Message.RabbitMq;
+package org.georges.georges.Conversation.Message.RabbitMq;
 
 import lombok.extern.slf4j.Slf4j;
-import org.georges.georges.Config.SecurityUtils;
-import org.georges.georges.User.User;
-import org.georges.georges.User.UserQueue;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.List;
 @Slf4j
 @Component
 public class GenerateQueueName {

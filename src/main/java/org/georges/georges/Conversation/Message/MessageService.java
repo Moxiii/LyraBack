@@ -1,4 +1,4 @@
-package org.georges.georges.Message;
+package org.georges.georges.Conversation.Message;
 
 import lombok.extern.slf4j.Slf4j;
 import org.georges.georges.Conversation.Conversation;

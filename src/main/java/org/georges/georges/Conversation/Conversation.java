@@ -2,7 +2,7 @@ package org.georges.georges.Conversation;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.georges.georges.Message.Message;
+import org.georges.georges.Conversation.Message.Message;
 import org.georges.georges.User.User;
 
 import java.util.HashSet;
