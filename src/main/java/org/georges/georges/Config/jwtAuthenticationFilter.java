@@ -42,20 +42,28 @@ public class jwtAuthenticationFilter extends OncePerRequestFilter {
  * @Token
  */
 
-    @Override
-    protected void doFilterInternal(HttpServletRequest request , HttpServletResponse response , FilterChain filterChain)throws ServletException, IOException{
-        String token  = jwtUtil.extractTokenFromRequest(request);
-        log.info("Le  token validator renvoie :{}"  , token);
-        if(token != null && jwtUtil.validateToken(token) ){
-            String username = jwtUtil.extractUsername(token);
-            log.info("Le  username valide :{}" , username);
-            UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
-            log.info("Le  userDetails valide :{} , {} , {}" , userDetails.getUsername() , userDetails.getPassword() , userDetails.getAuthorities());
-            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-        }
-        filterChain.doFilter(request, response);
+@Override
+protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    String token = jwtUtil.extractTokenFromRequest(request);
+
+    String newToken = jwtUtil.checkToken(request);
+
+    if (newToken != null) {
+        response.setHeader("Authorization", "Bearer " + newToken);
     }
+
+    if (token != null && jwtUtil.validateToken(token)) {
+        String username = jwtUtil.extractUsername(token);
+        UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
+
+        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+    }
+
+    filterChain.doFilter(request, response);
+}
+
+
     private void updateSecurityContext(HttpServletRequest request, String username) {
         UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
         UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());

@@ -13,7 +13,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @Slf4j
@@ -65,25 +67,6 @@ public class UserApiController {
         }
     }
 
-//@GetMapping("/me")
-//    public ResponseEntity<?> getUserProfile(HttpServletRequest request) {
-//        boolean isAuth = SecurityUtils.isAuthorized(request , jwtUtil);
-//        if (isAuth == true) {
-//                User currentUser = SecurityUtils.getCurrentUser();
-//                if (currentUser != null) {
-//                    if (currentUser.getDescription() == null) {
-//                        currentUser.setDescription("Basic User of Gilbert");
-//                    }
-//                    UserProfileRes profileRes = new UserProfileRes(
-//                            currentUser.getUsername(),
-//                            currentUser.getEmail(),
-//                            currentUser.getDescription()
-//                    );
-//                    return new ResponseEntity<>(profileRes, HttpStatus.OK);
-//                }
-//            }
-//    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorRes(HttpStatus.UNAUTHORIZED, "User not found"));
-//}
     @GetMapping("/me")
     public ResponseEntity<?> getUserProfile(HttpServletRequest request) {
         String token = jwtUtil.extractTokenFromRequest(request);
@@ -97,10 +80,28 @@ public class UserApiController {
                         currentUser.getDescription(),
                         currentUser.getEmail()
                 );
+                if(currentUser.getProfilePicture() != null){profileRes.setProfileImage(currentUser.getProfilePicture());}
                 return new ResponseEntity<>(profileRes, HttpStatus.OK);
             }
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorRes(HttpStatus.UNAUTHORIZED, "User not found"));
+    }
+    @PostMapping("/uploadProfilPic")
+    public ResponseEntity<?> uploadProfilPic(@RequestParam("file") MultipartFile file , HttpServletRequest request) {
+        if(SecurityUtils.isAuthorized(request , new JwtUtil(userRepository)) == true){
+            User currentUser = SecurityUtils.getCurrentUser();
+            try{
+                byte[] imageBytes = file.getBytes();
+                currentUser.setProfilePicture(imageBytes);
+                userRepository.save(currentUser);
+                UserProfileRes userProfileRes = new UserProfileRes();
+                userProfileRes.setProfileImage(currentUser.getProfilePicture());
+                return new ResponseEntity<>(userProfileRes, HttpStatus.OK);
+            }
+            catch (IOException e){return ResponseEntity.status(500).body("Error uploading image.");}
+
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 }
 

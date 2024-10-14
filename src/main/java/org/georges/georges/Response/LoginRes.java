@@ -7,9 +7,10 @@ import lombok.Setter;
 @Setter
 public class LoginRes {
     private String username;
-    private String token ;
-    public LoginRes(String username, String token){
-        this.username=username;
-        this.token=token;
+    private String accessToken ;
+
+    public LoginRes(String username, String accessToken) {
+        this.username = username;
+        this.accessToken = accessToken;
     }
 }

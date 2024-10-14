@@ -37,6 +37,10 @@ public class User {
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "user_id")
     private List<Todo> todos;
+    @Lob
+    @Basic(fetch = FetchType.LAZY)
+    @Column(length = 500*1024*1024)
+    private byte[] profilePicture;
     private static final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public User(String name, String username, String email, String password, String dateInscription, UserRole userRole) {

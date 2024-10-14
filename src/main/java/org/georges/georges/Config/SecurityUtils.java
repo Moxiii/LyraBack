@@ -24,7 +24,7 @@ public class SecurityUtils {
     public static boolean isAuthorized(HttpServletRequest request , JwtUtil jwtUtil){
         String authorizationHeader = request.getHeader("Authorization");
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-            String token = authorizationHeader.substring(7);
+            String token = jwtUtil.extractTokenFromRequest(request);
             if (jwtUtil != null && jwtUtil.validateToken(token)) {
                 return true;
             }

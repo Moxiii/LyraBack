@@ -63,25 +63,6 @@ public class GeorgesApplication {
                 userRepository.save(martindrvt);
                 userRepository.save(goerges);
             }
-            if (messageRepository.count() == 0) {
-                User moxi = userRepository.findByUsername("moxi");
-                User test = userRepository.findByUsername("test");
-                Date curentTimeStamp = new Date();
-
-                // Créer des messages fictifs
-                Message message1 = new Message(moxi, test, "Bonjour, comment ça va ?");
-                Message message2 = new Message(test, moxi, "Salut ! Ça va bien, et toi ?");
-                Message message3 = new Message(moxi, test, "Oui, ça va aussi. Que fais-tu de beau ?");
-                // Ajouter d'autres messages fictifs selon vos besoins
-                message1.setTimestamp(curentTimeStamp);
-                message2.setTimestamp(curentTimeStamp);
-                message3.setTimestamp(curentTimeStamp);
-
-                // Enregistrer les messages dans la base de données
-                messageRepository.save(message1);
-                messageRepository.save(message2);
-                messageRepository.save(message3);
-            }
             if (todoRepository.count() == 0) {
                 Task task1 = new Task("Description 1 " , "test" , false);
                 Task task2 = new Task("Description 2 " , "test completed" , true);

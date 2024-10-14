@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.georges.georges.User.User;
 
+import org.georges.georges.User.UserRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.security.core.AuthenticationException;
@@ -25,12 +26,17 @@ public class JwtUtil {
     private final SecretKey SECRET_KEY = Keys.secretKeyFor(SignatureAlgorithm.HS256);
 
 
-    private final long TOKEN_VALIDITY = 60*60*1000;
+    private final long ACCESS_TOKEN_VALIDITY = 60*60*1000;
+    private final long REFRESH_TOKEN_VALIDITY = 24 * 60 * 60 * 1000;
+
     private final String TOKEN_HEADER = "Authorization";
     private final String TOKEN_PREFIX = "Bearer ";
 
-    public JwtUtil() {
+    private final UserRepository userRepository;
+
+    public JwtUtil(UserRepository userRepository) {
         this.jwtParser = Jwts.parser().setSigningKey(SECRET_KEY).build();
+        this.userRepository = userRepository;
     }
 
     private final JwtParser jwtParser;
@@ -39,18 +45,28 @@ public class JwtUtil {
 public JwtDecoder jwtDecoder() {
     return NimbusJwtDecoder.withSecretKey(SECRET_KEY).build();
 }
-public String createToken(User user){
+public String createAccessToken(User user){
         Claims claims = Jwts.claims().setSubject(user.getUsername()).build();
         Date tokenCreateTime = new Date();
-        Date tokenValidity = new Date(tokenCreateTime.getTime() + TOKEN_VALIDITY);
-        String token =  Jwts.builder()
+        Date tokenValidity = new Date(tokenCreateTime.getTime() + ACCESS_TOKEN_VALIDITY);
+        String accesToken =  Jwts.builder()
                 .setClaims(claims)
                 .setExpiration(tokenValidity)
                 .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
                 .compact();
-        return token;
+        return accesToken;
 }
-
+public String createRefreshToken(User user){
+    Claims claims = Jwts.claims().setSubject(user.getUsername()).build();
+    Date tokenCreateTime = new Date();
+    Date tokenValidity = new Date(tokenCreateTime.getTime() + REFRESH_TOKEN_VALIDITY);
+    String refreshToken =  Jwts.builder()
+            .setClaims(claims)
+            .setExpiration(tokenValidity)
+            .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
+            .compact();
+    return refreshToken;
+}
     private Claims parseJwtClaims(String token) {
         return jwtParser.parseClaimsJws(token).getBody();
     }
@@ -65,30 +81,28 @@ public String createToken(User user){
         }
     }
 
-
+public boolean isTokenExpired(String token) {
+    Claims claims = Jwts.parser()
+            .setSigningKey(SECRET_KEY).
+            build().parseClaimsJws(token)
+            .getPayload();
+    Date expiration = claims.getExpiration();
+    return expiration.before(new Date());
+}
 
     public boolean validateToken(String token) {
     try{
-        Claims claims = Jwts.parser()
-                .setSigningKey(SECRET_KEY).
-                build().parseClaimsJws(token)
-                .getPayload();
-        // Vérifiez si le token est expiré
-        Date expirationDate = claims.getExpiration();
-        Date currentDate = new Date();
-        if (expirationDate.before(currentDate)) {
-            return false;
-        }
+        Jwts.parser().setSigningKey(SECRET_KEY).build().parseClaimsJws(token).getPayload();
         return true;
     }catch (JwtException e) {
         log.warn("Le token a une erreur : {}", e.getMessage());
-        // Journaliser la trace complète de l'exception pour un débogage plus approfondi si nécessaire
         log.debug("Trace complète de l'exception : ", e);
         return false;
     } catch (IllegalArgumentException e) {
         log.warn("L'argument du token est invalide : {}", e.getMessage());
-        // Journaliser la trace complète de l'exception pour un débogage plus approfondi si nécessaire
         log.debug("Trace complète de l'exception : ", e);
+        return false;
+    } catch (Exception e) {
         return false;
     }
     }
@@ -98,26 +112,36 @@ public String createToken(User user){
             return bearerToken.substring(TOKEN_PREFIX.length());
         }return null;
     }
-    public String extractTokenFromServerRequest(ServerHttpRequest request) {
-        String bearerToken = request.getHeaders().getFirst(TOKEN_HEADER);
-        if (bearerToken != null && bearerToken.startsWith(TOKEN_PREFIX)) {
-            return bearerToken.substring(TOKEN_PREFIX.length());
-        }
-        return null;
-    }
+
     public String extractUsername(String token) {
     Claims claims = parseJwtClaims(token);
     return claims.getSubject();
     }
 
-    public String getValidToken(String username){
-        String storedToken = tokenMap.get(username);
-        if(storedToken != null && validateToken(storedToken)){
-            return storedToken;
-        }
-        return null;
-    }
+
     public void addToken(String username , String token){
         tokenMap.put(username , token);
+    }
+
+    public void removeToken(String username,String token){tokenMap.remove(username , token);}
+    public String checkToken(HttpServletRequest request){
+       String token = extractTokenFromRequest(request);
+       if(validateToken(token) && token != null){
+           if(isTokenExpired(token)){
+               String username = extractUsername(token);
+               User currentUser = userRepository.findByUsername(username);
+               if(currentUser != null){
+                   String refreshToken = tokenMap.get(currentUser.getUsername()+ "_refresh");
+                   if(refreshToken != null && validateToken(refreshToken)){
+                       String newAccessToken =  createAccessToken(currentUser);
+                       addToken(currentUser.getUsername(), newAccessToken);
+                       return newAccessToken;
+                   }
+               }
+           }
+           return token;
+
+           }
+          return null;
     }
 }

@@ -103,35 +103,44 @@ private TokenManager tokenManager;
                     UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(existingUser.getUsername(), user.getPassword());
 
                     try {
-                        // Utilisez l'AuthenticationManager pour authentifier l'utilisateur
                         Authentication authentication = authenticationManager.authenticate(token);
                         if (authentication != null && authentication.isAuthenticated()) {
-                            // L'utilisateur est authentifié, vous pouvez accéder aux détails d'authentification
                             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
                             SecurityContext sc = SecurityContextHolder.getContext();
                             sc.setAuthentication(authentication);
                             HttpSession session = req.getSession(true);
-                            String jwtToken = jwtUtil.createToken(user);
-                            tokenManager.addToken(user.getUsername(), jwtToken);
-                            // Retournez le token JWT dans la réponse
-                            return ResponseEntity.ok(new LoginRes(existingUser.getUsername(), jwtToken));
+                            String accessToken = jwtUtil.createAccessToken(user);
+                            String refreshToken = jwtUtil.createRefreshToken(user);
+                            tokenManager.addToken(user.getUsername() + "_refresh",refreshToken);
+                            tokenManager.addToken(user.getUsername(), accessToken);
+                            return ResponseEntity.ok(new LoginRes(existingUser.getUsername(), accessToken));
                         }
                     } catch (AuthenticationException e) {
                         log.warn("Authentication failed for user: {}", user.getUsername(), e);
-                        // L'authentification a échoué, retournez une erreur dans la réponse
                         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Authentication failed");
                     }
                 }
             } else {
-                // Le mot de passe est incorrect, retournez une erreur dans la réponse
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Incorrect password");
             }
         } else {
-            // L'utilisateur n'existe pas, retournez une erreur dans la réponse
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
         }
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal server error");
     }
+
+@DeleteMapping("/logout")
+    public ResponseEntity<String> logout(HttpServletRequest req) {
+        String token = jwtUtil.extractTokenFromRequest(req);
+        if (token != null) {
+            String username = jwtUtil.extractUsername(token);
+            if (username != null) {
+                tokenManager.removeToken(username);
+                return ResponseEntity.status(HttpStatus.OK).body("User logged out successfully");
+            }
+        }
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal server error");
+}
 
 
 }
