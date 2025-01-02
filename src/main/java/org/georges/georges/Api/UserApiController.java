@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.security.Principal;
 import java.util.List;
 
 @Slf4j
@@ -102,6 +103,10 @@ public class UserApiController {
 
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
+    @RequestMapping("/googleUser")
+    public Principal googleUser(Principal principal) {
+        return principal;
     }
 }
 

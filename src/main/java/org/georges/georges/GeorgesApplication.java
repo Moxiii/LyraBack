@@ -15,6 +15,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.georges.georges.User.User;
 import org.georges.georges.User.UserRepository;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -23,6 +24,7 @@ import java.util.List;
 
 @Slf4j
 @SpringBootApplication
+@EnableWebSecurity
 public class GeorgesApplication {
     public static void main(String[] args) {
         SpringApplication.run(GeorgesApplication.class, args);
@@ -94,7 +96,7 @@ public class GeorgesApplication {
                 User moxi = userRepository.findByUsername("moxi");
                 List<User> users = Arrays.asList(moxi, martindvt);
                 List<String> links = Arrays.asList("https://www.google.com/" , "https://github.com/Martindvttt/wiveapp");
-                Projets wive = new Projets("wive" , "Un super projet de fout" ,links  , users );
+                Projets wive = new Projets("wive" , "Un super projet de fou" ,links  , users );
                 projetsRepository.save(wive);
             }
 

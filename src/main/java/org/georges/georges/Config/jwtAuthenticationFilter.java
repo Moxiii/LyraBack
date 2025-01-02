@@ -50,6 +50,7 @@ protected void doFilterInternal(HttpServletRequest request, HttpServletResponse 
 
     if (newToken != null) {
         response.setHeader("Authorization", "Bearer " + newToken);
+        token = newToken;
     }
 
     if (token != null && jwtUtil.validateToken(token)) {

@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.georges.georges.Config.JwtUtil;
 import org.georges.georges.Config.TokenManager;
 import org.georges.georges.Response.LoginRes;
+import org.georges.georges.User.Provider;
 import org.georges.georges.User.User;
 import org.georges.georges.User.UserRepository;
 import org.georges.georges.User.UserRole.UserRole;
@@ -32,9 +33,12 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.GeneralSecurityException;
+import java.security.Principal;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
@@ -140,6 +144,17 @@ private TokenManager tokenManager;
             }
         }
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal server error");
+}
+@PostMapping("/refresh-token")
+    public ResponseEntity<?> refreshToken(HttpServletRequest req) {
+        String token = jwtUtil.extractTokenFromRequest(req);
+        String newAccessToken = jwtUtil.checkToken(req);
+        if (newAccessToken != null) {
+            String username = jwtUtil.extractUsername(newAccessToken);
+            return ResponseEntity.ok(new LoginRes(username, newAccessToken));
+        }else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
+        }
 }
 
 
