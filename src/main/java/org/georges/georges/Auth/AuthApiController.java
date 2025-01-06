@@ -148,16 +148,27 @@ private TokenManager tokenManager;
 @PostMapping("/refresh-token")
     public ResponseEntity<?> refreshToken(HttpServletRequest req) {
         String token = jwtUtil.extractTokenFromRequest(req);
-        String newAccessToken = jwtUtil.checkToken(req);
-        if (newAccessToken != null) {
-            String username = jwtUtil.extractUsername(newAccessToken);
-            return ResponseEntity.ok(new LoginRes(username, newAccessToken));
-        }else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
+        if(token != null) {
+            String newAccessToken = jwtUtil.checkToken(req);
+            if (newAccessToken != null) {
+                String username = jwtUtil.extractUsername(newAccessToken);
+                return ResponseEntity.ok(new LoginRes(username, newAccessToken));
+            }else {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or expired token");
+            }
         }
+
+    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Missing token");
 }
 
-
+@GetMapping("/check-token")
+    public ResponseEntity<?> checkToken(HttpServletRequest req) {
+        String token = jwtUtil.extractTokenFromRequest(req);
+        if (token != null && jwtUtil.validateToken(token)) {
+            return ResponseEntity.ok(new LoginRes(jwtUtil.extractUsername(token), token));
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or expired token");
+}
 }
 
 
