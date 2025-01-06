@@ -89,7 +89,7 @@ public class UserApiController {
     }
     @PostMapping("/uploadProfilPic")
     public ResponseEntity<?> uploadProfilPic(@RequestParam("file") MultipartFile file , HttpServletRequest request) {
-        if(SecurityUtils.isAuthorized(request , new JwtUtil(userRepository)) == true){
+        if(SecurityUtils.isAuthorized(request, jwtUtil)){
             User currentUser = SecurityUtils.getCurrentUser();
             try{
                 byte[] imageBytes = file.getBytes();
