@@ -77,7 +77,7 @@ public class UserApiController {
             if (currentUser != null) {
                 if(currentUser.getDescription() == null){currentUser.setDescription("basic user of Gilbert");}
                 UserProfileRes profileRes = new UserProfileRes(
-                        currentUser.getUsername(),
+                        currentUser.getName(),
                         currentUser.getDescription(),
                         currentUser.getEmail()
                 );
