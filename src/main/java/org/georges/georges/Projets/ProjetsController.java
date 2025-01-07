@@ -56,23 +56,25 @@ public class ProjetsController {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Project not found");
             }
             Projets projets = projet.get();
-            if(!projets.getUsers().contains(currentUser)) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized access");
+            boolean userIsInProject = projets.getUsers().stream()
+                    .anyMatch(user -> user.getId().equals(currentUser.getId()));
+            if(userIsInProject) {
+                projets.setName(updateProject.getName());
+                projets.setDescription(updateProject.getDescription());
+                projets.setLinks(updateProject.getLinks());
+                projets.setUsers(updateProject.getUsers());
+                projetsRepository.save(projets);
+                return ResponseEntity.status(HttpStatus.OK).body("Project updated");
             }
-            projets.setName(updateProject.getName());
-            projets.setDescription(updateProject.getDescription());
-            projets.setLinks(updateProject.getLinks());
-            projets.setUsers(updateProject.getUsers());
-            projetsRepository.save(projets);
-            return ResponseEntity.status(HttpStatus.OK).body("Project updated");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Not your Project !");
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized access");
     }
-    @PostMapping("/create")
+    @PostMapping("/add")
     public ResponseEntity<?> createProject(HttpServletRequest request , @RequestBody Projets createProject) {
         if(SecurityUtils.isAuthorized(request, jwtUtil)){
             User currentUser = SecurityUtils.getCurrentUser();
-            long nextProjectId = projetsRepository.findByUsers(currentUser).size()+1;
+            long nextProjectId = projetsRepository.findByUsers(currentUser).size() + System.currentTimeMillis();
             Projets projet = new Projets();
             projet.setId(Long.parseLong(currentUser.getId()+""+nextProjectId));
             projet.setName(createProject.getName());

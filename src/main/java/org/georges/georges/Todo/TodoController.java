@@ -143,7 +143,7 @@ public ResponseEntity<?> updateTaskOnTodo(HttpServletRequest request , @PathVari
     public ResponseEntity<?> deleteTodo(HttpServletRequest request , @PathVariable Long todoID) {
         if(SecurityUtils.isAuthorized(request, jwtUtil)){
                 Todo existingTodo = todoRepository.findById(todoID).orElseThrow(()->new EntityNotFoundException("Todo not found with id : " + todoID));
-                todoRepository.deleteById(todoID);
+                todoRepository.delete(existingTodo);
                 return ResponseEntity.status(HttpStatus.OK).body("Todo deleted with id : " + todoID);
             }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("");
