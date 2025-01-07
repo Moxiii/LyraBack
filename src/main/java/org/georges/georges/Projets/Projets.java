@@ -13,7 +13,6 @@ import java.util.List;
 @Setter
 public class Projets {
     @Id
-    @GeneratedValue
     private Long id;
     private String name;
     private String description;

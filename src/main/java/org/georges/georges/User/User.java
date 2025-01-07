@@ -34,7 +34,7 @@ public class User {
     private Long id;
     @Enumerated(EnumType.STRING)
     private Provider provider;
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id")
     private List<Todo> todos;
     @Lob
@@ -56,14 +56,6 @@ public class User {
         this.name = name;
         this.email = email;
         this.dateInscription = dateInscription;
-    }
-
-    public Provider getProvider() {
-        return provider;
-    }
-
-    public void setProvider(Provider provider) {
-        this.provider = provider;
     }
 
     public User(){

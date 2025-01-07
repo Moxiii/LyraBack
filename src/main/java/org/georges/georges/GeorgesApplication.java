@@ -91,6 +91,8 @@ public class GeorgesApplication {
                 task2.setTodo(todo);
                 task3.setTodo(todo1);
                 task4.setTodo(todo1);
+                todo1.setId(moxi.getId()+System.currentTimeMillis());
+                todo.setId(moxi.getId()+System.currentTimeMillis());
                 todoRepository.save(todo);
                 todoRepository.save(todo1);
             }
@@ -100,6 +102,7 @@ public class GeorgesApplication {
                 List<User> users = Arrays.asList(moxi, martindvt);
                 List<String> links = Arrays.asList("https://www.google.com/" , "https://github.com/Martindvttt/wiveapp");
                 Projets wive = new Projets("wive" , "Un super projet de fou" ,links  , users );
+                wive.setId(moxi.getId()+System.currentTimeMillis());
                 projetsRepository.save(wive);
             }
 

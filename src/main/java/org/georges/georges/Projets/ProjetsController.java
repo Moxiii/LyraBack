@@ -10,11 +10,11 @@ import org.georges.georges.User.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -26,9 +26,8 @@ public class ProjetsController {
     @Autowired
     private ProjetsRepository projetsRepository;
 
-    @RequestMapping("/get")
+    @GetMapping("/get")
     public ResponseEntity<?> getMyProject(HttpServletRequest request) {
-        String token = jwtUtil.extractTokenFromRequest(request);
         if(SecurityUtils.isAuthorized(request, jwtUtil)){
             User currentUser = SecurityUtils.getCurrentUser();
             List<Projets> projets  = projetsRepository.findByUsers(currentUser);
@@ -45,6 +44,59 @@ public class ProjetsController {
                 return projectRes;
             }).collect(Collectors.toList());
             return new ResponseEntity<>(projectResponses, HttpStatus.OK);
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized access");
+    }
+    @PutMapping("/update/{id}")
+    public ResponseEntity<?> updateProject(HttpServletRequest request, @PathVariable long id , @RequestBody Projets updateProject) {
+        if(SecurityUtils.isAuthorized(request, jwtUtil)){
+            User currentUser = SecurityUtils.getCurrentUser();
+            Optional<Projets> projet = projetsRepository.findById(id);
+            if(projet.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Project not found");
+            }
+            Projets projets = projet.get();
+            if(!projets.getUsers().contains(currentUser)) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized access");
+            }
+            projets.setName(updateProject.getName());
+            projets.setDescription(updateProject.getDescription());
+            projets.setLinks(updateProject.getLinks());
+            projets.setUsers(updateProject.getUsers());
+            projetsRepository.save(projets);
+            return ResponseEntity.status(HttpStatus.OK).body("Project updated");
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized access");
+    }
+    @PostMapping("/create")
+    public ResponseEntity<?> createProject(HttpServletRequest request , @RequestBody Projets createProject) {
+        if(SecurityUtils.isAuthorized(request, jwtUtil)){
+            User currentUser = SecurityUtils.getCurrentUser();
+            long nextProjectId = projetsRepository.findByUsers(currentUser).size()+1;
+            Projets projet = new Projets();
+            projet.setId(Long.parseLong(currentUser.getId()+""+nextProjectId));
+            projet.setName(createProject.getName());
+            projet.setDescription(createProject.getDescription());
+            projet.setLinks(createProject.getLinks());
+            projet.setUsers(createProject.getUsers());
+            projetsRepository.save(projet);
+            return ResponseEntity.status(HttpStatus.CREATED).body("Project created");
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized access");
+    }
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<?> deleteProject(HttpServletRequest request, @PathVariable long id) {
+        if(SecurityUtils.isAuthorized(request, jwtUtil)){
+            User currentUser = SecurityUtils.getCurrentUser();
+            Optional<Projets> projet = projetsRepository.findById(id);
+            if(projet.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Project not found");
+            }
+            if(!projet.get().getUsers().contains(currentUser)) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized access");
+            }
+            projetsRepository.delete(projet.get());
+            return ResponseEntity.status(HttpStatus.OK).body("Project deleted");
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized access");
     }

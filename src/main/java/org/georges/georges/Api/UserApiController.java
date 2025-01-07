@@ -31,41 +31,34 @@ public class UserApiController {
     @Autowired
     private JwtUtil jwtUtil;
 
-    @GetMapping("/getAll")
-    public List<User> getAllUsers() {
-        List<User> allUser = userRepository.findAll();
-        return allUser;
-    }
-@GetMapping("/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable Long id){
-        User user = userRepository.findById(id).orElse(null);
-        if (user != null){
-            return ResponseEntity.ok(user);
-        }else{
-            return ResponseEntity.notFound().build();
-        }
-}
-@PutMapping("/update/{id}")
-    public ResponseEntity<String> updateUser(@PathVariable Long id , @RequestBody User userToUpdate) {
-    User existingUser = userRepository.findById(id).orElse(null);
-    if (existingUser != null) {
-        existingUser.setName(userToUpdate.getName());
-        //existingUser.setUserRole(userToUpdate.getUserRole());
-        userRepository.save(existingUser);
+
+@PutMapping("/update/")
+    public ResponseEntity<String> updateUser( HttpServletRequest request, @RequestBody User userToUpdate) {
+    if(SecurityUtils.isAuthorized(request, jwtUtil)){
+        User currentUser = SecurityUtils.getCurrentUser();
+        currentUser.setName(userToUpdate.getName());
+        currentUser.setEmail(userToUpdate.getEmail());
+        currentUser.setPassword(userToUpdate.getPassword());
+        currentUser.setProfilePicture(userToUpdate.getProfilePicture());
+        currentUser.setUsername(userToUpdate.getUsername());
+        userRepository.save(currentUser);
         return new ResponseEntity<>("User mis à jour avec succès", HttpStatus.OK);
-    } else {
-        return new ResponseEntity<>("User non trouvé", HttpStatus.NOT_FOUND);
     }
+    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized access");
 }
-@DeleteMapping("/delete/{id}")
-    public ResponseEntity<String> deleteUserById(@PathVariable Long id) {
+@DeleteMapping("/delete")
+    public ResponseEntity<String> deleteUser( HttpServletRequest request) {
+    if(SecurityUtils.isAuthorized(request, jwtUtil)){
+        User currentUser = SecurityUtils.getCurrentUser();
         try {
-            userService.deleteUserById(id);
+            userService.deleteUserById(currentUser.getId());
             return new ResponseEntity<>("User supprimé avec succès", HttpStatus.OK);
         } catch (Exception e) {
             e.printStackTrace();
             return new ResponseEntity<>("Erreur lors de la suppression de l'user", HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized access");
     }
 
     @GetMapping("/me")
@@ -89,6 +82,12 @@ public class UserApiController {
     }
     @PostMapping("/uploadProfilPic")
     public ResponseEntity<?> uploadProfilPic(@RequestParam("file") MultipartFile file , HttpServletRequest request) {
+        if (file.isEmpty()) {
+            log.warn("Aucun fichier reçu !");
+            return ResponseEntity.badRequest().body("Aucun fichier reçu");
+        }
+        log.info("Nom du fichier reçu : " + file.getOriginalFilename());
+        log.info("Taille du fichier : " + file.getSize());
         if(SecurityUtils.isAuthorized(request, jwtUtil)){
             User currentUser = SecurityUtils.getCurrentUser();
             try{
@@ -97,6 +96,8 @@ public class UserApiController {
                 userRepository.save(currentUser);
                 UserProfileRes userProfileRes = new UserProfileRes();
                 userProfileRes.setProfileImage(currentUser.getProfilePicture());
+                userProfileRes.setUsername(currentUser.getUsername());
+                userProfileRes.setEmailAddress(currentUser.getEmail());
                 return new ResponseEntity<>(userProfileRes, HttpStatus.OK);
             }
             catch (IOException e){return ResponseEntity.status(500).body("Error uploading image.");}

@@ -6,6 +6,7 @@ import com.rabbitmq.client.Connection;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.georges.georges.Config.JwtUtil;
+import org.georges.georges.Config.SecurityUtils;
 import org.georges.georges.Conversation.Message.RabbitMq.*;
 import org.georges.georges.Conversation.Message.Socket.WebSocketService;
 import org.georges.georges.User.User;
@@ -35,10 +36,8 @@ private UserRepository  userRepository;
 MessageSender messageSender;
     @PostMapping("/sendPrivateMessage")
     public ResponseEntity<?> sendPrivateMessage(@RequestBody Message message , HttpServletRequest request){
-        String authorizationHeader = request.getHeader("Authorization");
-        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-            String token = authorizationHeader.substring(7); // Supprimer le préfixe "Bearer "
-            if (jwtUtil != null && jwtUtil.validateToken(token)) {
+        if(SecurityUtils.isAuthorized(request, jwtUtil)){
+            User currentUser = SecurityUtils.getCurrentUser();
         try (Connection connection = RabbitmqConnection.getConnection();
              Channel channel = connection.createChannel()) {
             Long id = message.getId();
@@ -56,7 +55,6 @@ MessageSender messageSender;
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to send message");
         }
-    }
         }
         log.info("NO TOKEN OR INVALID TOKEN");
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Collections.singletonMap("error", "Unauthorized"));
@@ -65,16 +63,8 @@ MessageSender messageSender;
     @GetMapping("/messages")
     @ResponseBody
     public ResponseEntity<?> getAllMessages(HttpServletRequest request) throws Exception {
-        String authorizationHeader = request.getHeader("Authorization");
-        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-            String token = authorizationHeader.substring(7); // Supprimer le préfixe "Bearer "
-            log.info("TOKEN AUTHORIZED");
-            log.info("JWTUTILS :{}" , jwtUtil);
-            log.info("VALIDATE TOKEN : {}" , jwtUtil.validateToken(token));
-            if (jwtUtil != null && jwtUtil.validateToken(token)) {
-                String username = jwtUtil.extractUsername(token);
-                log.info("Lusername du token est : {}",username);
-                User currentUser = userRepository.findByUsername(username);
+        if(SecurityUtils.isAuthorized(request, jwtUtil)){
+            User currentUser = SecurityUtils.getCurrentUser();
                 List<Message> messages = messageRepository.findBySenderOrReceiver(currentUser , currentUser);
                 List<Map<String, Object>> result = new ArrayList<>();
                 for (Message message : messages) {
@@ -85,22 +75,14 @@ MessageSender messageSender;
                     result.add(messageInfo);
                 }
                 return ResponseEntity.ok(result);
-            }
         }
-        log.info("NO TOKEN OR INVALID TOKEN");
-        // Si le jeton n'est pas valide ou s'il est absent, renvoyer un code d'erreur
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Collections.singletonMap("error", "Unauthorized"));
     }
 
     @PostMapping("/receivePrivateMessages")
     public ResponseEntity<?> receivePrivateMessages(@RequestBody Message message , HttpServletRequest request) {
-        String authorizationHeader = request.getHeader("Authorization");
-        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-            String token = authorizationHeader.substring(7); // Supprimer le préfixe "Bearer "
-            if (jwtUtil != null && jwtUtil.validateToken(token)) {
-                // Extraire l'identifiant de l'utilisateur du jeton
-                String username = jwtUtil.extractUsername(token);
-                log.info("Lusername du token est : {}", username);
+        if(SecurityUtils.isAuthorized(request, jwtUtil)){
+            User currentUser = SecurityUtils.getCurrentUser();
                 try {
                     // Définir le gestionnaire de messages pour enregistrer automatiquement les messages en base de données
                     MessageHandler messageHandler = new MessageHandler() {
@@ -126,24 +108,17 @@ MessageSender messageSender;
                     log.error("Failed to start receiving private messages: {}", e.getMessage());
                     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to start receiving private messages");
                 }
-            }
-
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Collections.singletonMap("error", "Unauthorized"));
     }
 
     @PostMapping("/message/send")
     public ResponseEntity<?> sendMessage(@RequestParam Long senderId, @RequestParam Long receiverId, @RequestParam String content, HttpServletRequest request) {
-        String authorizationHeader = request.getHeader("Authorization");
-        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-            String token = authorizationHeader.substring(7);
-            if (jwtUtil != null && jwtUtil.validateToken(token)) {
-                String username = jwtUtil.extractUsername(token);
-                log.info("Lusername du token est : {}", username);
+        if(SecurityUtils.isAuthorized(request, jwtUtil)){
+            User currentUser = SecurityUtils.getCurrentUser();
                 webSocketService.sendMessage(senderId, receiverId, content);
                 return ResponseEntity.ok("Message sent successfully");
             }
-        }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Collections.singletonMap("error", "Unauthorized"));
     }
 }
