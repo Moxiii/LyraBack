@@ -37,4 +37,6 @@ public class Projets {
     public Projets() {
 
     }
+    //TODO faire en sorte d'integerer des délais type deadline , faire un suivis des sprint etc etc + faire un modal pour update les projets eventuellement ou
+    // faire en sorte que les projets est leurs Screen avec les discutions lier etc
 }
