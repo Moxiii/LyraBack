@@ -34,3 +34,5 @@ build/
 
 application.propreties
 application.yml
+*.env
+.env
