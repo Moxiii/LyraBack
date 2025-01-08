@@ -1,5 +1,6 @@
 package org.georges.georges.Api;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.georges.georges.Config.JwtUtil;
@@ -10,6 +11,7 @@ import org.georges.georges.User.User;
 import org.georges.georges.User.UserRepository;
 import org.georges.georges.User.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -63,11 +65,8 @@ public class UserApiController {
 
     @GetMapping("/me")
     public ResponseEntity<?> getUserProfile(HttpServletRequest request) {
-        String token = jwtUtil.extractTokenFromRequest(request);
-        if (token != null && jwtUtil.validateToken(token)) {
-            String username = jwtUtil.extractUsername(token);
-            User currentUser = userRepository.findByUsername(username);
-            if (currentUser != null) {
+        if(SecurityUtils.isAuthorized(request, jwtUtil)){
+            User currentUser = SecurityUtils.getCurrentUser();
                 if(currentUser.getDescription() == null){currentUser.setDescription("basic user of Gilbert");}
                 UserProfileRes profileRes = new UserProfileRes(
                         currentUser.getName(),
@@ -77,10 +76,9 @@ public class UserApiController {
                 if(currentUser.getProfilePicture() != null){profileRes.setProfileImage(currentUser.getProfilePicture());}
                 return new ResponseEntity<>(profileRes, HttpStatus.OK);
             }
-        }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorRes(HttpStatus.UNAUTHORIZED, "User not found"));
     }
-    @PostMapping("/uploadProfilPic")
+    @PostMapping("/upload/profilPic")
     public ResponseEntity<?> uploadProfilPic(@RequestParam("file") MultipartFile file , HttpServletRequest request) {
         if (file.isEmpty()) {
             log.warn("Aucun fichier reçu !");
@@ -105,9 +103,17 @@ public class UserApiController {
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
-    @RequestMapping("/googleUser")
-    public Principal googleUser(Principal principal) {
-        return principal;
+    @GetMapping("/get/profilPic")
+    public ResponseEntity<?> getProfilPic(HttpServletRequest request) {
+    if(SecurityUtils.isAuthorized(request, jwtUtil)){
+        User currentUser = SecurityUtils.getCurrentUser();
+        byte[] imageBytes = currentUser.getProfilePicture();
+        if(imageBytes == null || imageBytes.length == 0){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+        return  new ResponseEntity<>( imageBytes, HttpStatus.OK);
+    }
+    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized access");
     }
 }
 
