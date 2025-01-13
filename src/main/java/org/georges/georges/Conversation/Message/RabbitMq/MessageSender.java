@@ -9,17 +9,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class MessageSender {
 
-private RabbitMQConfig rabbitMQConfig = new RabbitMQConfig();
-@Autowired
-    private ApplicationEventPublisher eventPublisher;
-    private final RabbitTemplate rabbitTemplate;
     @Autowired
-    public MessageSender(RabbitTemplate rabbitTemplate) {
-        this.rabbitTemplate = rabbitTemplate;
-    }
+    private ApplicationEventPublisher eventPublisher;
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
+    @Autowired
+    private GenerateQueueName generateQueueName;
 
     public void sendDirectMessage(Long senderId, Long receiverId, String message) {
-        GenerateQueueName generateQueueName = new GenerateQueueName();
         String QUEUE_NAME = generateQueueName.privateQueueName(senderId, receiverId);
         String senderIdString = String.valueOf(senderId);
         String receiverIdString = String.valueOf(receiverId);

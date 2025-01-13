@@ -13,13 +13,15 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 public class RabbitQueueService {
-
-RabbitMQConfig rabbitMQConfig = new RabbitMQConfig();
-@Autowired
-        RabbitAdmin rabbitAdmin;
-RabbitListenerEndpointRegistry rabbitListenerEndpointRegistry = new RabbitListenerEndpointRegistry();
+    @Autowired
+    private RabbitMQConfig rabbitMQConfig ;
+    @Autowired
+    RabbitAdmin rabbitAdmin;
+    @Autowired
+    private RabbitListenerEndpointRegistry rabbitListenerEndpointRegistry;
 
     public void addNewQueue(String queueName, String exchangeName, String routingKey) {
+        if (!queueExists(queueName)) {
         Queue queue = new Queue(queueName , true , false,false);
         Binding binding = new Binding(
                 queueName,
@@ -32,6 +34,9 @@ RabbitListenerEndpointRegistry rabbitListenerEndpointRegistry = new RabbitListen
         rabbitMQConfig.rabbitAdmin().declareBinding(binding);
         this.addQueueToListener(exchangeName,queueName);
         log.info("Queue added succesfuly");
+    }else{
+            log.info("Queue already exists");
+        }
     }
 
 
@@ -73,21 +78,20 @@ RabbitListenerEndpointRegistry rabbitListenerEndpointRegistry = new RabbitListen
                         return Boolean.TRUE;
                     }
                 }
-                return Boolean.FALSE;
-            } else {
-                log.info("there is no queue exist on listener");
-                return Boolean.FALSE;
             }
         } catch (Exception e) {
             log.error("Error on checking queue exist on listener");
             log.error("error message : " + e.getMessage());
             log.error("trace : " + e.getStackTrace());
-            return Boolean.FALSE;
         }
+        return Boolean.FALSE;
     }
 
     public AbstractMessageListenerContainer getMessageListenerContainerById(String listenerId) {
         log.info("getting message listener container by id : " + listenerId);
         return ((AbstractMessageListenerContainer) this.rabbitListenerEndpointRegistry.getListenerContainer(listenerId));
+    }
+    public boolean queueExists(String queueName) {
+        return rabbitAdmin.getQueueProperties(queueName) != null;
     }
 }

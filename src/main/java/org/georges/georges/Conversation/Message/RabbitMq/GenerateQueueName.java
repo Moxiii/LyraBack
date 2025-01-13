@@ -1,15 +1,14 @@
 package org.georges.georges.Conversation.Message.RabbitMq;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
 public class GenerateQueueName {
-RabbitQueueService rabbitQueueService = new RabbitQueueService();
-
-
-
+@Autowired
+private RabbitQueueService rabbitQueueService;
 
     public String privateQueueName(Long senderId , Long receiverId){
 

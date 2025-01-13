@@ -42,19 +42,8 @@ public class MessageReceiver {
                 log.error("Erreur lors de la sauvegarde du message en base de données : {}", e.getMessage());
             }
         }, consumerTag -> {
-            // handle cancellation
             channel.basicCancel(QUEUE_NAME);
             connection.close();
         });
     }
-
-    //public static void receiveGroupMessages(String queueName) throws Exception {
-      //  try (Connection connection = RabbitmqConnection.getConnection();
-          //   Channel channel = connection.createChannel()) {
-          //  channel.exchangeDeclare(EXCHANGE_NAME, "fanout");
-          //  String queue = channel.queueDeclare(queueName, false, false, false, null).getQueue();
-           // channel.queueBind(queue, EXCHANGE_NAME, "");
-           // channel.basicConsume(queue, true, callback, consumerTag -> {});
-        //}
-    //}
 }

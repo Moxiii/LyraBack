@@ -34,7 +34,8 @@ private UserRepository  userRepository;
     private WebSocketService webSocketService;
 @Autowired
 MessageSender messageSender;
-    @PostMapping("/sendPrivateMessage")
+
+    @PostMapping("/send/private")
     public ResponseEntity<?> sendPrivateMessage(@RequestBody Message message , HttpServletRequest request){
         if(SecurityUtils.isAuthorized(request, jwtUtil)){
             User currentUser = SecurityUtils.getCurrentUser();
@@ -42,14 +43,13 @@ MessageSender messageSender;
              Channel channel = connection.createChannel()) {
             Long id = message.getId();
             String content = message.getContent();
-            User sender = userRepository.findByUsername(message.getSender().getUsername());
             User receiver = userRepository.findByUsername(message.getReceiver().getUsername());
 
             if (receiver == null) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Recipient user does not exist");
             }
-                String queueName = new GenerateQueueName().privateQueueName(sender.getId(), receiver.getId());
-            messageSender.sendDirectMessage(sender.getId(), receiver.getId() , message.getContent());
+                String queueName = new GenerateQueueName().privateQueueName(currentUser.getId(), receiver.getId());
+            messageSender.sendDirectMessage(currentUser.getId(), receiver.getId() , message.getContent());
             return ResponseEntity.ok("Message sent successfully");
         } catch (Exception e) {
             e.printStackTrace();
@@ -60,7 +60,7 @@ MessageSender messageSender;
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Collections.singletonMap("error", "Unauthorized"));
     }
 
-    @GetMapping("/messages")
+    @GetMapping("/get/messages")
     @ResponseBody
     public ResponseEntity<?> getAllMessages(HttpServletRequest request) throws Exception {
         if(SecurityUtils.isAuthorized(request, jwtUtil)){
@@ -79,7 +79,7 @@ MessageSender messageSender;
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Collections.singletonMap("error", "Unauthorized"));
     }
 
-    @PostMapping("/receivePrivateMessages")
+    @PostMapping("/receive/private")
     public ResponseEntity<?> receivePrivateMessages(@RequestBody Message message , HttpServletRequest request) {
         if(SecurityUtils.isAuthorized(request, jwtUtil)){
             User currentUser = SecurityUtils.getCurrentUser();
@@ -109,16 +109,6 @@ MessageSender messageSender;
                     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to start receiving private messages");
                 }
         }
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Collections.singletonMap("error", "Unauthorized"));
-    }
-
-    @PostMapping("/message/send")
-    public ResponseEntity<?> sendMessage(@RequestParam Long senderId, @RequestParam Long receiverId, @RequestParam String content, HttpServletRequest request) {
-        if(SecurityUtils.isAuthorized(request, jwtUtil)){
-            User currentUser = SecurityUtils.getCurrentUser();
-                webSocketService.sendMessage(senderId, receiverId, content);
-                return ResponseEntity.ok("Message sent successfully");
-            }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Collections.singletonMap("error", "Unauthorized"));
     }
 }
