@@ -86,9 +86,10 @@ private TaskRepository taskRepository;
                        todoRes.setId(todo.getId());
                        todoRes.setTitle(todo.getTitle());
                        todoRes.setTask(todo.getTask());
+                       log.info(todoRes.toString());
                        return ResponseEntity.status(HttpStatus.CREATED).body(todoRes);
                 }
-            
+
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("");
         }
     @Transactional
@@ -98,12 +99,12 @@ private TaskRepository taskRepository;
             User currentUser = SecurityUtils.getCurrentUser();
             currentUser.getTodos().size();
                 todo.setUser(currentUser);
-                long todoId = currentUser.getTodos().size() + System.currentTimeMillis();
-                todo.setId(Long.parseLong(currentUser.getId()+""+todoId));
+                long todoID = currentUser.getTodos().size() + System.currentTimeMillis();
+                todo.setId(Long.parseLong(currentUser.getId()+""+todoID));
                 currentUser.getTodos().add(todo);
                 userRepository.save(currentUser);
                 TodoRes todoRes = new TodoRes();
-                todoRes.setId(todoId);
+                todoRes.setId(todo.getId());
                 todoRes.setTitle(todo.getTitle());
                 if(todo.getTask() != null){
                     todoRes.setTask(todo.getTask());

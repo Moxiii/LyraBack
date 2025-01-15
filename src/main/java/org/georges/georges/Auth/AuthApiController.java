@@ -59,7 +59,6 @@ public class AuthApiController {
     private JwtUtil jwtUtil;
 
 
-    private static final String CLIENT_ID = "1047364862184-5ht68ioumb1cnjmpivurtmvtnb7fkr4s.apps.googleusercontent.com\n";
     private static final JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
 
 @Autowired
