@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.georges.georges.Contact.Contact;
 import org.georges.georges.Conversation.Conversation;
 import org.georges.georges.Todo.Todo;
 import org.georges.georges.User.UserRole.UserRole;
@@ -41,6 +42,8 @@ public class User {
     @Basic(fetch = FetchType.LAZY)
     @Column(length = 500*1024*1024)
     private byte[] profilePicture;
+    @OneToMany(mappedBy = "user" , cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Contact> contacts;
     private static final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public User(String name, String username, String email, String password, String dateInscription, UserRole userRole) {

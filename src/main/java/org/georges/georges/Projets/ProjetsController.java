@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.georges.georges.Config.JwtUtil;
 import org.georges.georges.Config.SecurityUtils;
 import org.georges.georges.Response.ProjectRes;
-import org.georges.georges.Response.UserProfileRes;
 import org.georges.georges.User.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -15,9 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -54,19 +51,15 @@ public class ProjetsController {
     public ResponseEntity<?> updateProject(HttpServletRequest request, @PathVariable long id , @RequestBody Projets updateProject) {
         if(SecurityUtils.isAuthorized(request, jwtUtil)){
             User currentUser = SecurityUtils.getCurrentUser();
-            Optional<Projets> projet = projetsRepository.findById(id);
-            if(projet.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Project not found");
-            }
-            Projets projets = projet.get();
-            boolean userIsInProject = projets.getUsers().stream()
+            Projets projet = projetsRepository.findById(id).orElseThrow(() -> new RuntimeException("Project not found"));
+            boolean userIsInProject = projet.getUsers().stream()
                     .anyMatch(user -> user.getId().equals(currentUser.getId()));
             if(userIsInProject) {
-                projets.setName(updateProject.getName());
-                projets.setDescription(updateProject.getDescription());
-                projets.setLinks(updateProject.getLinks());
-                projets.setUsers(updateProject.getUsers());
-                projetsRepository.save(projets);
+                projet.setName(updateProject.getName());
+                projet.setDescription(updateProject.getDescription());
+                projet.setLinks(updateProject.getLinks());
+                projet.setUsers(updateProject.getUsers());
+                projetsRepository.save(projet);
                 return ResponseEntity.status(HttpStatus.OK).body("Project updated");
             }
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Not your Project !");
@@ -93,54 +86,50 @@ public class ProjetsController {
     public ResponseEntity<?> deleteProject(HttpServletRequest request, @PathVariable long id) {
         if(SecurityUtils.isAuthorized(request, jwtUtil)){
             User currentUser = SecurityUtils.getCurrentUser();
-            Optional<Projets> projet = projetsRepository.findById(id);
-            if(projet.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Project not found");
-            }
-            if(!projet.get().getUsers().contains(currentUser)) {
+            Projets projet = projetsRepository.findById(id).orElseThrow(() -> new RuntimeException("Project not found"));
+            if(!projet.getUsers().contains(currentUser)) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized access");
             }
-            projetsRepository.delete(projet.get());
+            projetsRepository.delete(projet);
             return ResponseEntity.status(HttpStatus.OK).body("Project deleted");
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized access");
     }
     @PostMapping("/upload/projectPic/{id}")
-    public ResponseEntity<?> uploadProfilPic(@RequestParam("file") MultipartFile file , HttpServletRequest request , @PathVariable long id) {
+    public ResponseEntity<?> uploadProjectPic(
+            @RequestParam("file") MultipartFile file,
+            HttpServletRequest request,
+            @PathVariable long id) {
         if (file.isEmpty()) {
             log.warn("Aucun fichier reçu !");
             return ResponseEntity.badRequest().body("Aucun fichier reçu");
         }
-        if(SecurityUtils.isAuthorized(request, jwtUtil)){
+
+        if (SecurityUtils.isAuthorized(request, jwtUtil)) {
             User currentUser = SecurityUtils.getCurrentUser();
-            try{
-                byte[] imageBytes = file.getBytes();
-                Optional<Projets> projet = projetsRepository.findById(id);
-                if(projet.isEmpty()) {
-                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Project not found");
-                }
-                Projets existingProjets = projet.get();
-                boolean userIsInProject = existingProjets.getUsers().stream()
+
+            try {
+                Projets projet = projetsRepository.findById(id)
+                        .orElseThrow(() -> new RuntimeException("Projet introuvable"));
+
+                boolean userIsInProject = projet.getUsers().stream()
                         .anyMatch(user -> user.getId().equals(currentUser.getId()));
-                if(userIsInProject) {
-                List<ProjectRes> projectResponses = projet.stream().map(newProjet -> {
-                    ProjectRes projectRes = new ProjectRes();
-                    projectRes.setId(newProjet.getId());
-                    projectRes.setName(newProjet.getName());
-                    projectRes.setDescription(newProjet.getDescription());
-                    projectRes.setLinks(newProjet.getLinks());
-                    List<String> usernames = newProjet.getUsers().stream()
-                            .map(User::getUsername)
-                            .collect(Collectors.toList());
-                    projectRes.setUsers(usernames);
-                    projectRes.setProjectPicture(imageBytes);
-                    return projectRes;
-                }).collect(Collectors.toList());
-                return new ResponseEntity<>(projectResponses, HttpStatus.OK);
+
+                if (!userIsInProject) {
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                            .body("Vous n'avez pas les droits pour modifier ce projet");
+                }
+                projet.setProjectPicture(file.getBytes());
+                projetsRepository.save(projet);
+
+                return ResponseEntity.ok("Image du projet mise à jour avec succès");
+            } catch (IOException e) {
+                log.error("Erreur lors du téléchargement de l'image", e);
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body("Erreur lors de l'envoi de l'image");
             }
-            }
-            catch (IOException e){return ResponseEntity.status(500).body("Error uploading image.");}
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
+
 }
