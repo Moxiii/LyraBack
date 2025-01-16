@@ -20,7 +20,7 @@ public class Todo {
 
     @JsonManagedReference
     @OneToMany(mappedBy = "todo", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Task> task;
+    private List<Task> tasks;
 
     @ManyToOne
     @JoinColumn(name = "user_id", insertable = true, updatable = true)

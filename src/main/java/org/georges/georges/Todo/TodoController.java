@@ -41,8 +41,8 @@ private TaskRepository taskRepository;
                 TodoRes todoRes = new TodoRes();
                 todoRes.setId(todo.getId());
                 todoRes.setTitle(todo.getTitle());
-                if(!todo.getTask().isEmpty()){
-                    todoRes.setTask(todo.getTask());
+                if(!todo.getTasks().isEmpty()){
+                    todoRes.setTasks(todo.getTasks());
                 }
                 return ResponseEntity.ok().body(todoRes);
         }
@@ -59,7 +59,7 @@ private TaskRepository taskRepository;
                     TodoRes todoRes = new TodoRes();
                     todoRes.setId(todo.getId());
                     todoRes.setTitle(todo.getTitle());
-                    todoRes.setTask(todo.getTask());
+                    todoRes.setTasks(todo.getTasks());
                     return todoRes;
                         }).collect(Collectors.toList());
                 return ResponseEntity.ok().body(todoResponses);
@@ -73,18 +73,16 @@ private TaskRepository taskRepository;
     @PostMapping("/add/task/{todoID}")
         public ResponseEntity<?> addTask(HttpServletRequest request , @PathVariable Long todoID, @RequestBody List<Task> tasks) {
         if(SecurityUtils.isAuthorized(request, jwtUtil)){
+                List<Task> newTasks = new ArrayList<>();
                    Todo todo = todoRepository.findById(todoID).orElseThrow(() -> new EntityNotFoundException("Todo not found with id : " + todoID));
                        for(Task task : tasks){
                            task.setTodo(todo);
+                           todo.getTasks().add(task);
+                           newTasks.add(task);
                        }
-                       todo.getTask().addAll(tasks);
+                       todo.getTasks().addAll(tasks);
                        todoRepository.save(todo);
-                       TodoRes todoRes = new TodoRes();
-                       todoRes.setId(todo.getId());
-                       todoRes.setTitle(todo.getTitle());
-                       todoRes.setTask(todo.getTask());
-                       log.info(todoRes.toString());
-                       return ResponseEntity.status(HttpStatus.CREATED).body(todoRes);
+                       return ResponseEntity.status(HttpStatus.CREATED).body(newTasks);
                 }
 
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("");
@@ -103,8 +101,8 @@ private TaskRepository taskRepository;
                 TodoRes todoRes = new TodoRes();
                 todoRes.setId(todo.getId());
                 todoRes.setTitle(todo.getTitle());
-                if(todo.getTask() != null){
-                    todoRes.setTask(todo.getTask());
+                if(todo.getTasks() != null){
+                    todoRes.setTasks(todo.getTasks());
                 }
                 return ResponseEntity.status(HttpStatus.CREATED).body(todoRes);
             }
@@ -122,8 +120,8 @@ private TaskRepository taskRepository;
                 TodoRes todoRes = new TodoRes();
                 todoRes.setId(existingTodo.getId());
                 todoRes.setTitle(updatedTodo.getTitle());
-                if(updatedTodo.getTask() != null){
-                    todoRes.setTask(updatedTodo.getTask());
+                if(updatedTodo.getTasks() != null){
+                    todoRes.setTasks(updatedTodo.getTasks());
                 }
                 return ResponseEntity.status(HttpStatus.OK).body(todoRes);
             }
@@ -137,7 +135,6 @@ public ResponseEntity<?> updateTaskOnTodo(HttpServletRequest request , @PathVari
     if(SecurityUtils.isAuthorized(request, jwtUtil)){
             Task existingTask = taskRepository.findById(taskID).orElseThrow(() -> new EntityNotFoundException("Task not found with id : " + taskID));
             Todo existingTodo = todoRepository.findById(todoID).orElseThrow(() -> new EntityNotFoundException("Todo not found with id : " + todoID));
-
             if (existingTask.getTodo().getId().equals(existingTodo.getId())) {
                 if(updatedTask.getDescription() != null){
                     existingTask.setDescription(updatedTask.getDescription());
@@ -149,11 +146,7 @@ public ResponseEntity<?> updateTaskOnTodo(HttpServletRequest request , @PathVari
                     existingTask.setCompleted(updatedTask.isCompleted());
                 }
                 taskRepository.save(existingTask);
-                TodoRes todoRes = new TodoRes();
-                todoRes.setId(existingTodo.getId());
-                todoRes.setTitle(existingTodo.getTitle());
-                todoRes.setTask(existingTodo.getTask());
-                return ResponseEntity.status(HttpStatus.OK).body(todoRes);
+                return ResponseEntity.status(HttpStatus.OK).body(existingTask);
             }else {throw new RuntimeException("Task and Todo ids do not match");}
         }
     return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("");

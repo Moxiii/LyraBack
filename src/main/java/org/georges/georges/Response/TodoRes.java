@@ -11,5 +11,5 @@ import java.util.List;
 public class TodoRes {
     private Long id;
     private String title;
-    private List<Task> task;
+    private List<Task> tasks;
 }

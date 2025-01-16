@@ -82,8 +82,8 @@ public class GeorgesApplication {
                 Todo todo1 = new Todo();
                 todo1.setTitle("Todo 1");
                 todo.setTitle("Sample Todo");
-                todo.setTask(Arrays.asList(task1, task2));
-                todo1.setTask(Arrays.asList(task3,task4));
+                todo.setTasks(Arrays.asList(task1, task2));
+                todo1.setTasks(Arrays.asList(task3,task4));
                User moxi = userRepository.findByUsername("moxi");
                todo1.setUser(moxi);
                todo.setUser(moxi);
