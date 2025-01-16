@@ -12,5 +12,4 @@ public class TodoRes {
     private Long id;
     private String title;
     private List<Task> task;
-    private byte[] projectPicture;
 }
