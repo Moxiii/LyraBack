@@ -84,8 +84,6 @@ public class UserApiController {
             log.warn("Aucun fichier reçu !");
             return ResponseEntity.badRequest().body("Aucun fichier reçu");
         }
-        log.info("Nom du fichier reçu : " + file.getOriginalFilename());
-        log.info("Taille du fichier : " + file.getSize());
         if(SecurityUtils.isAuthorized(request, jwtUtil)){
             User currentUser = SecurityUtils.getCurrentUser();
             try{

@@ -16,6 +16,8 @@ public class Projets {
     private Long id;
     private String name;
     private String description;
+    @Column(length = 500*1024*1024)
+    private byte[] projectPicture;
     @ElementCollection
     private List<String> links = new ArrayList<>();
     @ManyToMany

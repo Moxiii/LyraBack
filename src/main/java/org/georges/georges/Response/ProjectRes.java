@@ -14,6 +14,6 @@ public class ProjectRes {
     private String description;
     private List<String> links;
     private List<String> users;
-
+    private byte[] projectPicture;
 
 }
