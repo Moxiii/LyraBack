@@ -1,28 +1,33 @@
 package org.georges.georges.Todo;
 
-import jakarta.persistence.EntityManager;
-import jakarta.transaction.SystemException;
-import jakarta.transaction.UserTransaction;
-import org.georges.georges.Todo.Tasks.Task;
+import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.georges.georges.Todo.Tasks.TaskRepository;
-import org.georges.georges.User.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestMapping;
 
-import java.util.List;
-import java.util.Optional;
-
+@Slf4j
 @Service
-@RequestMapping("api/todo")
 public class TodoService {
     @Autowired
     private TaskRepository taskRepository;
 @Autowired
     private TodoRepository todoRepository;
-@Autowired
-    private EntityManager entityManager;
 
-
-
+    @Transactional
+    public void deleteTodoWithTasks(Long todoID) {
+        try {
+            taskRepository.deleteAllByTodoId(todoID);
+        } catch (Exception e) {
+            log.error("Error deleting tasks for Todo with ID {}: {}", todoID, e.getMessage());
+            throw e;
+        }
+        try {
+            todoRepository.manualyDeleteTodoByID(todoID);
+        } catch (Exception e) {
+            log.error("Error deleting Todo with ID {}: {}", todoID, e.getMessage());
+            throw e;
+        }
+    }
 }
+

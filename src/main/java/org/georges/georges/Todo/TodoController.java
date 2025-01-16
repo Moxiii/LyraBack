@@ -9,7 +9,6 @@ import org.georges.georges.Config.SecurityUtils;
 import org.georges.georges.Response.TodoRes;
 import org.georges.georges.Todo.Tasks.Task;
 import org.georges.georges.Todo.Tasks.TaskRepository;
-import org.georges.georges.Todo.Tasks.TaskService;
 import org.georges.georges.User.User;
 import org.georges.georges.User.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,8 +25,6 @@ import java.util.stream.Collectors;
 public class TodoController {
     @Autowired
     private TodoService todoService;
-    @Autowired
-    private TaskService taskService;
     @Autowired
     private TodoRepository todoRepository;
     @Autowired
@@ -161,16 +158,20 @@ public ResponseEntity<?> updateTaskOnTodo(HttpServletRequest request , @PathVari
         }
     return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("");
 }
+    @Transactional
     @DeleteMapping("/delete/{todoID}")
     public ResponseEntity<?> deleteTodo(HttpServletRequest request, @PathVariable Long todoID) {
         try {
             if (SecurityUtils.isAuthorized(request, jwtUtil)) {
                 Todo existingTodo = todoRepository.findById(todoID)
                         .orElseThrow(() -> new EntityNotFoundException("Todo not found with id: " + todoID));
-                taskRepository.deleteAll(existingTodo.getTask());
-                todoRepository.delete(existingTodo);
-                return ResponseEntity.status(HttpStatus.OK)
-                        .body(Map.of("message", "Todo deleted successfully", "todoID", todoID));
+                try {
+                    todoService.deleteTodoWithTasks(existingTodo.getId());
+                    return ResponseEntity.ok(Map.of("message", "Todo and associated tasks deleted successfully"));
+                } catch (Exception e) {
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                            .body(Map.of("error", "An error occurred"));
+                }
             }
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Unauthorized"));
         } catch (EntityNotFoundException e) {
