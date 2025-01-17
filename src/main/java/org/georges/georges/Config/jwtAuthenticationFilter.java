@@ -64,6 +64,11 @@ protected void doFilterInternal(HttpServletRequest request, HttpServletResponse 
     filterChain.doFilter(request, response);
 }
 
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        String path = request.getRequestURI();
+        return path.startsWith("/ws") || path.startsWith("/socket.io/");
+    }
 
     private void updateSecurityContext(HttpServletRequest request, String username) {
         UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);

@@ -23,7 +23,6 @@ public class Message {
 
     private String content;
 
-
     @ManyToOne
     @JoinColumn(name = "sender_id")
     private User sender;
@@ -44,18 +43,5 @@ public class Message {
         this.receiver = receiver;
         this.content = content;
     }
-    // string format  :
-    @Override
-    public String toString() {
-        return "Message{" +
-                "id=" + id +
-                ", conversation=" + conversation +
-                ", content='" + content + '\'' +
-                ", receiver=" + receiver +
-                ",sender="+sender+
-                ", timestamp=" + timestamp +
-                '}';
-    }
-
 
 }
