@@ -1,5 +1,5 @@
 package org.georges.georges.Calendar;
 
-public enum ReccurenceRule {
+public enum RecurrenceRule {
     Daily, Weekly, Monthly, Yearly
 }

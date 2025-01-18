@@ -24,7 +24,7 @@ public class Calendar {
     private User user;
     @ElementCollection
     private Set<String> tags;
-    private ReccurenceRule recurrenceRule;
+    private RecurrenceRule recurrenceRule;
 
     public Calendar() {
 
