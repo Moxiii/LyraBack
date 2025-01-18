@@ -10,6 +10,6 @@ public class CreateProjectDTO {
     private String name;
     private String description;
     private List<String> links;
-    private List<Long> userIDS;
+    private List<String> username;
     private String projectPicture;
 }

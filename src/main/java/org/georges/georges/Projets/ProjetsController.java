@@ -61,13 +61,11 @@ public class ProjetsController {
             Projets projet = new Projets();
             projet.setId(Long.parseLong(currentUser.getId()+""+nextProjectId));
             projet.setName(createProject.getName());
-            projet.setDescription(createProject.getDescription());
-            if(!createProject.getLinks().isEmpty()){
-                projet.setLinks(createProject.getLinks());
-            }
+            projet.setDescription(createProject.getDescription() != null ? createProject.getDescription() : "");
+            projet.setLinks(createProject.getLinks() != null ? createProject.getLinks() : new ArrayList<>());
             List<User> users = new ArrayList<>();
-            for (Long userID :createProject.getUserIDS()){
-                User user = userRepository.findById(userID).orElseThrow(()-> new RuntimeException("User with ID " + userID + " not found"));
+            for (String username :createProject.getUsername()){
+                User user = userRepository.findByUsername(username);
                 users.add(user);
             }
             if(!users.contains(currentUser)){
@@ -146,15 +144,9 @@ public class ProjetsController {
             boolean userIsInProject = projet.getUsers().stream()
                     .anyMatch(user -> user.getId().equals(currentUser.getId()));
             if(userIsInProject) {
-                if(!updateProject.getName().isEmpty()){
-                    projet.setName(updateProject.getName());
-                }
-                if(!updateProject.getDescription().isEmpty()){
-                    projet.setDescription(updateProject.getDescription());
-                }
-                if(!updateProject.getLinks().isEmpty()){
-                    projet.setLinks(updateProject.getLinks());
-                }
+              projet.setName(updateProject.getName() != null ? updateProject.getName() : projet.getName());
+                projet.setDescription(updateProject.getDescription() != null ? updateProject.getDescription() : projet.getDescription());
+                projet.setLinks(updateProject.getLinks() != null ? updateProject.getLinks() : projet.getLinks());
                 if(updateProject.getUsername() != null && !updateProject.getUsername().isEmpty() ){
                     List<User> users = new ArrayList<>();
                     for(String usernames : updateProject.getUsername()){
