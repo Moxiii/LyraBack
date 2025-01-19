@@ -4,8 +4,9 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
-import org.georges.georges.Config.JwtUtil;
-import org.georges.georges.Config.SecurityUtils;
+import org.georges.georges.Config.CustomAnnotation.RequireAuthorization;
+import org.georges.georges.Config.Utils.JwtUtil;
+import org.georges.georges.Config.Utils.SecurityUtils;
 import org.georges.georges.DTO.TodoRes;
 import org.georges.georges.Todo.Tasks.Task;
 import org.georges.georges.Todo.Tasks.TaskRepository;
@@ -22,7 +23,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
-@Slf4j
+@RequireAuthorization
 @RequestMapping("/api/todo")
 public class TodoController {
     @Autowired
@@ -31,14 +32,13 @@ public class TodoController {
     private TodoRepository todoRepository;
     @Autowired
     private UserRepository userRepository;
-    @Autowired
-    private JwtUtil jwtUtil;
+
 @Autowired
 private TaskRepository taskRepository;
 
     @GetMapping("/{todoID}")
-    public ResponseEntity<?> getTodoByID(HttpServletRequest request , @PathVariable Long todoID){
-        if(SecurityUtils.isAuthorized(request, jwtUtil)){
+    public ResponseEntity<?> getTodoByID(  @PathVariable Long todoID){
+
                 Todo todo = todoRepository.findById(todoID).orElseThrow(() -> new EntityNotFoundException("Todo not found with id : " + todoID));
                 TodoRes todoRes = new TodoRes();
                 todoRes.setId(todo.getId());
@@ -47,13 +47,10 @@ private TaskRepository taskRepository;
                     todoRes.setTasks(todo.getTasks());
                 }
                 return ResponseEntity.ok().body(todoRes);
-        }
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("");
     }
 
     @GetMapping("/get")
-        public ResponseEntity<?>getTodosByUser(HttpServletRequest request){
-        if(SecurityUtils.isAuthorized(request, jwtUtil)){
+        public ResponseEntity<?>getTodosByUser(){
             User currentUser = SecurityUtils.getCurrentUser();
             if (currentUser != null) {
            List<Todo>todos = todoRepository.findAllByUser(currentUser);
@@ -65,16 +62,13 @@ private TaskRepository taskRepository;
                     return todoRes;
                         }).collect(Collectors.toList());
                 return ResponseEntity.ok().body(todoResponses);
-
             }
-        }
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 
 
     @PostMapping("/add/task/{todoID}")
-        public ResponseEntity<?> addTask(HttpServletRequest request , @PathVariable Long todoID, @RequestBody List<Task> tasks) {
-        if(SecurityUtils.isAuthorized(request, jwtUtil)){
+        public ResponseEntity<?> addTask(  @PathVariable Long todoID, @RequestBody List<Task> tasks) {
                 List<Task> newTasks = new ArrayList<>();
                    Todo todo = todoRepository.findById(todoID).orElseThrow(() -> new EntityNotFoundException("Todo not found with id : " + todoID));
                        for(Task task : tasks){
@@ -85,14 +79,12 @@ private TaskRepository taskRepository;
                        todo.getTasks().addAll(tasks);
                        todoRepository.save(todo);
                        return ResponseEntity.status(HttpStatus.CREATED).body(newTasks);
-                }
 
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("");
         }
     @Transactional
     @PostMapping("/add")
-        public ResponseEntity<?> addTodo(HttpServletRequest request , @RequestBody Todo todo){
-        if(SecurityUtils.isAuthorized(request, jwtUtil)){
+        public ResponseEntity<?> addTodo(  @RequestBody Todo todo){
+
             User currentUser = SecurityUtils.getCurrentUser();
             currentUser.getTodos().size();
                 todo.setUser(currentUser);
@@ -107,13 +99,10 @@ private TaskRepository taskRepository;
                     todoRes.setTasks(todo.getTasks());
                 }
                 return ResponseEntity.status(HttpStatus.CREATED).body(todoRes);
-            }
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized access");
     }
 
     @PutMapping("/update/{todoID}")
-    public ResponseEntity<?> updateTodo(HttpServletRequest request , @PathVariable Long todoID , @RequestBody Todo updatedTodo) {
-        if(SecurityUtils.isAuthorized(request, jwtUtil)){
+    public ResponseEntity<?> updateTodo(  @PathVariable Long todoID , @RequestBody Todo updatedTodo) {
                 Todo existingTodo = todoRepository.findById(todoID).orElseThrow(()->new EntityNotFoundException("Todo not found with id : " + todoID));
                 if (updatedTodo.getTitle() != null){
                     existingTodo.setTitle(updatedTodo.getTitle());
@@ -126,15 +115,11 @@ private TaskRepository taskRepository;
                     todoRes.setTasks(updatedTodo.getTasks());
                 }
                 return ResponseEntity.status(HttpStatus.OK).body(todoRes);
-            }
-        
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("");
     }
 
 
 @PutMapping("/update/task/{todoID}/{taskID}")
-public ResponseEntity<?> updateTaskOnTodo(HttpServletRequest request , @PathVariable Long taskID , @PathVariable Long todoID , @RequestBody Task updatedTask){
-    if(SecurityUtils.isAuthorized(request, jwtUtil)){
+public ResponseEntity<?> updateTaskOnTodo(  @PathVariable Long taskID , @PathVariable Long todoID , @RequestBody Task updatedTask){
             Task existingTask = taskRepository.findById(taskID).orElseThrow(() -> new EntityNotFoundException("Task not found with id : " + taskID));
             Todo existingTodo = todoRepository.findById(todoID).orElseThrow(() -> new EntityNotFoundException("Todo not found with id : " + todoID));
             if (existingTask.getTodo().getId().equals(existingTodo.getId())) {
@@ -150,14 +135,11 @@ public ResponseEntity<?> updateTaskOnTodo(HttpServletRequest request , @PathVari
                 taskRepository.save(existingTask);
                 return ResponseEntity.status(HttpStatus.OK).body(existingTask);
             }else {throw new RuntimeException("Task and Todo ids do not match");}
-        }
-    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("");
 }
     @Transactional
     @DeleteMapping("/delete/{todoID}")
-    public ResponseEntity<?> deleteTodo(HttpServletRequest request, @PathVariable Long todoID) {
+    public ResponseEntity<?> deleteTodo(@PathVariable Long todoID) {
         try {
-            if (SecurityUtils.isAuthorized(request, jwtUtil)) {
                 Todo existingTodo = todoRepository.findById(todoID)
                         .orElseThrow(() -> new EntityNotFoundException("Todo not found with id: " + todoID));
                 try {
@@ -167,8 +149,6 @@ public ResponseEntity<?> updateTaskOnTodo(HttpServletRequest request , @PathVari
                     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                             .body(Map.of("error", "An error occurred"));
                 }
-            }
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Unauthorized"));
         } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", e.getMessage()));
         } catch (Exception e) {
@@ -179,8 +159,7 @@ public ResponseEntity<?> updateTaskOnTodo(HttpServletRequest request , @PathVari
 
 
     @DeleteMapping("/delete/task/{todoID}/{taskID}")
-    public ResponseEntity<?> deleteTask(HttpServletRequest request, @PathVariable Long taskID, @PathVariable Long todoID) {
-        if(SecurityUtils.isAuthorized(request, jwtUtil)){
+    public ResponseEntity<?> deleteTask( @PathVariable Long taskID, @PathVariable Long todoID) {
                 Task existingTask = taskRepository.findById(taskID).orElseThrow(() -> new EntityNotFoundException("Task not found with id : " + taskID));
                 Todo existingTodo = todoRepository.findById(todoID).orElseThrow(() -> new EntityNotFoundException("Todo not found with id : " + todoID));
                 if (existingTask.getTodo().getId().equals(existingTodo.getId())) {
@@ -189,8 +168,6 @@ public ResponseEntity<?> updateTaskOnTodo(HttpServletRequest request , @PathVari
                 } else {
                     throw new RuntimeException("Task and Todo ids do not match");
                 }
-            }
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("");
     }
 
 }

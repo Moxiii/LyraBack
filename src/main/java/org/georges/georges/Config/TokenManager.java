@@ -1,5 +1,6 @@
 package org.georges.georges.Config;
 
+import org.georges.georges.Config.Utils.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

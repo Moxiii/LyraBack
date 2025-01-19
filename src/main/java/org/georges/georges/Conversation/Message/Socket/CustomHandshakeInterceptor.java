@@ -1,7 +1,7 @@
 package org.georges.georges.Conversation.Message.Socket;
 
 import lombok.extern.slf4j.Slf4j;
-import org.georges.georges.Config.JwtUtil;
+import org.georges.georges.Config.Utils.JwtUtil;
 import org.georges.georges.Conversation.Message.MessageQueueService;
 import org.georges.georges.User.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;

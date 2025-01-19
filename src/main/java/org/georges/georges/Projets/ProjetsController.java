@@ -1,10 +1,8 @@
 package org.georges.georges.Projets;
 
 
-import jakarta.servlet.http.HttpServletRequest;
-import lombok.extern.slf4j.Slf4j;
-import org.georges.georges.Config.JwtUtil;
-import org.georges.georges.Config.SecurityUtils;
+import org.georges.georges.Config.CustomAnnotation.RequireAuthorization;
+import org.georges.georges.Config.Utils.SecurityUtils;
 import org.georges.georges.DTO.CreateProjectDTO;
 import org.georges.georges.DTO.ProjectRes;
 import org.georges.georges.DTO.UpdateProjectDTO;
@@ -21,12 +19,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Slf4j
+@RequireAuthorization
 @RestController
 @RequestMapping("/api/project")
 public class ProjetsController {
-    @Autowired
-    private JwtUtil jwtUtil;
     @Autowired
     private ProjetsRepository projetsRepository;
     @Autowired
@@ -43,19 +39,16 @@ public class ProjetsController {
     }
 
     @GetMapping("/get")
-    public ResponseEntity<?> getMyProject(HttpServletRequest request) {
-        if(SecurityUtils.isAuthorized(request, jwtUtil)){
+    public ResponseEntity<?> getMyProject() {
             User currentUser = SecurityUtils.getCurrentUser();
             List<Projets> projets  = projetsRepository.findByUsers(currentUser);
             List<ProjectRes> projectResponses = projets.stream().map(this::toRes).collect(Collectors.toList());
             return new ResponseEntity<>(projectResponses, HttpStatus.OK);
         }
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized access");
-    }
+
 
     @PostMapping("/add")
-    public ResponseEntity<?> createProject(HttpServletRequest request ,@RequestParam(value = "file", required = false) MultipartFile file, @RequestBody CreateProjectDTO createProject) {
-        if(SecurityUtils.isAuthorized(request, jwtUtil)){
+    public ResponseEntity<?> createProject(@RequestParam(value = "file", required = false) MultipartFile file, @RequestBody CreateProjectDTO createProject) {
             User currentUser = SecurityUtils.getCurrentUser();
             long nextProjectId = projetsRepository.findByUsers(currentUser).size() + System.currentTimeMillis();
             Projets projet = new Projets();
@@ -82,13 +75,10 @@ public class ProjetsController {
             }
             projetsRepository.save(projet);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
-        }
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized access");
     }
 
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<?> deleteProject(HttpServletRequest request, @PathVariable long id) {
-        if(SecurityUtils.isAuthorized(request, jwtUtil)){
+    public ResponseEntity<?> deleteProject(@PathVariable long id) {
             User currentUser = SecurityUtils.getCurrentUser();
             Projets projet = projetsRepository.findById(id).orElseThrow(() -> new RuntimeException("Project not found"));
             if(!projet.getUsers().contains(currentUser)) {
@@ -96,20 +86,15 @@ public class ProjetsController {
             }
             projetsRepository.delete(projet);
             return ResponseEntity.status(HttpStatus.OK).body("Project deleted");
-        }
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized access");
     }
 
     @PostMapping("/upload/projectPic/{id}")
     public ResponseEntity<?> uploadProjectPic(
             @RequestParam("file") MultipartFile file,
-            HttpServletRequest request,
             @PathVariable long id) {
         if (file.isEmpty()) {
-            log.warn("Aucun fichier reçu !");
             return ResponseEntity.badRequest().body("Aucun fichier reçu");
         }
-        if (SecurityUtils.isAuthorized(request, jwtUtil)) {
             User currentUser = SecurityUtils.getCurrentUser();
 
             try {
@@ -128,17 +113,13 @@ public class ProjetsController {
 
                 return ResponseEntity.ok("Image du projet mise à jour avec succès");
             } catch (IOException e) {
-                log.error("Erreur lors du téléchargement de l'image", e);
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                         .body("Erreur lors de l'envoi de l'image");
             }
-        }
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<?> updateProject(HttpServletRequest request, @PathVariable long id , @RequestParam(value = "file", required = false) MultipartFile file, @RequestBody UpdateProjectDTO updateProject) {
-        if(SecurityUtils.isAuthorized(request, jwtUtil)){
+    public ResponseEntity<?> updateProject( @PathVariable long id , @RequestParam(value = "file", required = false) MultipartFile file, @RequestBody UpdateProjectDTO updateProject) {
             User currentUser = SecurityUtils.getCurrentUser();
             Projets projet = projetsRepository.findById(id).orElseThrow(() -> new RuntimeException("Project not found"));
             boolean userIsInProject = projet.getUsers().stream()
@@ -168,6 +149,4 @@ public class ProjetsController {
             }
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Not your Project !");
         }
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized access");
-    }
 }

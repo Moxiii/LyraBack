@@ -4,8 +4,7 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
-import lombok.extern.slf4j.Slf4j;
-import org.georges.georges.Config.JwtUtil;
+import org.georges.georges.Config.Utils.JwtUtil;
 import org.georges.georges.Config.TokenManager;
 import org.georges.georges.DTO.LoginRes;
 import org.georges.georges.User.User;
@@ -28,7 +27,7 @@ import org.springframework.web.bind.annotation.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-@Slf4j
+
 @RestController
 @RequestMapping("api/auth")
 public class AuthApiController {
@@ -44,7 +43,6 @@ public class AuthApiController {
     private JwtUtil jwtUtil;
 
 
-    private static final JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
 
 @Autowired
 private TokenManager tokenManager;
@@ -71,8 +69,6 @@ private TokenManager tokenManager;
     @ResponseBody
     public ResponseEntity<?> inscriptionSubmit(@RequestBody User user, HttpServletRequest req) {
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-        // Vérifier si l'utilisateur existe dans votre système
-        
         User existingUser = null;
         if (user.getEmail() != null) {
             existingUser = userService.findByEmail(user.getEmail().toLowerCase());
@@ -81,13 +77,12 @@ private TokenManager tokenManager;
         }
 
         if (existingUser != null) {
-            // L'utilisateur existe, vérifiez le mot de passe
             if (passwordEncoder.matches(user.getPassword(), existingUser.getPassword())) {
                 String validToken = tokenManager.getValidToken(existingUser.getUsername());
                 if (validToken != null) {
                     return ResponseEntity.ok(new LoginRes(existingUser.getUsername(), validToken));
                 } else {
-                    // Créez un token d'authentification
+
                     UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(existingUser.getUsername(), user.getPassword());
 
                     try {
@@ -104,7 +99,6 @@ private TokenManager tokenManager;
                             return ResponseEntity.ok(new LoginRes(existingUser.getUsername(), accessToken));
                         }
                     } catch (AuthenticationException e) {
-                        log.warn("Authentication failed for user: {}", user.getUsername(), e);
                         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Authentication failed");
                     }
                 }

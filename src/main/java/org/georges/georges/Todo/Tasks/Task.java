@@ -22,11 +22,5 @@ public class Task {
     @JoinColumn(name = "todo_id")
     private Todo todo;
 
-
-    public Task(String description ,String content, boolean completed ){
-        this.description = description;
-        this.content=content;
-        this.completed = completed;
-    }
     public Task(){}
 }

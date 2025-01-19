@@ -12,7 +12,6 @@ import java.util.List;
 @Entity
 @Getter
 @Setter
-@Slf4j
 public class Todo {
     @Id
     private Long id ;

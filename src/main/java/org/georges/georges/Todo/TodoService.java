@@ -23,7 +23,7 @@ public class TodoService {
             throw e;
         }
         try {
-            todoRepository.manualyDeleteTodoByID(todoID);
+            todoRepository.manuallyDeleteTodoByID(todoID);
         } catch (Exception e) {
             log.error("Error deleting Todo with ID {}: {}", todoID, e.getMessage());
             throw e;

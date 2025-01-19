@@ -16,5 +16,5 @@ List<Todo> findAllByUser(User user);
 @Transactional
 @Modifying
 @Query("DELETE FROM Todo t WHERE t.id = :todoID")
-void manualyDeleteTodoByID(@Param("todoID") Long todoID);
+void manuallyDeleteTodoByID(@Param("todoID") Long todoID);
 }

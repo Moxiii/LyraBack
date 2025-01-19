@@ -1,10 +1,11 @@
-package org.georges.georges.Config;
+package org.georges.georges.Config.Filter;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.georges.georges.Config.Utils.JwtUtil;
 import org.georges.georges.User.CustomUserDetailsService;
 import org.hibernate.annotations.Filter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +21,7 @@ import java.io.IOException;
 @Component
 public class jwtAuthenticationFilter extends OncePerRequestFilter {
     @Autowired
-    private  JwtUtil jwtUtil;
+    private JwtUtil jwtUtil;
     @Autowired
     private CustomUserDetailsService customUserDetailsService;
 

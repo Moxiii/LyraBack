@@ -1,10 +1,7 @@
 package org.georges.georges.Api;
 
-import jakarta.servlet.http.HttpServletRequest;
-import lombok.extern.slf4j.Slf4j;
-import org.georges.georges.Config.JwtUtil;
-import org.georges.georges.Config.SecurityUtils;
-import org.georges.georges.DTO.ErrorRes;
+import org.georges.georges.Config.CustomAnnotation.RequireAuthorization;
+import org.georges.georges.Config.Utils.SecurityUtils;
 import org.georges.georges.DTO.UserProfileRes;
 import org.georges.georges.User.User;
 import org.georges.georges.User.UserRepository;
@@ -17,7 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 
-@Slf4j
+@RequireAuthorization
 @RequestMapping("api/user")
 @RestController
 public class UserApiController {
@@ -26,13 +23,10 @@ public class UserApiController {
     private UserService userService;
     @Autowired
     private UserRepository userRepository;
-    @Autowired
-    private JwtUtil jwtUtil;
 
 
 @PutMapping("/update/")
-    public ResponseEntity<String> updateUser( HttpServletRequest request, @RequestBody User userToUpdate) {
-    if(SecurityUtils.isAuthorized(request, jwtUtil)){
+    public ResponseEntity<String> updateUser(  @RequestBody User userToUpdate) {
         User currentUser = SecurityUtils.getCurrentUser();
         currentUser.setName(userToUpdate.getName());
         currentUser.setEmail(userToUpdate.getEmail());
@@ -41,12 +35,9 @@ public class UserApiController {
         currentUser.setUsername(userToUpdate.getUsername());
         userRepository.save(currentUser);
         return new ResponseEntity<>("User mis à jour avec succès", HttpStatus.OK);
-    }
-    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized access");
 }
 @DeleteMapping("/delete")
-    public ResponseEntity<String> deleteUser( HttpServletRequest request) {
-    if(SecurityUtils.isAuthorized(request, jwtUtil)){
+    public ResponseEntity<String> deleteUser( ) {
         User currentUser = SecurityUtils.getCurrentUser();
         try {
             userService.deleteUserById(currentUser.getId());
@@ -56,12 +47,9 @@ public class UserApiController {
             return new ResponseEntity<>("Erreur lors de la suppression de l'user", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized access");
-    }
 
     @GetMapping("/me")
-    public ResponseEntity<?> getUserProfile(HttpServletRequest request) {
-        if(SecurityUtils.isAuthorized(request, jwtUtil)){
+    public ResponseEntity<?> getUserProfile() {
             User currentUser = SecurityUtils.getCurrentUser();
                 if(currentUser.getDescription() == null){currentUser.setDescription("basic user of Gilbert");}
                 UserProfileRes profileRes = new UserProfileRes(
@@ -71,16 +59,12 @@ public class UserApiController {
                 );
                 if(currentUser.getProfilePicture() != null){profileRes.setProfileImage(currentUser.getProfilePicture());}
                 return new ResponseEntity<>(profileRes, HttpStatus.OK);
-            }
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorRes(HttpStatus.UNAUTHORIZED, "User not found"));
     }
     @PostMapping("/upload/profilPic")
-    public ResponseEntity<?> uploadProfilPic(@RequestParam("file") MultipartFile file , HttpServletRequest request) {
+    public ResponseEntity<?> uploadProfilPic(@RequestParam("file") MultipartFile file ) {
         if (file.isEmpty()) {
-            log.warn("Aucun fichier reçu !");
             return ResponseEntity.badRequest().body("Aucun fichier reçu");
         }
-        if(SecurityUtils.isAuthorized(request, jwtUtil)){
             User currentUser = SecurityUtils.getCurrentUser();
             try{
                 byte[] imageBytes = file.getBytes();
@@ -94,20 +78,15 @@ public class UserApiController {
             }
             catch (IOException e){return ResponseEntity.status(500).body("Error uploading image.");}
 
-        }
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
     @GetMapping("/get/profilPic")
-    public ResponseEntity<?> getProfilPic(HttpServletRequest request) {
-    if(SecurityUtils.isAuthorized(request, jwtUtil)){
+    public ResponseEntity<?> getProfilPic() {
         User currentUser = SecurityUtils.getCurrentUser();
         byte[] imageBytes = currentUser.getProfilePicture();
         if(imageBytes == null || imageBytes.length == 0){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
         return  new ResponseEntity<>( imageBytes, HttpStatus.OK);
-    }
-    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized access");
     }
 }
 

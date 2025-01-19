@@ -1,4 +1,4 @@
-package org.georges.georges.Config;
+package org.georges.georges.Config.Utils;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.georges.georges.User.CustomUserDetails;

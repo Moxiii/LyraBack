@@ -1,4 +1,4 @@
-package org.georges.georges.Config;
+package org.georges.georges.Config.Utils;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
