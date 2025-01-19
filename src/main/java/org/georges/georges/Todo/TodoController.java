@@ -6,7 +6,7 @@ import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.georges.georges.Config.JwtUtil;
 import org.georges.georges.Config.SecurityUtils;
-import org.georges.georges.Response.TodoRes;
+import org.georges.georges.DTO.TodoRes;
 import org.georges.georges.Todo.Tasks.Task;
 import org.georges.georges.Todo.Tasks.TaskRepository;
 import org.georges.georges.User.User;
@@ -16,7 +16,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController

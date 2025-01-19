@@ -7,7 +7,7 @@ import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.georges.georges.Config.JwtUtil;
 import org.georges.georges.Config.TokenManager;
-import org.georges.georges.Response.LoginRes;
+import org.georges.georges.DTO.LoginRes;
 import org.georges.georges.User.User;
 import org.georges.georges.User.UserRepository;
 import org.georges.georges.User.UserRole.UserRole;
@@ -24,6 +24,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 

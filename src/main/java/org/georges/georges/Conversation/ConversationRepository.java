@@ -1,6 +1,5 @@
 package org.georges.georges.Conversation;
 
-import org.georges.georges.Conversation.Conversation;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

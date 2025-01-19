@@ -3,7 +3,7 @@ package org.georges.georges.Contact;
 import jakarta.servlet.http.HttpServletRequest;
 import org.georges.georges.Config.JwtUtil;
 import org.georges.georges.Config.SecurityUtils;
-import org.georges.georges.Response.ContactRes;
+import org.georges.georges.DTO.ContactRes;
 import org.georges.georges.Todo.TodoRepository;
 import org.georges.georges.User.User;
 import org.springframework.beans.factory.annotation.Autowired;

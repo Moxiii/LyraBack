@@ -1,7 +1,6 @@
 package org.georges.georges.Config;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.georges.georges.Response.ErrorRes;
 import org.georges.georges.User.CustomUserDetails;
 import org.georges.georges.User.User;
 import org.springframework.security.core.Authentication;

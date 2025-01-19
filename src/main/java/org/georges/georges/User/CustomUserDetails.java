@@ -1,6 +1,5 @@
 package org.georges.georges.User;
 
-import org.georges.georges.User.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

@@ -3,13 +3,9 @@ package org.georges.georges.Config;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.extern.slf4j.Slf4j;
 import org.georges.georges.User.User;
-
 import org.georges.georges.User.UserRepository;
 import org.springframework.context.annotation.Bean;
-import org.springframework.http.server.ServerHttpRequest;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.stereotype.Component;
@@ -18,7 +14,6 @@ import javax.crypto.SecretKey;
 import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
 
 @Component
 public class JwtUtil {

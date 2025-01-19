@@ -1,25 +1,21 @@
 package org.georges.georges.Api;
 
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.georges.georges.Config.JwtUtil;
 import org.georges.georges.Config.SecurityUtils;
-import org.georges.georges.Response.ErrorRes;
-import org.georges.georges.Response.UserProfileRes;
+import org.georges.georges.DTO.ErrorRes;
+import org.georges.georges.DTO.UserProfileRes;
 import org.georges.georges.User.User;
 import org.georges.georges.User.UserRepository;
 import org.georges.georges.User.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.security.Principal;
-import java.util.List;
 
 @Slf4j
 @RequestMapping("api/user")

@@ -1,4 +1,4 @@
-package org.georges.georges.Response;
+package org.georges.georges.DTO;
 
 import lombok.Getter;
 import lombok.Setter;

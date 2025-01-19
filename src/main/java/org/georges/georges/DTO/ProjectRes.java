@@ -1,8 +1,7 @@
-package org.georges.georges.Response;
+package org.georges.georges.DTO;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.georges.georges.User.User;
 
 import java.util.List;
 

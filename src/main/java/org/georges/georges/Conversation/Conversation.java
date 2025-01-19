@@ -1,14 +1,15 @@
 package org.georges.georges.Conversation;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Getter;
+import lombok.Setter;
 import org.georges.georges.Conversation.Message.Message;
 import org.georges.georges.User.User;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.ArrayList;
 
 @Getter
 @Setter
