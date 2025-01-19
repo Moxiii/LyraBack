@@ -1,12 +1,14 @@
 package org.georges.georges.User;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.georges.georges.Contact.Contact;
 import org.georges.georges.Conversation.Conversation;
 import org.georges.georges.Todo.Todo;
+import org.georges.georges.Calendar.Calendar;
 import org.georges.georges.User.UserRole.UserRole;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -19,6 +21,7 @@ import java.util.Set;
 @Setter
 @Entity
 public class User {
+    @JsonIgnore
     @ManyToMany(mappedBy = "participants")
     private Set<Conversation> conversations;
     @ManyToOne(fetch = FetchType.LAZY)
@@ -38,6 +41,10 @@ public class User {
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id")
     private List<Todo> todos;
+    @OneToOne(mappedBy = "user" , cascade = CascadeType.ALL, orphanRemoval = true , fetch = FetchType.EAGER)
+    @JoinColumn(name = "user_id")
+    private Calendar calendar;
+
     @Lob
     @Basic(fetch = FetchType.LAZY)
     @Column(length = 500*1024*1024)

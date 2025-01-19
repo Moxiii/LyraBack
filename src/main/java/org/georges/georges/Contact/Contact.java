@@ -12,7 +12,7 @@ import java.time.LocalDate;
 @Entity
 public class Contact {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @ManyToOne
     @JoinColumn(name="user_id")

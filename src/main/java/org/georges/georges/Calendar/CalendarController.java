@@ -6,6 +6,7 @@ import org.georges.georges.Calendar.event.EventRepository;
 import org.georges.georges.Config.CustomAnnotation.RequireAuthorization;
 import org.georges.georges.Config.Utils.JwtUtil;
 import org.georges.georges.Config.Utils.SecurityUtils;
+import org.georges.georges.DTO.CalendarRes;
 import org.georges.georges.User.User;
 import org.georges.georges.User.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,14 +36,23 @@ public class CalendarController {
     public ResponseEntity<?> getCalendar() {
             User currentUser = SecurityUtils.getCurrentUser();
             Calendar calendar = calendarRepository.findByUser(currentUser);
-            return ResponseEntity.ok(calendar);
+            CalendarRes calendarRes = new CalendarRes();
+            calendarRes.setUsername(currentUser.getUsername());
+            calendarRes.setEventsList(calendar.getEvents());
+            return ResponseEntity.ok(calendarRes);
     }
     @PostMapping("/add")
-    public ResponseEntity<?> addCalendar( @RequestBody Calendar calendar) {
+    public ResponseEntity<?> addCalendar( ) {
             User currentUser = SecurityUtils.getCurrentUser();
+            Calendar calendar = new Calendar();
+            currentUser.setCalendar(calendar);
             calendar.setUser(currentUser);
+            CalendarRes calendarRes = new CalendarRes();
+            calendarRes.setUsername(currentUser.getUsername());
+            calendarRes.setId(calendar.getId());
+            userRepository.save(currentUser);
             calendarRepository.save(calendar);
-            return ResponseEntity.ok(calendar);
+            return ResponseEntity.ok(calendarRes);
     }
 
     @DeleteMapping("/delete")
@@ -87,7 +97,7 @@ public class CalendarController {
             calendarRepository.save(calendar);
             existingEvent.setCalendar(calendar);
             eventRepository.save(existingEvent);
-            return ResponseEntity.ok(calendar.getEvents());
+            return ResponseEntity.ok(existingEvent);
     }
     @DeleteMapping("/event/delete/{eventID}")
     public ResponseEntity<?> deleteEvent( @PathVariable long eventID) {

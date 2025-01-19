@@ -14,7 +14,7 @@ import java.util.List;
 @Setter
 public class Calendar {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @OneToOne
     @JoinColumn(name="user_id" , insertable=true, updatable=true)
