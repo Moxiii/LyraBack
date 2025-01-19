@@ -30,16 +30,11 @@ public class GeorgesApplication {
 
     private final UserRepository userRepository;
     private final UserRoleRepository userRoleRepository;
-
-    private final MessageRepository messageRepository;
     private final ProjetsRepository projetsRepository;
 
-    public GeorgesApplication(UserRepository userRepository, UserRoleRepository userRoleRepository,
-                              MessageRepository messageRepository,  ProjetsRepository projetsRepository) {
+    public GeorgesApplication(UserRepository userRepository, UserRoleRepository userRoleRepository,ProjetsRepository projetsRepository) {
         this.userRepository = userRepository;
         this.userRoleRepository = userRoleRepository;
-        this.messageRepository = messageRepository;
-
         this.projetsRepository = projetsRepository;
     }
 

@@ -52,15 +52,14 @@ public class UserApiController {
     public ResponseEntity<?> getUserProfile() {
             User currentUser = SecurityUtils.getCurrentUser();
                 if(currentUser.getDescription() == null){currentUser.setDescription("basic user of Gilbert");}
-                UserProfileRes profileRes = new UserProfileRes(
-                        currentUser.getName(),
-                        currentUser.getDescription(),
-                        currentUser.getEmail()
-                );
+                UserProfileRes profileRes = new UserProfileRes();
+                profileRes.setUsername(currentUser.getUsername());
+                profileRes.setDescription(currentUser.getDescription());
+                profileRes.setEmailAddress(currentUser.getEmail());
                 if(currentUser.getProfilePicture() != null){profileRes.setProfileImage(currentUser.getProfilePicture());}
                 return new ResponseEntity<>(profileRes, HttpStatus.OK);
     }
-    @PostMapping("/upload/profilPic")
+    @PostMapping("/upload/profil/picture")
     public ResponseEntity<?> uploadProfilPic(@RequestParam("file") MultipartFile file ) {
         if (file.isEmpty()) {
             return ResponseEntity.badRequest().body("Aucun fichier reçu");
@@ -73,20 +72,10 @@ public class UserApiController {
                 UserProfileRes userProfileRes = new UserProfileRes();
                 userProfileRes.setProfileImage(currentUser.getProfilePicture());
                 userProfileRes.setUsername(currentUser.getUsername());
-                userProfileRes.setEmailAddress(currentUser.getEmail());
                 return new ResponseEntity<>(userProfileRes, HttpStatus.OK);
             }
             catch (IOException e){return ResponseEntity.status(500).body("Error uploading image.");}
 
-    }
-    @GetMapping("/get/profilPic")
-    public ResponseEntity<?> getProfilPic() {
-        User currentUser = SecurityUtils.getCurrentUser();
-        byte[] imageBytes = currentUser.getProfilePicture();
-        if(imageBytes == null || imageBytes.length == 0){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-        }
-        return  new ResponseEntity<>( imageBytes, HttpStatus.OK);
     }
 }
 

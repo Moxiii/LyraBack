@@ -12,5 +12,5 @@ public class UpdateProjectDTO {
     private String description;
     private List<String> links;
     private List<String> username;
-    private String projectPicture;
+    private byte[] projectPicture;
 }
