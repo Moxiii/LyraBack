@@ -7,7 +7,10 @@ import lombok.Setter;
 import org.georges.georges.Calendar.Calendar;
 import org.georges.georges.Calendar.RecurrenceRule;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.Set;
 
 @Getter
@@ -20,9 +23,9 @@ public class Event {
     private String description;
     private LocalDate startDate;
     private LocalDate endDate;
-    private LocalDate startHours;
-    private LocalDate endHours;
-    private boolean completed;
+    private LocalTime startHours;
+    private LocalTime endHours;
+    private boolean completed = false;
     @ElementCollection
     private Set<String> tags;
     private RecurrenceRule recurrenceRule;
@@ -30,4 +33,6 @@ public class Event {
     @ManyToOne
     @JoinColumn(name = "calendar_id")
     private Calendar calendar;
+
+
 }

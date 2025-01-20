@@ -9,14 +9,19 @@ import org.georges.georges.Config.Utils.SecurityUtils;
 import org.georges.georges.DTO.CalendarRes;
 import org.georges.georges.User.User;
 import org.georges.georges.User.UserRepository;
+import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import org.springframework.beans.BeanUtils;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.util.*;
+
 @RequireAuthorization
 @RestController
 @RequestMapping("/api/calendar")
@@ -32,11 +37,18 @@ public class CalendarController {
     @Autowired
     private CalendarService calendarService;
 
+   private String[] getNullPropertyNames(Object source) {
+       final BeanWrapper src = new BeanWrapperImpl(source);
+       return Arrays.stream(src.getPropertyDescriptors())
+               .filter(pd-> src.getPropertyValue(pd.getName()) == null)
+               .toArray(String[]::new);
+   }
     @GetMapping("/get")
     public ResponseEntity<?> getCalendar() {
             User currentUser = SecurityUtils.getCurrentUser();
             Calendar calendar = calendarRepository.findByUser(currentUser);
             CalendarRes calendarRes = new CalendarRes();
+            calendarRes.setId(calendar.getId());
             calendarRes.setUsername(currentUser.getUsername());
             calendarRes.setEventsList(calendar.getEvents());
             return ResponseEntity.ok(calendarRes);
@@ -80,6 +92,12 @@ public class CalendarController {
             Calendar calendar = calendarRepository.findByUser(currentUser);
             for (Event event : events) {
                 event.setCalendar(calendar);
+                if (event.getStartHours() == null) {
+                    event.setStartHours(LocalTime.parse("00:00"));
+                }
+                if (event.getEndHours() == null) {
+                    event.setEndHours(LocalTime.parse("23:59"));
+                }
                 newEvents.add(event);
                 calendar.getEvents().add(event);
             }
@@ -89,11 +107,17 @@ public class CalendarController {
     }
 
     @PutMapping("/event/update/{eventID}")
-    public ResponseEntity<?> updateEvent(  @PathVariable long eventID , @RequestBody List<Event> updatedEvents) {
+    public ResponseEntity<?> updateEvent(  @PathVariable long eventID , @RequestBody Event updatedEvents) {
             User currentUser = SecurityUtils.getCurrentUser();
             Event existingEvent = eventRepository.findById(eventID).orElseThrow(()-> new RuntimeException("Event not found"));
             Calendar calendar = calendarRepository.findByUser(currentUser);
-            calendar.setEvents(existingEvent != null ? updatedEvents :calendar.getEvents());
+            BeanUtils.copyProperties(updatedEvents, existingEvent, getNullPropertyNames(updatedEvents));
+        if (updatedEvents.getTags() != null && !updatedEvents.getTags().equals(existingEvent.getTags())) {
+            existingEvent.setTags(updatedEvents.getTags());
+        }
+        if (updatedEvents.isCompleted()) {
+            existingEvent.setCompleted(true);
+        }
             calendarRepository.save(calendar);
             existingEvent.setCalendar(calendar);
             eventRepository.save(existingEvent);
@@ -102,7 +126,8 @@ public class CalendarController {
     @DeleteMapping("/event/delete/{eventID}")
     public ResponseEntity<?> deleteEvent( @PathVariable long eventID) {
             Event existingEvent = eventRepository.findById(eventID).orElseThrow(()-> new RuntimeException("Event not found"));
-            calendarRepository.delete(existingEvent.getCalendar());
+            Calendar calendar = existingEvent.getCalendar();
+            calendar.getEvents().remove(existingEvent);
             eventRepository.delete(existingEvent);
             return ResponseEntity.ok(Map.of("message", "Event deleted"));
         }

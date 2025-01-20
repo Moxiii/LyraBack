@@ -1,7 +1,8 @@
 package org.georges.georges;
 
 import lombok.extern.slf4j.Slf4j;
-import org.georges.georges.Conversation.Message.MessageRepository;
+import org.georges.georges.Calendar.Calendar;
+import org.georges.georges.Calendar.CalendarRepository;
 import org.georges.georges.Projets.Projets;
 import org.georges.georges.Projets.ProjetsRepository;
 import org.georges.georges.User.Provider;
@@ -39,30 +40,33 @@ public class GeorgesApplication {
     }
 
     @Bean
-    public CommandLineRunner defaultDataInitializer() {
+    public CommandLineRunner defaultDataInitializer(CalendarRepository calendarRepository) {
         return args -> {
             Date aujourdhui = new Date();
             SimpleDateFormat formatedDate = new SimpleDateFormat("dd-MM-yyyy");
             String dateString = formatedDate.format(aujourdhui);
             log.info("formated date" + dateString);
             if (userRepository.count()==0){
-                UserRole user = new UserRole("user","user",1l);
+                UserRole userRole = new UserRole("user","user",1l);
                 UserRole georgesRole = new UserRole("georges","georges",2l);
-               user = userRoleRepository.save(user);
+               userRole = userRoleRepository.save(userRole);
                georgesRole = userRoleRepository.save(georgesRole);
                 User georges = new User("georges" , "georges" , "georges.app.sav@gmail.com","ee",dateString , georgesRole);
-                User moxi = new User("moxi","moxi","moxi@moxi.com","ee",dateString,user);
-                User test = new User("test","test","test@e.e","ee",dateString,user);;
-                User martindrvt = new User("martin","martindvt","martin@martin.com","ee",dateString,user);
+                User moxi = new User("moxi","moxi","moxi@moxi.com","ee",dateString,userRole);
+                User test = new User("test","test","test@e.e","ee",dateString,userRole);;
+                User martindvt = new User("martin","martindvt","martin@martin.com","ee",dateString,userRole);
                 moxi.setDescription("backend Dev of Gilbert");
-                martindrvt.setDescription("CEO of the world");
+                martindvt.setDescription("CEO of the world");
                 moxi.setProvider(Provider.LOCAL);
-                martindrvt.setProvider(Provider.LOCAL);
+                martindvt.setProvider(Provider.LOCAL);
                 test.setProvider(Provider.LOCAL);
-                userRepository.save(moxi);
-                userRepository.save(test);
-                userRepository.save(martindrvt);
-                userRepository.save(georges);
+                List<User> users = Arrays.asList(moxi, martindvt, test , georges);
+                users.forEach(user -> {
+                    Calendar calendar = new Calendar();
+                    calendar.setUser(user);
+                    user.setCalendar(calendar);
+                });
+                userRepository.saveAll(users);
             }
             if(projetsRepository.count()==0){
                 User martindvt = userRepository.findByUsername("martindvt");
