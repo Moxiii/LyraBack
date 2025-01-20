@@ -10,5 +10,4 @@ public class UserProfileRes {
     private String Description;
     private String EmailAddress;
     private byte[] ProfileImage;
-    public UserProfileRes() {}
 }

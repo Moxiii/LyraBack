@@ -1,4 +1,4 @@
-package org.georges.georges.User;
+package org.georges.georges.DTO;
 
 import lombok.*;
 
