@@ -1,5 +1,5 @@
-package org.georges.georges.Calendar;
+package org.georges.georges.Calendar.event;
 
 public enum RecurrenceRule {
-    Daily, Weekly, Monthly, Yearly , Custom
+    Day, Week, Month, Year , Custom
 }
