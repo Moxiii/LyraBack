@@ -1,7 +1,5 @@
 package org.georges.georges.Auth;
 
-import com.google.api.client.json.JsonFactory;
-import com.google.api.client.json.jackson2.JacksonFactory;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.georges.georges.Config.Utils.JwtUtil;
@@ -31,8 +29,6 @@ import java.util.Date;
 @RestController
 @RequestMapping("api/auth")
 public class AuthApiController {
-    @Autowired
-    private UserService userService;
     @Autowired
     private UserRepository userRepository;
 
@@ -67,13 +63,13 @@ private TokenManager tokenManager;
 
     @PostMapping(path = {"/login"})
     @ResponseBody
-    public ResponseEntity<?> inscriptionSubmit(@RequestBody User user, HttpServletRequest req) {
+    public ResponseEntity<?> login(@RequestBody User user, HttpServletRequest req) {
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         User existingUser = null;
         if (user.getEmail() != null) {
-            existingUser = userService.findByEmail(user.getEmail().toLowerCase());
+            existingUser = userRepository.findByEmail(user.getEmail().toLowerCase());
         } else if (user.getUsername() != null) {
-            existingUser = userService.findByUsername(user.getUsername().toLowerCase());
+            existingUser = userRepository.findByUsername(user.getUsername().toLowerCase());
         }
 
         if (existingUser != null) {
@@ -118,6 +114,7 @@ private TokenManager tokenManager;
             String username = jwtUtil.extractUsername(token);
             if (username != null) {
                 tokenManager.removeToken(username);
+                SecurityContextHolder.getContext().setAuthentication(null);
                 return ResponseEntity.status(HttpStatus.OK).body("User logged out successfully");
             }
         }

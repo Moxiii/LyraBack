@@ -3,8 +3,9 @@ package org.georges.georges.Calendar;
 
 import org.georges.georges.Calendar.event.Event;
 import org.georges.georges.Calendar.event.EventRepository;
+import org.georges.georges.Calendar.event.RecurrenceFactory;
+import org.georges.georges.Calendar.event.RecurrenceRule;
 import org.georges.georges.Config.CustomAnnotation.RequireAuthorization;
-import org.georges.georges.Config.Utils.JwtUtil;
 import org.georges.georges.Config.Utils.SecurityUtils;
 import org.georges.georges.DTO.CalendarRes;
 import org.georges.georges.User.User;
@@ -12,14 +13,11 @@ import org.georges.georges.User.UserRepository;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.BeanUtils;
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZoneId;
+import java.time.*;
 import java.util.*;
 
 @RequireAuthorization
@@ -27,21 +25,30 @@ import java.util.*;
 @RequestMapping("/api/calendar")
 public class CalendarController {
     @Autowired
-    private JwtUtil jwtUtil;
-    @Autowired
    private CalendarRepository calendarRepository;
     @Autowired
     private UserRepository userRepository;
     @Autowired
     private EventRepository eventRepository;
-    @Autowired
-    private CalendarService calendarService;
 
    private String[] getNullPropertyNames(Object source) {
        final BeanWrapper src = new BeanWrapperImpl(source);
        return Arrays.stream(src.getPropertyDescriptors())
                .filter(pd-> src.getPropertyValue(pd.getName()) == null)
                .toArray(String[]::new);
+   }
+   private List<Event> generateRecurringEvents(Event event , int interval , RecurrenceRule rule , String unit){
+       if (interval <= 0) {
+           throw new IllegalArgumentException("Interval must be greater than 0.");
+       }
+       if (!List.of("Day", "Week", "Month", "Year").contains(unit)) {
+           throw new IllegalArgumentException("Invalid recurrence unit: " + unit);
+       }
+       final RecurrenceFactory factory = new RecurrenceFactory();
+       event.setRecurrenceRule(rule);
+       event.setRecurrenceUnit(unit);
+       event.setRecurrenceInterval(interval);
+       return factory.generateRecurringEvents(event);
    }
     @GetMapping("/get")
     public ResponseEntity<?> getCalendar() {
@@ -53,6 +60,27 @@ public class CalendarController {
             calendarRes.setEventsList(calendar.getEvents());
             return ResponseEntity.ok(calendarRes);
     }
+
+    @GetMapping("/getByWeek")
+    public ResponseEntity<?> getCalendarByWeek(@RequestBody LocalDate week) {
+       LocalDate firstDay = week.with(DayOfWeek.MONDAY);
+       LocalDate lastDay = week.with(DayOfWeek.SUNDAY);
+       List<Event> events = eventRepository.findByStartDateBetween(firstDay, lastDay);
+       CalendarRes calendarRes = new CalendarRes();
+       calendarRes.setEventsList(events);
+       return ResponseEntity.ok(calendarRes);
+    }
+    @GetMapping("/getByMonth")
+    public ResponseEntity<?> getCalendarByMonth(@RequestBody LocalDate month) {
+       LocalDate selectedMonth = month.withMonth(month.getMonthValue());
+       LocalDate firstDay = selectedMonth.withDayOfMonth(1);
+       LocalDate lastDay = selectedMonth.withDayOfMonth(selectedMonth.getDayOfMonth());
+       List<Event> events = eventRepository.findByStartDateBetween(firstDay, lastDay);
+       CalendarRes calendarRes = new CalendarRes();
+       calendarRes.setEventsList(events);
+       return ResponseEntity.ok(calendarRes);
+    }
+
     @PostMapping("/add")
     public ResponseEntity<?> addCalendar( ) {
             User currentUser = SecurityUtils.getCurrentUser();
@@ -64,17 +92,16 @@ public class CalendarController {
             calendarRes.setId(calendar.getId());
             userRepository.save(currentUser);
             calendarRepository.save(calendar);
-            return ResponseEntity.ok(calendarRes);
+        return ResponseEntity.status(HttpStatus.CREATED).body(calendarRes);
     }
 
     @DeleteMapping("/delete")
     public ResponseEntity<?> deleteCalendar( ) {
             User currentUser = SecurityUtils.getCurrentUser();
-            Calendar calendar = calendarRepository.findByUser(currentUser);
-            calendarRepository.delete(calendar);
+            calendarRepository.delete(calendarRepository.findByUser(currentUser));
             return ResponseEntity.ok(Map.of("message", "Calendar deleted"));
     }
-    //Gestion des tache /evenement journalier
+    //Gestion des tâches /événement journalier
     @GetMapping("/event/get")
     public ResponseEntity<?> getDailyEvent(  @RequestBody LocalDate day) {
             List<Event> dayEvent = eventRepository.findByStartDate(day);
@@ -93,10 +120,14 @@ public class CalendarController {
             for (Event event : events) {
                 event.setCalendar(calendar);
                 if (event.getStartHours() == null) {
-                    event.setStartHours(LocalTime.parse("00:00"));
+                    event.setStartHours(LocalTime.MIN);
                 }
                 if (event.getEndHours() == null) {
-                    event.setEndHours(LocalTime.parse("23:59"));
+                    event.setEndHours(LocalTime.MAX);
+                }
+                if(event.getRecurrenceRule() != null) {
+                    List<Event> recurringEvents = generateRecurringEvents(event , event.getRecurrenceInterval() , event.getRecurrenceRule(),event.getRecurrenceUnit());
+                    newEvents.addAll(recurringEvents);
                 }
                 newEvents.add(event);
                 calendar.getEvents().add(event);
@@ -117,6 +148,10 @@ public class CalendarController {
         }
         if (updatedEvents.isCompleted()) {
             existingEvent.setCompleted(true);
+        }
+        if(updatedEvents.getRecurrenceRule() != null) {
+            List<Event> recurringEvents = generateRecurringEvents(updatedEvents,updatedEvents.getRecurrenceInterval(),updatedEvents.getRecurrenceRule(),updatedEvents.getRecurrenceUnit());
+            calendar.setEvents(recurringEvents);
         }
             calendarRepository.save(calendar);
             existingEvent.setCalendar(calendar);

@@ -7,14 +7,13 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import org.georges.georges.Config.Utils.JwtUtil;
 import org.georges.georges.DTO.LoginRes;
+import org.georges.georges.DTO.TokenRequest;
 import org.georges.georges.User.Provider;
 import org.georges.georges.User.User;
 import org.georges.georges.User.UserRepository;
 import org.georges.georges.User.UserRole.UserRole;
 import org.georges.georges.User.UserRole.UserRoleRepository;
 import org.georges.georges.User.UserService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -33,7 +32,6 @@ import java.util.Date;
 @RestController
 @RequestMapping("api/oauth2")
 public class OAuth2Controller {
-    private static final Logger log = LoggerFactory.getLogger(OAuth2Controller.class);
     @Autowired
     private UserService userService;
     @Autowired
@@ -65,7 +63,7 @@ public class OAuth2Controller {
                 Date aujourdhui = new Date();
                 SimpleDateFormat formatedDate = new SimpleDateFormat("dd-MM-yyyy");
                 String dateString = formatedDate.format(aujourdhui);
-                UserRole userRole = userRoleRepository.findById(1l).get();
+                UserRole userRole = userRoleRepository.findById(1L).get();
                 if (existingUser == null) {
                     User newUser = new User();
                     newUser.setEmail(email);
@@ -76,8 +74,6 @@ public class OAuth2Controller {
                     newUser.setUserRole(userRole);
                     userRepository.save(newUser);
                     String jwtToken = jwtUtil.createAccessToken(newUser);
-                    log.info("JWT token: " + jwtToken);
-                    log.info("le nouveau utilisateur est : "  + newUser.getUsername());
                     return ResponseEntity.ok(new LoginRes(newUser.getUsername(), jwtToken));
                 } else {
                     String jwtToken = jwtUtil.createAccessToken(existingUser);

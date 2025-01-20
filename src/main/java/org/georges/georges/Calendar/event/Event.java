@@ -5,10 +5,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.georges.georges.Calendar.Calendar;
-import org.georges.georges.Calendar.RecurrenceRule;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Set;
@@ -19,7 +16,7 @@ import java.util.Set;
 public class Event {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private long id;
+    private Long id;
     private String description;
     private LocalDate startDate;
     private LocalDate endDate;
@@ -28,7 +25,10 @@ public class Event {
     private boolean completed = false;
     @ElementCollection
     private Set<String> tags;
+    @Enumerated(EnumType.STRING)
     private RecurrenceRule recurrenceRule;
+    private Integer recurrenceInterval;
+    private String recurrenceUnit;
     @JsonBackReference
     @ManyToOne
     @JoinColumn(name = "calendar_id")
