@@ -12,17 +12,17 @@
         public UserService(UserRepository userRepository) {
             this.userRepository = userRepository;
         }
-
-        public User findByUsername(String username) {
-            User user = userRepository.findByUsername(username);
-                return user;
+        public User exists(String username) {
+            username = username.toLowerCase();
+            if(userRepository.existsByUsername(username)){
+                return userRepository.findByUsername(username);
+            }
+            return null;
         }
+
         public User findByEmail(String email) {
             User user = userRepository.findByEmail(email);
             return user;
-        }
-        public void deleteUserByEmail(String Email){
-            userRepository.deleteByEmail(Email);
         }
         public void  deleteUserById(Long userid){
              userRepository.deleteById(userid);
@@ -34,15 +34,11 @@
                 return Collections.singletonList(userByName);
             }
 
-            // Recherche par nom ou e-mail partiel
             List<User> usersByNameOrEmail = userRepository.findByUsernameContainingOrEmailContaining(query, query);
             return usersByNameOrEmail;
         }
 
-        public User getUserById(Long id) {
-            User user = userRepository.getById(id);
-            return user;
+        public User findByUsername(String username) {
+            return userRepository.findByUsername(username);
         }
-
-
     }

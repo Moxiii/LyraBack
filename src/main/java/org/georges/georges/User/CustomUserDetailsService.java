@@ -23,7 +23,6 @@ public class CustomUserDetailsService implements UserDetailsService {
             throw new UsernameNotFoundException("User not found with username: " + username);
         }
 
-        // Créez et retournez une instance de UserDetails (par exemple, CustomUserDetails)
         return new CustomUserDetails(user.getEmail(), user.getPassword(),user);
     }
 }

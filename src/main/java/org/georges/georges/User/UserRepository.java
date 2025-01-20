@@ -7,19 +7,10 @@ import java.util.List;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
-
-
-    boolean existsByUsername(String pseudo);
-    void deleteByEmail(String Email );
-
-    boolean existsByEmail(String email);
-
-    List<User> findUserByUsername(String username);
-    List<User>findUserByEmail(String email);
-
     User findByUsername(String username);
-
+    boolean existsByUsername(String username);
     List<User> findByUsernameContainingOrEmailContaining(String username , String  email);
 
     User findByEmail(String email);
+
 }

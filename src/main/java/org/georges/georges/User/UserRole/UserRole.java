@@ -6,7 +6,6 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 import org.georges.georges.User.User;
-import org.springframework.data.annotation.Id;
 
 import java.util.List;
 @Getter
@@ -20,7 +19,6 @@ public class UserRole {
     private String role;
     @NotBlank(message = "Le champ description n'est pas renseigné")
     private String description;
-    @jakarta.persistence.Id
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -31,14 +29,4 @@ public class UserRole {
         this.id = id;
     }
     public UserRole(){}
-
-
-    public List<User> getUserList() {
-        return userList;
-    }
-
-    public void setUserList(List<User> userList) {
-        this.userList = userList;
-    }
-
 }
