@@ -40,7 +40,7 @@ public class LyraApplication {
     }
 
     @Bean
-    public CommandLineRunner defaultDataInitializer(CalendarRepository calendarRepository) {
+    public CommandLineRunner defaultDataInitializer() {
         return args -> {
             Date aujourdhui = new Date();
             SimpleDateFormat formatedDate = new SimpleDateFormat("dd-MM-yyyy");

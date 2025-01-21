@@ -8,6 +8,7 @@ import com.moxi.lyra.Calendar.Calendar;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.Period;
 import java.util.Set;
 
 @Getter
@@ -29,6 +30,8 @@ public class Event {
     private RecurrenceRule recurrenceRule;
     private Integer recurrenceInterval;
     private String recurrenceUnit;
+    private LocalDate recurrenceEndDate;
+    private Period recurrenceDuration;
     @JsonBackReference
     @ManyToOne
     @JoinColumn(name = "calendar_id")

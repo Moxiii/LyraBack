@@ -7,11 +7,9 @@ import com.moxi.lyra.Config.CustomAnnotation.RequireAuthorization;
 import com.moxi.lyra.Config.Utils.SecurityUtils;
 import com.moxi.lyra.DTO.CalendarRes;
 import com.moxi.lyra.User.User;
-import com.moxi.lyra.User.UserService;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.BeanUtils;
@@ -23,8 +21,6 @@ import java.util.*;
 @RequestMapping("/api/calendar")
 public class CalendarController {
     @Autowired
-    private UserService userService;
-    @Autowired
     private CalendarService calendarService;
     @Autowired
     private EventService eventService;
@@ -35,14 +31,12 @@ private String[] getNullPropertyNames(Object source) {
                .filter(pd-> src.getPropertyValue(pd.getName()) == null)
                .toArray(String[]::new);
    }
-private List<Event> generateRecurringEvents(Event event , Integer interval , RecurrenceRule rule , String unit){
+private List<Event> generateRecurringEvents(Event event , Integer interval , RecurrenceRule rule , String unit , LocalDate recurrenceEffectiveEndDate){
     if (rule == null) {
         throw new IllegalArgumentException("Recurrence rule must be provided");
     }
 
     if(rule == RecurrenceRule.Custom){
-        log.info("Integer interval is {} , ", interval );
-        log.info("Recurrence Interval: " + event.getRecurrenceInterval());
         if(interval == null || interval <= 0 ){
             throw new IllegalArgumentException("Recurrence recurrence interval must be greater than zero for Custom rule");
         }
@@ -71,7 +65,7 @@ private List<Event> generateRecurringEvents(Event event , Integer interval , Rec
         event.setRecurrenceInterval(null);
     }
 
-    return factory.generateRecurringEvents(event);
+    return factory.generateRecurringEvents(event , recurrenceEffectiveEndDate);
 }
     @GetMapping("/get")
     public ResponseEntity<?> getCalendar() {
@@ -87,7 +81,7 @@ private List<Event> generateRecurringEvents(Event event , Integer interval , Rec
     @GetMapping("/getByWeek")
     public ResponseEntity<?> getCalendarByWeek(@RequestBody LocalDate week) {
        LocalDate firstDay = week.with(DayOfWeek.MONDAY);
-       LocalDate lastDay = week.with(DayOfWeek.SUNDAY);
+       LocalDate lastDay = firstDay.plusDays(6);
        List<Event> events = eventService.findByStartDateBetween(firstDay, lastDay);
        CalendarRes calendarRes = new CalendarRes();
        calendarRes.setEventsList(events);
@@ -104,20 +98,6 @@ private List<Event> generateRecurringEvents(Event event , Integer interval , Rec
        return ResponseEntity.ok(calendarRes);
     }
 
-    @PostMapping("/add")
-    public ResponseEntity<?> addCalendar( ) {
-            User currentUser = SecurityUtils.getCurrentUser();
-            Calendar calendar = new Calendar();
-            currentUser.setCalendar(calendar);
-            calendar.setUser(currentUser);
-            CalendarRes calendarRes = new CalendarRes();
-            calendarRes.setUsername(currentUser.getUsername());
-            calendarRes.setId(calendar.getId());
-            userService.saveUser(currentUser);
-            calendarService.saveCalendar(calendar);
-        return ResponseEntity.status(HttpStatus.CREATED).body(calendarRes);
-    }
-
     //Gestion des tâches /événement journalier
     @GetMapping("/event/get")
     public ResponseEntity<?> getDailyEvent(  @RequestBody LocalDate day) {
@@ -129,32 +109,46 @@ private List<Event> generateRecurringEvents(Event event , Integer interval , Rec
             Event existingEvent = eventService.findById(eventID);
             return ResponseEntity.ok(existingEvent);
     }
-    @PostMapping("/event/add")
-    public ResponseEntity<?> addEvent(  @RequestBody List<Event> events) {
-            User currentUser = SecurityUtils.getCurrentUser();
-            List<Event> newEvents = new ArrayList<>();
-            Calendar calendar = calendarService.findByUser(currentUser);
-            for (Event event : events) {
-                event.setCalendar(calendar);
-                if (event.getStartHours() == null) {
-                    event.setStartHours(LocalTime.MIN);
-                }
-                if (event.getEndHours() == null) {
-                    event.setEndHours(LocalTime.MAX);
-                }
-                if(event.getRecurrenceRule() != null) {
-                    log.warn("Interval {} " , event.getRecurrenceRule() );
-                    List<Event> recurringEvents = generateRecurringEvents(event , event.getRecurrenceInterval() , event.getRecurrenceRule(),event.getRecurrenceUnit());
-                    newEvents.addAll(recurringEvents);
-                }else{
-                    newEvents.add(event);
-                }
-                calendar.getEvents().add(event);
+@PostMapping("/event/add")
+public ResponseEntity<?> addEvent(@RequestBody List<Event> events) {
+    User currentUser = SecurityUtils.getCurrentUser();
+    List<Event> newEvents = new ArrayList<>();
+    Calendar calendar = calendarService.findByUser(currentUser);
+    for (Event event : events) {
+        if (event.getEndDate() == null) {
+            event.setEndDate(event.getStartDate());
+        }
+        if (event.getStartHours() == null) {
+            event.setStartHours(LocalTime.MIN);
+        }
+        if (event.getEndHours() == null) {
+            event.setEndHours(LocalTime.MAX);
+        }
+        if (event.getRecurrenceRule() != null) {
+            if (event.getRecurrenceEndDate() != null && event.getRecurrenceDuration() != null) {
+                throw new IllegalArgumentException("Cannot provide both recurrenceEndDate and recurrenceDuration.");
             }
-            eventService.saveAllEvents(newEvents);
-            calendarService.saveCalendar(calendar);
-            return ResponseEntity.ok(newEvents);
+            LocalDate recurrenceEffectiveEndDate = event.getRecurrenceEndDate();
+            if (recurrenceEffectiveEndDate == null && event.getRecurrenceDuration() != null) {
+                recurrenceEffectiveEndDate = event.getStartDate().plus(event.getRecurrenceDuration());
+            }
+            if (recurrenceEffectiveEndDate == null) {
+                recurrenceEffectiveEndDate = event.getStartDate().plusMonths(6);
+            }
+            List<Event> recurringEvents = generateRecurringEvents(event, event.getRecurrenceInterval(),
+                    event.getRecurrenceRule(), event.getRecurrenceUnit(), recurrenceEffectiveEndDate);
+            newEvents.addAll(recurringEvents);
+        } else {
+            newEvents.add(event);
+        }
     }
+    calendar.getEvents().addAll(newEvents);
+    eventService.saveAllEvents(newEvents);
+    calendarService.saveCalendar(calendar);
+
+    return ResponseEntity.ok(newEvents);
+}
+
 
     @PutMapping("/event/update/{eventID}")
     public ResponseEntity<?> updateEvent(  @PathVariable long eventID , @RequestBody Event updatedEvents) {
@@ -169,7 +163,7 @@ private List<Event> generateRecurringEvents(Event event , Integer interval , Rec
             existingEvent.setCompleted(true);
         }
         if(updatedEvents.getRecurrenceRule() != null) {
-            List<Event> recurringEvents = generateRecurringEvents(updatedEvents,updatedEvents.getRecurrenceInterval(),updatedEvents.getRecurrenceRule(),updatedEvents.getRecurrenceUnit());
+            List<Event> recurringEvents = generateRecurringEvents(updatedEvents,updatedEvents.getRecurrenceInterval(),updatedEvents.getRecurrenceRule(),updatedEvents.getRecurrenceUnit() , updatedEvents.getRecurrenceEndDate());
             calendar.setEvents(recurringEvents);
         }
             calendarService.saveCalendar(calendar);
