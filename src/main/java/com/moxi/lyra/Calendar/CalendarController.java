@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.BeanUtils;
 import java.time.*;
+import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 @Slf4j
 @RequireAuthorization
@@ -83,19 +84,15 @@ private List<Event> generateRecurringEvents(Event event , Integer interval , Rec
        LocalDate firstDay = week.with(DayOfWeek.MONDAY);
        LocalDate lastDay = firstDay.plusDays(6);
        List<Event> events = eventService.findByStartDateBetween(firstDay, lastDay);
-       CalendarRes calendarRes = new CalendarRes();
-       calendarRes.setEventsList(events);
-       return ResponseEntity.ok(calendarRes);
+       return ResponseEntity.ok(events);
     }
     @GetMapping("/getByMonth")
     public ResponseEntity<?> getCalendarByMonth(@RequestBody LocalDate month) {
        LocalDate selectedMonth = month.withMonth(month.getMonthValue());
        LocalDate firstDay = selectedMonth.withDayOfMonth(1);
-       LocalDate lastDay = selectedMonth.withDayOfMonth(selectedMonth.getDayOfMonth());
+       LocalDate lastDay = selectedMonth.with(TemporalAdjusters.lastDayOfMonth());
        List<Event> events = eventService.findByStartDateBetween(firstDay, lastDay);
-       CalendarRes calendarRes = new CalendarRes();
-       calendarRes.setEventsList(events);
-       return ResponseEntity.ok(calendarRes);
+       return ResponseEntity.ok(events);
     }
 
     //Gestion des tâches /événement journalier
