@@ -12,8 +12,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -26,7 +28,13 @@ public class ContactController {
     private ContactService contactService;
     @Autowired
     private UserService userService;
-
+    private Contact contactFound(Long contactID){
+        Contact contact = contactService.findById(contactID);
+        if(contact == null){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+        return contact;
+    }
 
     @GetMapping("/")
     public ResponseEntity<?> getFriends() {
@@ -34,18 +42,20 @@ public class ContactController {
         List<Contact> contacts = contactService.findAllByUser(currentUser);
         List<ContactRes> contactResponses = contacts.stream().map(contact -> {
             ContactRes contactRes = new ContactRes();
-            contactRes.setId(contact.getId());;
-            contactRes.setContacts(List.of(contact.getUser().getUsername()));
+            contactRes.setId(contact.getId());
+            contactRes.setContacts(contact.getContact().getUsername());
+            contactRes.setStatus(contact.getStatus());
+            contactRes.setDateAdded(LocalDate.now());
             return contactRes;
         }).collect(Collectors.toList());
         return new ResponseEntity<>(contactResponses, HttpStatus.OK);
 }
     @GetMapping("/{id}")
     public ResponseEntity<?> getFriendsByID( @PathVariable Long id) {
-            Contact contact = contactService.findById(id);
+            Contact contact = contactFound(id);
             ContactRes contactRes = new ContactRes();
             contactRes.setId(contact.getId());
-            contactRes.setContacts(List.of(contact.getUser().getUsername()));
+            contactRes.setContacts(contact.getContact().getUsername());
             return ResponseEntity.status(HttpStatus.OK).body(contactRes);
     }
 
@@ -54,6 +64,7 @@ public class ContactController {
             User currentUser = SecurityUtils.getCurrentUser();
             User addFriend = userService.findByUsername(friendRequest.getUsername());
             Contact existingContact = contactService.findByUser(addFriend);
+            log.info("Result: {}", existingContact);
             if (existingContact != null) {
                 return ResponseEntity.status(HttpStatus.CONFLICT).body("Contact already exists");
             }
@@ -66,18 +77,44 @@ public class ContactController {
             return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("message :", "friend " + addFriend.getUsername() + " added successfully"));
     }
     @PutMapping("/update/{ID}")
-    public ResponseEntity<?> updateFriend( @PathVariable Long ID, @RequestBody String friendName) {
-        User currentUser = SecurityUtils.getCurrentUser();
-        User updateFriend = userService.findById(currentUser.getId());
-        Contact existingContact = contactService.findByUser(updateFriend);
-        if (existingContact != null) {
-            existingContact.setStatus(ContactStatus.PENDING);
-
-
+    public ResponseEntity<?> updateFriend( @PathVariable Long ID , @RequestBody Map<String ,String> request) {
+        Contact contact = contactFound(ID);
+        Contact existingContact = contactService.findByUserId(contact.getUser().getId());
+        log.info("User to find: {}", existingContact);
+        if (!request.containsKey("nickname")) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Missing 'nickname' in request");
         }
-        contactService.save(existingContact);
-        return ResponseEntity.status(HttpStatus.OK).body("Contact successfully updated");
+        String nickname = request.get("nickname");
+        if (existingContact != null) {
+            existingContact.setNickName(nickname);
+            contactService.save(existingContact);
+            return ResponseEntity.status(HttpStatus.OK).body("Contact successfully updated");
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Contact not found");
     }
+
+    @PutMapping("/accept/{ID}")
+    public ResponseEntity<?> acceptFriend( @PathVariable Long ID) {
+        Contact acceptedFriend = contactFound(ID);
+        acceptedFriend.setStatus(ContactStatus.ACCEPTED);
+        contactService.save(acceptedFriend);
+        return ResponseEntity.status(HttpStatus.OK).body("Contact Accepted");
+    }
+    @PutMapping("/block/{ID}")
+    public ResponseEntity<?> blockFriend( @PathVariable Long ID) {
+        Contact blockedFriend = contactFound(ID);
+        blockedFriend.setStatus(ContactStatus.BLOCKED);
+        contactService.save(blockedFriend);
+        return ResponseEntity.status(HttpStatus.OK).body("Contact Blocked");
+    }
+    @PutMapping("/mute/{ID}")
+    public ResponseEntity<?> muteFriend( @PathVariable Long ID) {
+        Contact mutedFriend = contactFound(ID);
+        mutedFriend.setStatus(ContactStatus.MUTED);
+        contactService.save(mutedFriend);
+        return ResponseEntity.status(HttpStatus.OK).body("Contact Muted");
+    }
+
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> deleteFriend( @PathVariable Long id) {
             Contact contact = contactService.findById(id);

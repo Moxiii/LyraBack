@@ -21,7 +21,12 @@ public Contact findById(Long id) {
     }
     return null;
 }
-
+public Contact findByUserId(Long userId) {
+    if (contactRepository.existsById(userId)) {
+        return contactRepository.findById(userId).get();
+    }
+    return null;
+}
 public Contact findByUser(User user) {
     return contactRepository.findByUser(user);
 }

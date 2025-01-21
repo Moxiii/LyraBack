@@ -18,8 +18,10 @@ public class Contact {
     @JoinColumn(name="user_id")
     private User user;
     @ManyToOne
-    @JoinColumn(name="contact_user_id")
+    @JoinColumn(name="contact_user_id" , nullable = false)
     private User contact;
+    @Enumerated(EnumType.STRING)
     private ContactStatus status;
     private LocalDate dateAdded;
+    private String nickName = "";
 }
