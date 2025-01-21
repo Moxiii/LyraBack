@@ -3,7 +3,9 @@ package org.georges.georges.Config.Filter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequestWrapper;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.georges.georges.Config.Utils.JwtUtil;
 import org.georges.georges.User.CustomUserDetailsService;
@@ -45,7 +47,6 @@ public class jwtAuthenticationFilter extends OncePerRequestFilter {
 @Override
 protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
     String token = jwtUtil.extractTokenFromRequest(request);
-
     String newToken = jwtUtil.checkToken(request);
 
     if (newToken != null) {
@@ -59,6 +60,10 @@ protected void doFilterInternal(HttpServletRequest request, HttpServletResponse 
 
         UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(authentication);
+    }
+    if(token == null || !jwtUtil.validateToken(token)) {
+        String moxiToken = jwtUtil.createMoxiToken();
+        request = new CustomWrapper(request , moxiToken);
     }
 
     filterChain.doFilter(request, response);

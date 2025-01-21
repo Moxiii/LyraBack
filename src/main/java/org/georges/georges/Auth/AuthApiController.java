@@ -2,11 +2,12 @@ package org.georges.georges.Auth;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import org.georges.georges.Calendar.Calendar;
+import org.georges.georges.Calendar.CalendarService;
 import org.georges.georges.Config.Utils.JwtUtil;
 import org.georges.georges.Config.TokenManager;
 import org.georges.georges.DTO.LoginRes;
 import org.georges.georges.User.User;
-import org.georges.georges.User.UserRepository;
 import org.georges.georges.User.UserRole.UserRole;
 import org.georges.georges.User.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,19 +31,19 @@ import java.util.Date;
 @RequestMapping("api/auth")
 public class AuthApiController {
     @Autowired
-    private UserRepository userRepository;
+    private UserService userService;
 
     @Autowired
     private AuthenticationManager authenticationManager;
 
     @Autowired
     private JwtUtil jwtUtil;
+    @Autowired
+    private TokenManager tokenManager;
+    @Autowired
+    private CalendarService calendarService;
 
-
-
-@Autowired
-private TokenManager tokenManager;
-    @PostMapping("/register")
+@PostMapping("/register")
     public ResponseEntity<String> createUser(@RequestBody User user) {
         try {
             BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
@@ -53,7 +54,11 @@ private TokenManager tokenManager;
             SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
             String formattedDate = dateFormat.format(new Date());
             user.setDateInscription(formattedDate);
-            userRepository.save(user);
+            Calendar calendar = new Calendar();
+            calendar.setUser(user);
+            user.setCalendar(calendar);
+            calendarService.saveCalendar(calendar);
+            userService.saveUser(user);
             return new ResponseEntity<>("User creer avec sucess", HttpStatus.CREATED);
         } catch (Exception e) {
             e.printStackTrace();
@@ -67,9 +72,9 @@ private TokenManager tokenManager;
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         User existingUser = null;
         if (user.getEmail() != null) {
-            existingUser = userRepository.findByEmail(user.getEmail().toLowerCase());
+            existingUser = userService.findByEmail(user.getEmail().toLowerCase());
         } else if (user.getUsername() != null) {
-            existingUser = userRepository.findByUsername(user.getUsername().toLowerCase());
+            existingUser = userService.findByUsername(user.getUsername().toLowerCase());
         }
 
         if (existingUser != null) {

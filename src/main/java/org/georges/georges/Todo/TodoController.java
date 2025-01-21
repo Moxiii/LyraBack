@@ -1,17 +1,14 @@
 package org.georges.georges.Todo;
 
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
-import lombok.extern.slf4j.Slf4j;
 import org.georges.georges.Config.CustomAnnotation.RequireAuthorization;
-import org.georges.georges.Config.Utils.JwtUtil;
 import org.georges.georges.Config.Utils.SecurityUtils;
 import org.georges.georges.DTO.TodoRes;
 import org.georges.georges.Todo.Tasks.Task;
 import org.georges.georges.Todo.Tasks.TaskRepository;
 import org.georges.georges.User.User;
-import org.georges.georges.User.UserRepository;
+import org.georges.georges.User.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,7 +28,7 @@ public class TodoController {
     @Autowired
     private TodoRepository todoRepository;
     @Autowired
-    private UserRepository userRepository;
+    private UserService userService;
 
 @Autowired
 private TaskRepository taskRepository;
@@ -91,7 +88,7 @@ private TaskRepository taskRepository;
                 long todoID = currentUser.getTodos().size() + System.currentTimeMillis();
                 todo.setId(Long.parseLong(currentUser.getId()+""+todoID));
                 currentUser.getTodos().add(todo);
-                userRepository.save(currentUser);
+                userService.saveUser(currentUser);
                 TodoRes todoRes = new TodoRes();
                 todoRes.setId(todo.getId());
                 todoRes.setTitle(todo.getTitle());

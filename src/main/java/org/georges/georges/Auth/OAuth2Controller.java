@@ -10,7 +10,6 @@ import org.georges.georges.DTO.LoginRes;
 import org.georges.georges.DTO.TokenRequest;
 import org.georges.georges.User.Provider;
 import org.georges.georges.User.User;
-import org.georges.georges.User.UserRepository;
 import org.georges.georges.User.UserRole.UserRole;
 import org.georges.georges.User.UserRole.UserRoleRepository;
 import org.georges.georges.User.UserService;
@@ -34,8 +33,6 @@ import java.util.Date;
 public class OAuth2Controller {
     @Autowired
     private UserService userService;
-    @Autowired
-    private UserRepository userRepository;
     @Autowired
     private JwtUtil jwtUtil;
     @Value("${spring.security.oauth2.client.registration.google.client-id}")
@@ -72,7 +69,7 @@ public class OAuth2Controller {
                     newUser.setProvider(Provider.GOOGLE);
                     newUser.setDateInscription(dateString);
                     newUser.setUserRole(userRole);
-                    userRepository.save(newUser);
+                    userService.saveUser(newUser);
                     String jwtToken = jwtUtil.createAccessToken(newUser);
                     return ResponseEntity.ok(new LoginRes(newUser.getUsername(), jwtToken));
                 } else {

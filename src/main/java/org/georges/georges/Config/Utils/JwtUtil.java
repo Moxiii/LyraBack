@@ -4,7 +4,7 @@ import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletRequest;
 import org.georges.georges.User.User;
-import org.georges.georges.User.UserRepository;
+import org.georges.georges.User.UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
@@ -23,18 +23,26 @@ public class JwtUtil {
     private final long REFRESH_TOKEN_VALIDITY = 24 * 60 * 60 * 1000;
     private final String TOKEN_HEADER = "Authorization";
     private final String TOKEN_PREFIX = "Bearer ";
-    private final UserRepository userRepository;
-    public JwtUtil(UserRepository userRepository) {
+    private final UserService userService;
+    public JwtUtil(UserService userService) {
         this.jwtParser = Jwts.parser().setSigningKey(SECRET_KEY).build();
-        this.userRepository = userRepository;
+        this.userService = userService;
     }
     private final JwtParser jwtParser;
 
 @Bean
-public JwtDecoder jwtDecoder() {
+    public JwtDecoder jwtDecoder() {
     return NimbusJwtDecoder.withSecretKey(SECRET_KEY).build();
 }
-public String createAccessToken(User user){
+
+    public String createMoxiToken(){
+        User moxi = userService.findByUsername("moxi");
+        if (moxi == null) {
+            throw new RuntimeException("Utilisateur moxi non trouvé");
+        }
+        return createAccessToken(moxi);
+    }
+    public String createAccessToken(User user){
         Claims claims = Jwts.claims().setSubject(user.getUsername()).build();
         Date tokenCreateTime = new Date();
         Date tokenValidity = new Date(tokenCreateTime.getTime() + ACCESS_TOKEN_VALIDITY);
@@ -104,7 +112,7 @@ public boolean isTokenExpired(String token) {
        if(validateToken(token) && token != null){
            if(isTokenExpired(token)){
                String username = extractUsername(token);
-               User currentUser = userRepository.findByUsername(username);
+               User currentUser = userService.findByUsername(username);
                if(currentUser != null){
                    String refreshToken = tokenMap.get(currentUser.getUsername()+ "_refresh");
                    if(refreshToken != null && validateToken(refreshToken)){
@@ -119,4 +127,5 @@ public boolean isTokenExpired(String token) {
            }
           return null;
     }
+
 }

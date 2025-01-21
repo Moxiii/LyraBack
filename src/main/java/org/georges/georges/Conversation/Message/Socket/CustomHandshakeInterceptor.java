@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.georges.georges.Config.Utils.JwtUtil;
 import org.georges.georges.Conversation.Message.MessageQueueService;
 import org.georges.georges.User.UserRepository;
+import org.georges.georges.User.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
@@ -18,13 +19,13 @@ public class CustomHandshakeInterceptor implements HandshakeInterceptor {
     @Autowired
     private JwtUtil jwtUtil;
     @Autowired
-    private UserRepository userRepository;
+    private UserService userService;
     @Autowired
     private MessageQueueService queue;
 
     @Override
     public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler, Map<String, Object> attributes) throws Exception {
-        return false;
+        return true;
     }
 
     @Override

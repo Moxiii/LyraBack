@@ -20,6 +20,6 @@ public class Contact {
     @ManyToOne
     @JoinColumn(name="contact_user_id")
     private User contact;
-    private String status;
+    private ContactStatus status;
     private LocalDate dateAdded;
 }

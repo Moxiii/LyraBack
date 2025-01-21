@@ -8,6 +8,7 @@ import org.georges.georges.DTO.ProjectRes;
 import org.georges.georges.DTO.UpdateProjectDTO;
 import org.georges.georges.User.User;
 import org.georges.georges.User.UserRepository;
+import org.georges.georges.User.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +27,7 @@ public class ProjetsController {
     @Autowired
     private ProjetsRepository projetsRepository;
     @Autowired
-    private UserRepository userRepository;
+    private UserService userService;
 
     private ProjectRes toRes(Projets projets){
         ProjectRes pr = new ProjectRes();
@@ -63,7 +64,7 @@ public class ProjetsController {
             projet.setLinks(createProject.getLinks() != null ? createProject.getLinks() : new ArrayList<>());
             List<User> users = new ArrayList<>();
             for (String username :createProject.getUsername()){
-                User user = userRepository.findByUsername(username);
+                User user = userService.findByUsername(username);
                 users.add(user);
             }
             if(!users.contains(currentUser)){
@@ -101,7 +102,7 @@ public class ProjetsController {
                 if(updateProject.getUsername() != null && !updateProject.getUsername().isEmpty() ){
                     List<User> users = new ArrayList<>();
                     for(String usernames : updateProject.getUsername()){
-                        User user = userRepository.findByUsername(usernames);
+                        User user = userService.findByUsername(usernames);
                         users.add(user);
                     }
                 projet.setUsers(users);

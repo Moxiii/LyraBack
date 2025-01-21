@@ -4,7 +4,6 @@ import org.georges.georges.Config.CustomAnnotation.RequireAuthorization;
 import org.georges.georges.Config.Utils.SecurityUtils;
 import org.georges.georges.DTO.UserProfileRes;
 import org.georges.georges.User.User;
-import org.georges.georges.User.UserRepository;
 import org.georges.georges.User.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,8 +20,7 @@ public class UserApiController {
 
     @Autowired
     private UserService userService;
-    @Autowired
-    private UserRepository userRepository;
+
 
 
 @PutMapping("/update/")
@@ -33,14 +31,14 @@ public class UserApiController {
         currentUser.setPassword(userToUpdate.getPassword());
         currentUser.setProfilePicture(userToUpdate.getProfilePicture());
         currentUser.setUsername(userToUpdate.getUsername());
-        userRepository.save(currentUser);
+        userService.saveUser(currentUser);
         return new ResponseEntity<>("User mis à jour avec succès", HttpStatus.OK);
 }
 @DeleteMapping("/delete")
     public ResponseEntity<String> deleteUser( ) {
         User currentUser = SecurityUtils.getCurrentUser();
         try {
-            userService.deleteUserById(currentUser.getId());
+            userService.deleteUser(currentUser);
             return new ResponseEntity<>("User supprimé avec succès", HttpStatus.OK);
         } catch (Exception e) {
             e.printStackTrace();
@@ -68,7 +66,7 @@ public class UserApiController {
             try{
                 byte[] imageBytes = file.getBytes();
                 currentUser.setProfilePicture(imageBytes);
-                userRepository.save(currentUser);
+                userService.saveUser(currentUser);
                 UserProfileRes userProfileRes = new UserProfileRes();
                 userProfileRes.setProfileImage(currentUser.getProfilePicture());
                 userProfileRes.setUsername(currentUser.getUsername());

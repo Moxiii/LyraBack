@@ -1,4 +1,4 @@
-package org.georges.georges.Calendar.event;
+package org.georges.georges.Calendar.Event;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;

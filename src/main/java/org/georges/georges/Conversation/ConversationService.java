@@ -1,7 +1,7 @@
 package org.georges.georges.Conversation;
 
-import org.georges.georges.Conversation.Message.MessageRepository;
-import org.georges.georges.User.UserRepository;
+import org.georges.georges.Conversation.Message.MessageService;
+import org.georges.georges.User.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -10,9 +10,9 @@ public class ConversationService {
 @Autowired
 private  ConversationRepository conversationRepository;
 @Autowired
-private  UserRepository userRepository;
+private UserService userService;
 @Autowired
-private  MessageRepository messageRepository;
+private MessageService messageService;
 
 
 

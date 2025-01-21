@@ -2,7 +2,7 @@ package org.georges.georges.DTO;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.georges.georges.Calendar.event.Event;
+import org.georges.georges.Calendar.Event.Event;
 
 import java.util.List;
 

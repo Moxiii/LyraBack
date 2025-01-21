@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.georges.georges.DTO.MessageDTO;
 import org.georges.georges.User.User;
 import org.georges.georges.User.UserRepository;
+import org.georges.georges.User.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -24,7 +25,7 @@ public class MessageController {
     @Autowired
     private SimpMessageSendingOperations messagingTemplate;
     @Autowired
-    private UserRepository userRepository;
+    private UserService userService;
 
     @MessageMapping("/queue_name")
     public void setSession(@Payload Map<String, String> clientData) {
@@ -35,8 +36,8 @@ public class MessageController {
     @MessageMapping("/chat/{queueID}")
     public void handleMessage(@DestinationVariable String queueID, @Payload MessageDTO messageDTO) {
         try {
-            User sender = userRepository.findByUsername(messageDTO.getSender());
-            User receiver = userRepository.findByUsername(messageDTO.getReceiver());
+            User sender = userService.findByUsername(messageDTO.getSender());
+            User receiver = userService.findByUsername(messageDTO.getReceiver());
             Message message = new Message(sender ,receiver , messageDTO.getContent());
             log.info("Message reçu sur la queue '{}'", queueID);
             log.info("Contenu du message: {}", message.getContent());

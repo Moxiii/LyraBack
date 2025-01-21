@@ -3,7 +3,7 @@ package org.georges.georges.Calendar;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import org.georges.georges.Calendar.event.Event;
+import org.georges.georges.Calendar.Event.Event;
 import org.georges.georges.User.User;
 
 import java.util.List;
