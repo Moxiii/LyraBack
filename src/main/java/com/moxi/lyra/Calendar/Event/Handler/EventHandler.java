@@ -8,6 +8,7 @@ import com.moxi.lyra.Calendar.Event.Recurrence.RecurrenceFactory;
 import com.moxi.lyra.Calendar.Event.Recurrence.RecurrenceRule;
 import com.moxi.lyra.Calendar.Event.Tags.Tags;
 import com.moxi.lyra.Calendar.Event.Tags.TagsUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
@@ -17,10 +18,9 @@ import org.springframework.stereotype.Component;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
+
+@Slf4j
 @Component
 public class EventHandler {
 @Autowired
@@ -57,8 +57,10 @@ public void updateCalendarAndSaveEvents(Calendar calendar, List<Event> eventList
 
 }
 private String determinateTag(Event event, Calendar calendar) {
+	HashSet set = new HashSet();
 	if (Boolean.TRUE.equals(event.isForcePersonalTag())) {
-		event.setTags(Collections.singleton(Tags.PERSONAL.toString()));
+		set.add(Tags.PERSONAL.toString());
+		event.setTags(set);
 	}
 	if (event.getTags() != null && !event.getTags().isEmpty()) {
 		String existingTag = event.getTags().iterator().next();
@@ -67,7 +69,8 @@ private String determinateTag(Event event, Calendar calendar) {
 		}
 	}
 	if (calendar.getWorkStartTime() == null || calendar.getWorkEndTime() == null) {
-		return Tags.PERSONAL.toString();
+		set.add((Tags.PERSONAL.toString()));
+		event.setTags(set);
 	}
 	List<DayOfWeek> workDays = calendar.getWorkDays();
 	boolean hashworkDays = workDays != null && !workDays.isEmpty();
@@ -137,7 +140,11 @@ private void handleDefaultDates(Event event) {
 }
 
 private void handleEventTags(Event event, Calendar calendar) {
-	determinateTag(event, calendar);
+	String determinedTag = determinateTag(event, calendar);
+
+	if(event.getTags() == null && event.getTags().isEmpty()) {
+		event.setTags(Collections.singleton(determinedTag));
+	}
 	if (event.getTags() != null && !event.getTags().isEmpty()) {
 		String currentTag = event.getTags().iterator().next();
 		if (TagsUtils.isCustomTag(currentTag)) {
