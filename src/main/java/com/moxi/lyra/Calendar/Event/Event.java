@@ -1,6 +1,7 @@
 package com.moxi.lyra.Calendar.Event;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.moxi.lyra.Calendar.Event.Recurrence.RecurrenceRule;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -32,10 +33,10 @@ public class Event {
     private String recurrenceUnit;
     private LocalDate recurrenceEndDate;
     private Period recurrenceDuration;
+	private boolean forcePersonalTag;
     @JsonBackReference
     @ManyToOne
     @JoinColumn(name = "calendar_id")
     private Calendar calendar;
-
 
 }

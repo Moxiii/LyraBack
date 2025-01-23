@@ -1,5 +1,6 @@
-package com.moxi.lyra.Calendar.Event;
+package com.moxi.lyra.Calendar.Event.Recurrence;
 
+import com.moxi.lyra.Calendar.Event.Event;
 import org.springframework.beans.BeanUtils;
 
 import java.time.LocalDate;
@@ -7,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RecurrenceFactory {
-public List<Event> generateRecurringEvents(Event event ,LocalDate recurrenceEffectiveEndDate) {
+public List<Event> generateRecurringEvents(Event event , LocalDate recurrenceEffectiveEndDate) {
     List<Event> recurringEvents = new ArrayList<>();
     LocalDate currentDate = event.getStartDate();
 
@@ -53,7 +54,6 @@ public List<Event> generateRecurringEvents(Event event ,LocalDate recurrenceEffe
 
     return recurringEvents;
 }
-
 
 private Event createRecurringEvent(Event originalEvent, LocalDate startDate) {
         Event recurringEvent = new Event();

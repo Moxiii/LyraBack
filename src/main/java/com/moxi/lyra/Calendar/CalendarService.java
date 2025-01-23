@@ -3,7 +3,6 @@ package com.moxi.lyra.Calendar;
 
 import com.moxi.lyra.Calendar.Event.EventService;
 import com.moxi.lyra.User.User;
-import com.moxi.lyra.User.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -11,8 +10,7 @@ import org.springframework.stereotype.Service;
 public class CalendarService {
     @Autowired
     private CalendarRepository calendarRepository;
-    @Autowired
-    private UserService userService;
+
     @Autowired
     private EventService eventService;
     public Calendar findByUser(User user) {
