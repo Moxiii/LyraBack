@@ -19,11 +19,13 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.firewall.StrictHttpFirewall;
+import org.springframework.web.client.RestTemplate;
 
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
 
     @Autowired
     private CustomUserDetailsService customUserDetailsService;
@@ -31,6 +33,10 @@ public class SecurityConfig {
     @Autowired
     private JwtUtil jwtUtil;
 
+@Bean
+public RestTemplate restTemplate() {
+    return new RestTemplate();
+}
     @Bean
     public AuthenticationManager authManager(HttpSecurity http) throws Exception {
         AuthenticationManagerBuilder authenticationManagerBuilder = http.getSharedObject(AuthenticationManagerBuilder.class);
