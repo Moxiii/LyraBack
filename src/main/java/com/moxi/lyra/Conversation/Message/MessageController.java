@@ -50,7 +50,7 @@ public void handleMessage(@DestinationVariable String queueID, @Payload MessageD
         log.info("Expéditeur: {}", message.getSender().getUsername());
         log.info("Destinataire: {}", message.getReceiver().getUsername());
 
-        messagingTemplate.convertAndSend("/user/"+receiverDTO.getUsername()+"/queue/message/" + sanitizedQueueID, messageDTO);
+        messagingTemplate.convertAndSend("/user/"+receiverDTO.getUsername()+"/queue/messages/" + sanitizedQueueID, messageDTO);
 
     } catch (Exception e) {
         log.error("Erreur de désérialisation du message: ", e);
