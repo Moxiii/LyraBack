@@ -1,5 +1,10 @@
 package com.moxi.lyra;
 
+import com.moxi.lyra.Contact.Contact;
+import com.moxi.lyra.Contact.ContactRepository;
+import com.moxi.lyra.Contact.ContactStatus;
+import com.moxi.lyra.Conversation.Conversation;
+import com.moxi.lyra.Conversation.ConversationRepository;
 import lombok.extern.slf4j.Slf4j;
 import com.moxi.lyra.Calendar.Calendar;
 import com.moxi.lyra.Calendar.CalendarRepository;
@@ -17,6 +22,7 @@ import com.moxi.lyra.User.UserRepository;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -32,12 +38,16 @@ public class LyraApplication {
     private final UserRepository userRepository;
     private final UserRoleRepository userRoleRepository;
     private final ProjetsRepository projetsRepository;
+    private final ContactRepository contactRepository;
+    private final ConversationRepository conversationRepository;
 
-    public LyraApplication(UserRepository userRepository, UserRoleRepository userRoleRepository,ProjetsRepository projetsRepository) {
-        this.userRepository = userRepository;
-        this.userRoleRepository = userRoleRepository;
-        this.projetsRepository = projetsRepository;
-    }
+public LyraApplication(UserRepository userRepository, UserRoleRepository userRoleRepository, ProjetsRepository projetsRepository, ContactRepository contactRepository, ConversationRepository conversationRepository) {
+    this.userRepository = userRepository;
+    this.userRoleRepository = userRoleRepository;
+    this.projetsRepository = projetsRepository;
+    this.contactRepository = contactRepository;
+    this.conversationRepository = conversationRepository;
+}
 
     @Bean
     public CommandLineRunner defaultDataInitializer() {
@@ -76,6 +86,24 @@ public class LyraApplication {
                 Projets wive = new Projets("wive" , "Un super projet de fou" ,links  , users );
                 wive.setId(moxi.getId()+System.currentTimeMillis());
                 projetsRepository.save(wive);
+            }
+            if(contactRepository.count()==0){
+                User moxi = userRepository.findByUsername("moxi");
+                User test = userRepository.findByUsername("test");
+                Contact moxiContact = new Contact();
+                Contact testContact = new Contact();
+                moxiContact.setUser(moxi);
+                moxiContact.setContact(test);
+                moxiContact.setStatus(ContactStatus.ACCEPTED);
+                moxiContact.setDateAdded(LocalDate.now());
+                testContact.setUser(test);
+                testContact.setContact(moxi);
+                testContact.setStatus(ContactStatus.ACCEPTED);
+                testContact.setDateAdded(LocalDate.now());
+                Conversation conversation = new Conversation();
+                conversation.getParticipants().add(moxi);
+                conversation.getParticipants().add(test);
+                conversationRepository.save(conversation);
             }
 
         };

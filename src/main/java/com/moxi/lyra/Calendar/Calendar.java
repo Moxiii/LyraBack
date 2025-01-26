@@ -1,5 +1,7 @@
 package com.moxi.lyra.Calendar;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -22,6 +24,7 @@ public class Calendar {
     private Long id;
     @OneToOne
     @JoinColumn(name="user_id" , insertable=true, updatable=true)
+    @JsonBackReference
     private User user;
     @OneToMany(mappedBy = "calendar" , cascade = CascadeType.ALL , orphanRemoval = true)
     private List<Event> events;

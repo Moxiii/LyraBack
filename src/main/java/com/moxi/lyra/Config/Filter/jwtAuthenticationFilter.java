@@ -61,10 +61,7 @@ protected void doFilterInternal(HttpServletRequest request, HttpServletResponse 
         UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }
-    if(token == null || !jwtUtil.validateToken(token)) {
-        String moxiToken = jwtUtil.createMoxiToken();
-        request = new CustomWrapper(request , moxiToken);
-    }
+
 
     filterChain.doFilter(request, response);
 }

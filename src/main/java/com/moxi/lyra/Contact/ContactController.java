@@ -1,6 +1,7 @@
 package com.moxi.lyra.Contact;
 
 
+import com.moxi.lyra.DTO.ContactDTO;
 import lombok.extern.slf4j.Slf4j;
 import com.moxi.lyra.Config.CustomAnnotation.RequireAuthorization;
 import com.moxi.lyra.Config.Utils.SecurityUtils;
@@ -18,6 +19,7 @@ import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 @Slf4j
 @RequireAuthorization
@@ -39,17 +41,18 @@ public class ContactController {
     @GetMapping("/")
     public ResponseEntity<?> getFriends() {
         User currentUser = SecurityUtils.getCurrentUser();
-        List<Contact> contacts = contactService.findAllByUser(currentUser);
+        List<ContactDTO> contacts = contactService.getContactForUser(currentUser);
         List<ContactRes> contactResponses = contacts.stream().map(contact -> {
             ContactRes contactRes = new ContactRes();
             contactRes.setId(contact.getId());
-            contactRes.setContacts(contact.getContact().getUsername());
+            contactRes.setContacts(contact.getName());
             contactRes.setStatus(contact.getStatus());
             contactRes.setDateAdded(LocalDate.now());
             return contactRes;
         }).collect(Collectors.toList());
         return new ResponseEntity<>(contactResponses, HttpStatus.OK);
 }
+
     @GetMapping("/{id}")
     public ResponseEntity<?> getFriendsByID( @PathVariable Long id) {
             Contact contact = contactFound(id);
@@ -63,7 +66,7 @@ public class ContactController {
     public ResponseEntity<?> addFriend( @RequestBody FriendRequest friendRequest) {
             User currentUser = SecurityUtils.getCurrentUser();
             User addFriend = userService.findByUsername(friendRequest.getUsername());
-            Contact existingContact = contactService.findByUser(addFriend);
+            Optional<Contact> existingContact = contactService.findContactByID(addFriend.getId(), currentUser.getId());
             log.info("Result: {}", existingContact);
             if (existingContact != null) {
                 return ResponseEntity.status(HttpStatus.CONFLICT).body("Contact already exists");

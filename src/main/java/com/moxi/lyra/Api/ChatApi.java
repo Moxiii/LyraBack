@@ -3,6 +3,7 @@ package com.moxi.lyra.Api;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.moxi.lyra.Config.CustomAnnotation.RequireAuthorization;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -10,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
-
+@RequireAuthorization
 @RequestMapping("/api/chat")
 @RestController
 public class ChatApi {
@@ -38,7 +39,7 @@ public ResponseEntity<String> getChat(@RequestBody String jsonMessage) {
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		HttpEntity<String> entity = new HttpEntity<>(jsonBody, headers);
 		ResponseEntity<String> response = restTemplate.exchange(
-				BASE_URL,
+				BASE_URL+"generate",
 				HttpMethod.POST,
 				entity,
 				String.class
@@ -47,6 +48,22 @@ public ResponseEntity<String> getChat(@RequestBody String jsonMessage) {
 	}
 	catch(Exception e){
 		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error getting api : "+ e.getMessage());
+	}
+
+}
+@PostMapping("/pull/model")
+public ResponseEntity<String> pullModel(@RequestBody String model) {
+	try {
+		ObjectNode jsonRequest = objectMapper.createObjectNode();
+		jsonRequest.put("name", model);
+		String jsonBody = objectMapper.writeValueAsString(jsonRequest);
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		HttpEntity<String> entity = new HttpEntity<>(jsonBody, headers);
+		ResponseEntity<String> response = restTemplate.postForEntity(BASE_URL+"pull", entity, String.class);
+		return ResponseEntity.ok(response.getBody());
+	} catch (Exception e) {
+		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error pulling model : "+ e.getMessage());
 	}
 }
 }
