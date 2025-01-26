@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -14,6 +16,6 @@ private String name;
 private String nickname ="";
 private ContactStatus status;
 private LocalDate dateAdded;
-private Long ConversationID;
+private List<Long> ConversationIDs = new ArrayList<>();
 }
 

@@ -49,7 +49,7 @@ public LyraApplication(UserRepository userRepository, UserRoleRepository userRol
     this.conversationRepository = conversationRepository;
 }
 
-    @Bean
+@Bean
     public CommandLineRunner defaultDataInitializer() {
         return args -> {
             Date aujourdhui = new Date();
@@ -104,6 +104,8 @@ public LyraApplication(UserRepository userRepository, UserRoleRepository userRol
                 conversation.getParticipants().add(moxi);
                 conversation.getParticipants().add(test);
                 conversationRepository.save(conversation);
+                contactRepository.save(testContact);
+                contactRepository.save(moxiContact);
             }
 
         };

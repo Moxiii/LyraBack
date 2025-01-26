@@ -3,7 +3,6 @@ package com.moxi.lyra.Conversation.Message.Socket;
 import lombok.extern.slf4j.Slf4j;
 import com.moxi.lyra.Config.Utils.JwtUtil;
 import com.moxi.lyra.Conversation.Message.MessageQueueService;
-import com.moxi.lyra.User.UserRepository;
 import com.moxi.lyra.User.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.server.ServerHttpRequest;

@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -41,11 +40,11 @@ public class ContactController {
     @GetMapping("/")
     public ResponseEntity<?> getFriends() {
         User currentUser = SecurityUtils.getCurrentUser();
-        List<ContactDTO> contacts = contactService.getContactForUser(currentUser);
+        List<Contact> contacts = contactService.findAllByUser(currentUser);
         List<ContactRes> contactResponses = contacts.stream().map(contact -> {
             ContactRes contactRes = new ContactRes();
             contactRes.setId(contact.getId());
-            contactRes.setContacts(contact.getName());
+            contactRes.setContacts(contact.getContact().getUsername());
             contactRes.setStatus(contact.getStatus());
             contactRes.setDateAdded(LocalDate.now());
             return contactRes;
@@ -68,7 +67,7 @@ public class ContactController {
             User addFriend = userService.findByUsername(friendRequest.getUsername());
             Optional<Contact> existingContact = contactService.findContactByID(addFriend.getId(), currentUser.getId());
             log.info("Result: {}", existingContact);
-            if (existingContact != null) {
+            if (existingContact.isPresent()) {
                 return ResponseEntity.status(HttpStatus.CONFLICT).body("Contact already exists");
             }
             Contact contact = new Contact();

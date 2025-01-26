@@ -7,7 +7,6 @@ import com.moxi.lyra.DTO.CreateProjectDTO;
 import com.moxi.lyra.DTO.ProjectRes;
 import com.moxi.lyra.DTO.UpdateProjectDTO;
 import com.moxi.lyra.User.User;
-import com.moxi.lyra.User.UserRepository;
 import com.moxi.lyra.User.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -113,7 +112,7 @@ public class ProjetsController {
             }
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Not your Project !");
         }
-    @PostMapping("/upload/project/picture/{id}")
+    @PostMapping("/project/upload/picture/{id}")
     public ResponseEntity<?> uploadProjectPic(
             @RequestParam("file") MultipartFile file,
             @PathVariable long id) {

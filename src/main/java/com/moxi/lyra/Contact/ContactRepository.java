@@ -13,8 +13,8 @@ import java.util.Optional;
 @Repository
 public interface ContactRepository extends JpaRepository<Contact, Long > {
 
-    @Query("SELECT c FROM Contact c WHERE c.contact.id = :contactUserID AND c.user.id =:userID")
-    Optional<Contact> findContactById(@Param("contactUserID")Long contactUserId , @Param("userID") Long userID);
+@Query("SELECT c FROM Contact c WHERE (c.user.id = :userID AND c.contact.id = :contactUserID) OR (c.user.id = :contactUserID AND c.contact.id = :userID)")
+Optional<Contact> findContactBetweenUsers(@Param("userID") Long userID, @Param("contactUserID") Long contactUserID);
 
 
     List<Contact> findAllByUser(User user);

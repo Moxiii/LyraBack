@@ -6,21 +6,18 @@ import com.moxi.lyra.DTO.ConversationDTO;
 import com.moxi.lyra.User.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @RequireAuthorization
-@RestController("/user/conversation")
+@RestController
+@RequestMapping("/api/conversation")
 public class ConversationController {
 @Autowired
 private ConversationService conversationService;
-@GetMapping("/")
+@GetMapping("/get")
 public ResponseEntity<?> getConversation() {
 	User currentUser = SecurityUtils.getCurrentUser();
 	List<Conversation> conversations = conversationService.findByUser(currentUser);

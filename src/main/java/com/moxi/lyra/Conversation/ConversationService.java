@@ -19,6 +19,6 @@ private MessageService messageService;
 
 
     public List<Conversation> findByUser(User user) {
-        return (List<Conversation>) conversationRepository.findByParticipantsContaining(user);
+        return conversationRepository.findByParticipantsContaining(user);
     }
     }

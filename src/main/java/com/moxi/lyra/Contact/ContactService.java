@@ -4,7 +4,6 @@ import com.moxi.lyra.Conversation.Conversation;
 import com.moxi.lyra.Conversation.ConversationRepository;
 import com.moxi.lyra.DTO.ContactDTO;
 import com.moxi.lyra.User.User;
-import com.moxi.lyra.User.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,8 +15,7 @@ import java.util.stream.Collectors;
 public class ContactService {
     @Autowired
     private ContactRepository contactRepository;
-@Autowired
-private UserRepository userRepository;
+
 @Autowired
 private ConversationRepository conversationRepository;
 
@@ -32,10 +30,12 @@ public List<ContactDTO> getContactForUser(User user) {
         contactDTO.setName(user.getUsername());
         contactDTO.setStatus(contact.getStatus());
         contactDTO.setDateAdded(contact.getDateAdded());
-        Conversation conversation = conversationRepository.findByParticipantsContaining(contact.getUser());
-        if(conversation !=null){
-        contactDTO.setConversationID(conversation.getId());
-        }
+        List<Conversation> conversation =  conversationRepository.findByParticipantsContaining(contact.getUser());
+      List<Long> conversationIds = conversation
+              .stream()
+              .map(Conversation::getId)
+              .collect(Collectors.toList());
+      contactDTO.setConversationIDs(conversationIds);
         return contactDTO;
     }).collect(Collectors.toList());
 
@@ -53,7 +53,7 @@ public Contact findByUserId(Long userId) {
     return null;
 }
 public Optional<Contact> findContactByID(Long contactUserID , Long userID ) {
-    return contactRepository.findContactById(contactUserID,userID);
+    return contactRepository.findContactBetweenUsers(contactUserID,userID);
 }
 public void save(Contact contact) {
     contactRepository.save(contact);

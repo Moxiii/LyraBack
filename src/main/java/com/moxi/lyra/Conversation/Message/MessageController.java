@@ -3,8 +3,6 @@ package com.moxi.lyra.Conversation.Message;
 import com.moxi.lyra.DTO.UserDTO;
 import lombok.extern.slf4j.Slf4j;
 import com.moxi.lyra.DTO.MessageDTO;
-import com.moxi.lyra.User.User;
-import com.moxi.lyra.User.UserRepository;
 import com.moxi.lyra.User.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
