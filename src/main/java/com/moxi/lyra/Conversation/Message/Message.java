@@ -20,15 +20,10 @@ public class Message {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private String content;
-
     @ManyToOne
     @JoinColumn(name = "sender_id")
     private User sender;
-    @ManyToOne
-    @JoinColumn(name = "receiver_id")
-    private User receiver;
 
     @ManyToOne
     @JoinColumn(name = "conversation_id")
@@ -38,19 +33,11 @@ public class Message {
     @JsonFormat(pattern = "dd-MM-YYYY HH:mm:ss", timezone = "UTC")
     private Date timestamp;
 
-    public Message(User sender, User receiver, String content) {
+    public Message(User sender, String content , Conversation conversation) {
         this.sender = sender;
-        this.receiver = receiver;
         this.content = content;
+        this.conversation = conversation;
+        this.timestamp = new Date();
     }
 
-    @Override
-    public String toString() {
-        return "Message{" +
-                "sender='" + sender + '\'' +
-                ", receiver='" + receiver + '\'' +
-                ", content='" + content + '\'' +
-                ", timestamp=" + timestamp +
-                '}';
-    }
 }

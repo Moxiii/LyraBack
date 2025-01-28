@@ -7,18 +7,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class ConversationService {
 @Autowired
-private  ConversationRepository conversationRepository;
+private ConversationRepository conversationRepository;
 @Autowired
 private UserService userService;
 @Autowired
 private MessageService messageService;
 
 
-    public List<Conversation> findByUser(User user) {
-        return conversationRepository.findByParticipantsContaining(user);
-    }
-    }
+public List<Conversation> findByUser(User user) {
+    return conversationRepository.findByUser(user);
+}
+}

@@ -15,15 +15,11 @@ import java.util.Set;
 @Setter
 @Entity
 public class Conversation {
-    @Column(name = "sender_id")
-    private Long senderId;
-
-    @Column(name = "receiver_id")
-    private Long receiverId;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    private String name;
 
     @ManyToMany
     @JoinTable(

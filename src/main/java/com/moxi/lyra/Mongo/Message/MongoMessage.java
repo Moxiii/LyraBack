@@ -4,6 +4,8 @@ import jakarta.persistence.Id;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.mongodb.core.mapping.Document;
+
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 @Getter
@@ -24,13 +26,17 @@ public MongoMessage(String sender, String receiver, String content) {
 	this.content = content;
 	this.timestamp = new Date();
 }
+private String getFormatedTimestamp() {
+	SimpleDateFormat formatter = new SimpleDateFormat("HH:mm");
+	return formatter.format(timestamp);
+}
 @Override
 public String toString() {
 	return "MongoMessage{" +
 			"senderId='" + sender + '\'' +
 			", receiverId='" + receiver + '\'' +
 			", content='" + content + '\'' +
-			", timestamp=" + timestamp +
+			", timestamp=" + getFormatedTimestamp() +
 			'}';
 }
 }

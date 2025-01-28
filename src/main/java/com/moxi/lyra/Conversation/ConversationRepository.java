@@ -11,9 +11,12 @@ import java.util.Set;
 
 @Repository
 public interface ConversationRepository extends JpaRepository<Conversation , Long > {
-    List<Conversation> findByParticipantsContaining(User user);
-    @Query("SELECT c FROM Conversation c WHERE  c.senderId IN :participantsIDs AND c.receiverId IN : participantsIDs")
-    List<Conversation> findBySenderIdAndReceiverId(@Param("participantsIDs") Set<Long> participantIds);
-    @Query("SELECT c FROM Conversation c WHERE c.senderId IN :senderID")
+    List<Conversation> findByUser(User user);
+    List<Conversation> findByParticipants(Set<User> participants);
+
+
+@Query("SELECT c FROM Conversation c WHERE c.participants IN :senderID")
     List<Conversation> findBySenderId(@Param("senderID") Long senderId);
+
+List<Conversation> findByParticipantsContaining(User user);
 }
