@@ -6,8 +6,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import com.moxi.lyra.Conversation.Conversation;
 import com.moxi.lyra.User.User;
-
 import java.util.Date;
+
 @Getter
 @Setter
 @Entity

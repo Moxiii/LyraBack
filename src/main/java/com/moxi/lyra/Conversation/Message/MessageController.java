@@ -1,6 +1,8 @@
 package com.moxi.lyra.Conversation.Message;
 
 import com.moxi.lyra.DTO.UserDTO;
+import com.moxi.lyra.Mongo.Message.MessageMongoRepository;
+import com.moxi.lyra.Mongo.Message.MongoMessage;
 import lombok.extern.slf4j.Slf4j;
 import com.moxi.lyra.DTO.MessageDTO;
 import com.moxi.lyra.User.UserService;
@@ -26,6 +28,8 @@ public class MessageController {
     private SimpMessageSendingOperations messagingTemplate;
     @Autowired
     private UserService userService;
+    @Autowired
+    private MessageService messageService;
 
     @MessageMapping("/queue_name")
     public void setSession(@Payload Map<String, String> clientData) {
@@ -37,25 +41,17 @@ public class MessageController {
 @MessageMapping("/chat/{queueID}")
 @SendToUser("/queue/messages/{queueID}")
 public void handleMessage(@DestinationVariable String queueID, @Payload MessageDTO messageDTO) {
-    try {
         UserDTO senderDTO = messageDTO.getSender();
         UserDTO receiverDTO = messageDTO.getReceiver();
         String sanitizedQueueID = queueID.replace("\"", "").replace("'", "");
         MessageDTO message = new MessageDTO();
         message.setSender(senderDTO);
         message.setReceiver(receiverDTO);
-        messageDTO.setContent(messageDTO.getContent());
-        log.info("Message reçu sur la queue '{}'", queueID);
-        log.info("Contenu du message: {}", messageDTO.getContent());
-        log.info("Expéditeur: {}", message.getSender().getUsername());
-        log.info("Destinataire: {}", message.getReceiver().getUsername());
-
+        message.setContent(messageDTO.getContent());
+        MongoMessage mongoMessage = new MongoMessage(senderDTO.getUsername(), receiverDTO.getUsername(), message.getContent());
+        messageService.saveMongoMessage(mongoMessage);
         messagingTemplate.convertAndSend("/user/"+receiverDTO.getUsername()+"/queue/messages/" + sanitizedQueueID, messageDTO);
-
-    } catch (Exception e) {
-        log.error("Erreur de désérialisation du message: ", e);
-    }
-};
+}
 }
 
 
