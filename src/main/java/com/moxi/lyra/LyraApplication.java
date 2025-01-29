@@ -7,7 +7,6 @@ import com.moxi.lyra.Conversation.Conversation;
 import com.moxi.lyra.Conversation.ConversationRepository;
 import lombok.extern.slf4j.Slf4j;
 import com.moxi.lyra.Calendar.Calendar;
-import com.moxi.lyra.Calendar.CalendarRepository;
 import com.moxi.lyra.Projets.Projets;
 import com.moxi.lyra.Projets.ProjetsRepository;
 import com.moxi.lyra.User.Provider;

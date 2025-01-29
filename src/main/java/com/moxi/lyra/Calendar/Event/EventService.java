@@ -1,7 +1,9 @@
 package com.moxi.lyra.Calendar.Event;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.moxi.lyra.Calendar.Calendar;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.ListOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -18,8 +20,11 @@ public class EventService {
 
     private static final  String REDIS_EVENT_QUEUE = "event_queue";
     private static final int MY_SQL_EVENT_LIMIT = 100;
+@Qualifier("objectMapper")
+@Autowired
+private ObjectMapper objectMapper;
 
-    public List<Event> findByStartDate(LocalDate startDate) {
+public List<Event> findByStartDate(LocalDate startDate) {
        return eventRepository.findByStartDate(startDate);
     }
     public List<Event> findByStartDateBetween(LocalDate startDate, LocalDate endDate) {
@@ -58,12 +63,13 @@ public class EventService {
         ListOperations<String, Object> listOps = redisTemplate.opsForList();
         Object rawEvent;
         while((rawEvent = listOps.leftPop(REDIS_EVENT_QUEUE)) != null) {
-            if(rawEvent instanceof Event) {
-                Event event = (Event) rawEvent;
-                saveEvent(event);
-            }else{
+            Event event;
+            try{
+                event = objectMapper.convertValue(rawEvent, Event.class);
+            }catch(Exception e){
                 throw new RuntimeException("non valid Event Object");
             }
+            saveEvent(event);
         }
     }
 public void deleteAll(List<Event> events) {

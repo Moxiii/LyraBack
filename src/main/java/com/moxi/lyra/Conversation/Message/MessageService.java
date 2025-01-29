@@ -11,6 +11,7 @@ import com.moxi.lyra.Mongo.Message.MongoMessage;
 import com.moxi.lyra.User.UserService;
 import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +22,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
+@EnableScheduling
 public class MessageService {
     @Autowired
     private MessageMongoRepository messageMongoRepository;
@@ -34,11 +36,10 @@ private final int MONGO_MESSAGE_LIMIT = 20;
 private final int MESSAGE_RETENTION_TIME_LIMIT = 5;
 public void saveMongoMessage(MongoMessage message){
     long messageCount = messageMongoRepository.count();
-    log.warn("Message count is {}", messageCount);
+    messageMongoRepository.save(message);
     if(messageCount >= MONGO_MESSAGE_LIMIT){
         transfertOldMessageToSql();
     }
-    messageMongoRepository.save(message);
     }
 @Transactional
 public Message convertToMysqlMessage(MongoMessage mongoMessage) {
@@ -97,7 +98,6 @@ public Message convertToMysqlMessage(MongoMessage mongoMessage) {
     transfertOldMessageToSql();
     }
 public void transfertOldMessageToSql(){
-    //LocalDateTime retentionTreshold = LocalDateTime.now().minusMinutes(MESSAGE_RETENTION_TIME_LIMIT);
     List<MongoMessage> oldMessages = messageMongoRepository.findAll();
     if(!oldMessages.isEmpty()){
         List<Message> messagesToSave = oldMessages.stream()

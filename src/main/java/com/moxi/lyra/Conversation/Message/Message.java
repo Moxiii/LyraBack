@@ -20,6 +20,7 @@ public class Message {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Column(columnDefinition = "LONGTEXT")
     private String content;
     @ManyToOne
     @JoinColumn(name = "sender_id")

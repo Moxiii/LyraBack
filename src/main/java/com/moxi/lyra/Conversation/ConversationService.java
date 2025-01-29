@@ -28,4 +28,7 @@ public List<Object[]> findByParticipants(Set<User> users) {
 public void save(Conversation conversation) {
     conversationRepository.save(conversation);
 }
+public Conversation findById(Long id) {
+    return conversationRepository.findById(id).orElse(null);
+}
 }
