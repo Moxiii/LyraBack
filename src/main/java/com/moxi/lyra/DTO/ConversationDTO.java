@@ -9,6 +9,7 @@ import java.util.List;
 @Setter
 public class ConversationDTO {
 private Long id;
+private String name ="";
 private List<String> participants;
 private String lastMessage = "";
 }

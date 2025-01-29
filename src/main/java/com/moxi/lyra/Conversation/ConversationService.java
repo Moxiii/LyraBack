@@ -20,6 +20,12 @@ private MessageService messageService;
 
 
 public List<Conversation> findByUser(User user) {
-    return conversationRepository.findByUser(user);
+    return conversationRepository.findByParticipantsContaining(user);
+}
+public List<Object[]> findByParticipants(Set<User> users) {
+    return conversationRepository.findByParticipants(users);
+}
+public void save(Conversation conversation) {
+    conversationRepository.save(conversation);
 }
 }
