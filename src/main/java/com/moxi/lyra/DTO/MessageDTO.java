@@ -16,7 +16,6 @@ private Long id;
     private UserDTO sender;
     private String content;
     private String timestamp;
-    private Long conversationID;
 
 public MessageDTO(Message message) {
     this.id = message.getId();

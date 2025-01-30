@@ -37,6 +37,8 @@ public class MessageController {
     private MessageService messageService;
 @Autowired
 private ConversationService conversationService;
+@Autowired
+private MessageRepository messageRepository;
 
 @MessageMapping("/queue_name")
     public void setSession(@Payload Map<String, String> clientData) {
@@ -45,16 +47,22 @@ private ConversationService conversationService;
         messagingTemplate.convertAndSend("/user/queue/" + clientID,queueName);
     }
 
-@MessageMapping("/chat/{queueID}")
+@MessageMapping("/chat/{queueID}/{conversationID}")
 @SendToUser("/queue/messages/{queueID}")
-public void handleMessage(@DestinationVariable String queueID , @Payload MessageDTO messageDTO) {
+public void handleMessage(@DestinationVariable String queueID ,
+                          @Payload MessageDTO messageDTO ,
+                          @DestinationVariable String conversationID) {
         UserDTO senderDTO = messageDTO.getSender();
-        Conversation conversation = conversationService.findById(messageDTO.getConversationID());
         String sanitizedQueueID = queueID.replace("\"", "").replace("'", "");
+
+        Conversation conversation = conversationService.findById(Long.parseLong(conversationID));
+
+
         MessageDTO message = new MessageDTO();
         String destination;
         String receiverUsername;
         message.setSender(senderDTO);
+
         if(conversation.getParticipants().size() > 2 ){
             receiverUsername = sanitizedQueueID;
             destination = "/topic/";
