@@ -102,6 +102,7 @@ public LyraApplication(UserRepository userRepository, UserRoleRepository userRol
                 Conversation conversation = new Conversation();
                 conversation.getParticipants().add(moxi);
                 conversation.getParticipants().add(test);
+                conversation.setName("Les zouzous");
                 conversationRepository.save(conversation);
                 contactRepository.save(testContact);
                 contactRepository.save(moxiContact);

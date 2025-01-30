@@ -1,8 +1,12 @@
 package com.moxi.lyra.Conversation.Message;
 
+import com.moxi.lyra.Conversation.Conversation;
+import com.moxi.lyra.Conversation.ConversationService;
+import com.moxi.lyra.DTO.ConversationDTO;
 import com.moxi.lyra.DTO.UserDTO;
 import com.moxi.lyra.Mongo.Message.MessageMongoRepository;
 import com.moxi.lyra.Mongo.Message.MongoMessage;
+import com.moxi.lyra.User.User;
 import lombok.extern.slf4j.Slf4j;
 import com.moxi.lyra.DTO.MessageDTO;
 import com.moxi.lyra.User.UserService;
@@ -15,6 +19,7 @@ import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.Map;
 
 
@@ -30,8 +35,10 @@ public class MessageController {
     private UserService userService;
     @Autowired
     private MessageService messageService;
+@Autowired
+private ConversationService conversationService;
 
-    @MessageMapping("/queue_name")
+@MessageMapping("/queue_name")
     public void setSession(@Payload Map<String, String> clientData) {
         String clientID = clientData.get("ClientID");
         String queueName = "testing";
@@ -40,17 +47,31 @@ public class MessageController {
 
 @MessageMapping("/chat/{queueID}")
 @SendToUser("/queue/messages/{queueID}")
-public void handleMessage(@DestinationVariable String queueID, @Payload MessageDTO messageDTO) {
+public void handleMessage(@DestinationVariable String queueID , @Payload MessageDTO messageDTO) {
         UserDTO senderDTO = messageDTO.getSender();
-        UserDTO receiverDTO = messageDTO.getReceiver();
+        Conversation conversation = conversationService.findById(messageDTO.getConversationID());
         String sanitizedQueueID = queueID.replace("\"", "").replace("'", "");
         MessageDTO message = new MessageDTO();
+        String destination;
+        String receiverUsername;
         message.setSender(senderDTO);
-        message.setReceiver(receiverDTO);
+        if(conversation.getParticipants().size() > 2 ){
+            receiverUsername = sanitizedQueueID;
+            destination = "/topic/";
+        }else{
+             receiverUsername = conversation.getParticipants().stream()
+                     .map(User::getUsername)
+                     .filter(username -> !username.equals(senderDTO.getUsername()))
+                    .findFirst().orElse(null);
+             log.warn("RECEIVER USERNAME: " + receiverUsername);
+            if (receiverUsername != null) {
+                destination = "/user/" + receiverUsername + "/queue/messages/";
+            }else{ throw new RuntimeException("User not found"); }
+        }
         message.setContent(messageDTO.getContent());
-        MongoMessage mongoMessage = new MongoMessage(senderDTO.getUsername(), receiverDTO.getUsername(), message.getContent());
+        MongoMessage mongoMessage = new MongoMessage(senderDTO.getUsername(),receiverUsername,  message.getContent());
         messageService.saveMongoMessage(mongoMessage);
-        messagingTemplate.convertAndSend("/user/"+receiverDTO.getUsername()+"/queue/messages/" + sanitizedQueueID, messageDTO);
+        messagingTemplate.convertAndSend(destination + sanitizedQueueID, messageDTO);
 }
 }
 

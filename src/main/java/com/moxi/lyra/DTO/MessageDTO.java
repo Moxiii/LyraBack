@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.text.SimpleDateFormat;
+import java.util.List;
 
 @NoArgsConstructor
 @Getter
@@ -13,9 +14,9 @@ import java.text.SimpleDateFormat;
 public class MessageDTO {
 private Long id;
     private UserDTO sender;
-    private UserDTO receiver;
     private String content;
     private String timestamp;
+    private Long conversationID;
 
 public MessageDTO(Message message) {
     this.id = message.getId();

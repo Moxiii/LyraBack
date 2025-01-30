@@ -50,6 +50,7 @@ public ResponseEntity<String> addConversation() {
 public ResponseEntity<?> getConversationById(@PathVariable("id") Long id) {
 	Conversation conversation = conversationService.findById(id);
 	ConversationDTO dto = new ConversationDTO(conversation);
+	messageService.transfertOldMessageToSql();
 	return ResponseEntity.ok(dto);
 }
 }

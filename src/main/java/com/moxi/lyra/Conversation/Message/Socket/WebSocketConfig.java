@@ -27,7 +27,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     private CustomHandshakeInterceptor customHandshakeInterceptor;
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
-        config.enableSimpleBroker("/user");
+        config.enableSimpleBroker("/user" , "/topic");
         config.setApplicationDestinationPrefixes("/app");
         config.setUserDestinationPrefix("/user");
 

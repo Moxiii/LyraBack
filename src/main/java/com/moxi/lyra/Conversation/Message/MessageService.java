@@ -45,7 +45,7 @@ public void saveMongoMessage(MongoMessage message){
 public Message convertToMysqlMessage(MongoMessage mongoMessage) {
     Message message = new Message();
     message.setContent(mongoMessage.getContent());
-
+    message.setTimestamp(mongoMessage.getTimestamp());
     Set<User> users = new HashSet<>();
     User receiver = userService.findByUsername(mongoMessage.getReceiver());
     User sender = userService.findByUsername(mongoMessage.getSender());
