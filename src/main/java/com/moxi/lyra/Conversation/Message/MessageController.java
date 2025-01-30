@@ -2,9 +2,7 @@ package com.moxi.lyra.Conversation.Message;
 
 import com.moxi.lyra.Conversation.Conversation;
 import com.moxi.lyra.Conversation.ConversationService;
-import com.moxi.lyra.DTO.ConversationDTO;
 import com.moxi.lyra.DTO.UserDTO;
-import com.moxi.lyra.Mongo.Message.MessageMongoRepository;
 import com.moxi.lyra.Mongo.Message.MongoMessage;
 import com.moxi.lyra.User.User;
 import lombok.extern.slf4j.Slf4j;
@@ -15,11 +13,10 @@ import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
-import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -43,14 +40,17 @@ private MessageRepository messageRepository;
 
 @MessageMapping("/queue_name")
     public void setSession(@Payload Map<String, String> clientData) {
-        String conversationID = clientData.get("conversationID");
+        String conversationID = clientData.get("ConversationID");
         String queueName = UUID.randomUUID().toString();
         Conversation conversation = conversationService.findById(Long.valueOf(conversationID));
         String conversationName = conversation.getName().isEmpty() ? conversation.getParticipants().toString() : conversation.getName();
-        for (User participant : conversation.getParticipants()) {
-            messagingTemplate.convertAndSend("/user/queue/" + participant.getUsername(),queueName);
-            messagingTemplate.convertAndSend("/user/queue/" + participant.getUsername(),conversationName);
-        }
+    Map<String, String> response = new HashMap<>();
+    response.put("queueName", queueName);
+    response.put("conversationName", conversationName);
+
+    for (User participant : conversation.getParticipants()) {
+        messagingTemplate.convertAndSend("/user/queue/" + participant.getUsername(), response);
+    }
 
     }
 
