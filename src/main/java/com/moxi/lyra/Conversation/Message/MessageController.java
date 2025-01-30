@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 
 @Slf4j
@@ -42,13 +43,18 @@ private MessageRepository messageRepository;
 
 @MessageMapping("/queue_name")
     public void setSession(@Payload Map<String, String> clientData) {
-        String clientID = clientData.get("ClientID");
-        String queueName = "testing";
-        messagingTemplate.convertAndSend("/user/queue/" + clientID,queueName);
+        String conversationID = clientData.get("conversationID");
+        String queueName = UUID.randomUUID().toString();
+        Conversation conversation = conversationService.findById(Long.valueOf(conversationID));
+        String conversationName = conversation.getName().isEmpty() ? conversation.getParticipants().toString() : conversation.getName();
+        for (User participant : conversation.getParticipants()) {
+            messagingTemplate.convertAndSend("/user/queue/" + participant.getUsername(),queueName);
+            messagingTemplate.convertAndSend("/user/queue/" + participant.getUsername(),conversationName);
+        }
+
     }
 
 @MessageMapping("/chat/{queueID}/{conversationID}")
-@SendToUser("/queue/messages/{queueID}")
 public void handleMessage(@DestinationVariable String queueID ,
                           @Payload MessageDTO messageDTO ,
                           @DestinationVariable String conversationID) {
@@ -56,7 +62,7 @@ public void handleMessage(@DestinationVariable String queueID ,
         String sanitizedQueueID = queueID.replace("\"", "").replace("'", "");
 
         Conversation conversation = conversationService.findById(Long.parseLong(conversationID));
-
+        String conversationName = conversation.getName().isEmpty() ? conversation.getParticipants().toString() : conversation.getName();
 
         MessageDTO message = new MessageDTO();
         String destination;
@@ -65,7 +71,7 @@ public void handleMessage(@DestinationVariable String queueID ,
 
         if(conversation.getParticipants().size() > 2 ){
             receiverUsername = sanitizedQueueID;
-            destination = "/topic/";
+            destination = "/topic/"+conversationName + "/";
         }else{
              receiverUsername = conversation.getParticipants().stream()
                      .map(User::getUsername)
@@ -73,7 +79,7 @@ public void handleMessage(@DestinationVariable String queueID ,
                     .findFirst().orElse(null);
              log.warn("RECEIVER USERNAME: " + receiverUsername);
             if (receiverUsername != null) {
-                destination = "/user/" + receiverUsername + "/queue/messages/";
+                destination = "/user/" + receiverUsername + "/messages/";
             }else{ throw new RuntimeException("User not found"); }
         }
         message.setContent(messageDTO.getContent());

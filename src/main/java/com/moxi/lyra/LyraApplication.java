@@ -89,6 +89,7 @@ public LyraApplication(UserRepository userRepository, UserRoleRepository userRol
             if(contactRepository.count()==0){
                 User moxi = userRepository.findByUsername("moxi");
                 User test = userRepository.findByUsername("test");
+                User martin = userRepository.findByUsername("martindvt");
                 Contact moxiContact = new Contact();
                 Contact testContact = new Contact();
                 moxiContact.setUser(moxi);
@@ -102,8 +103,13 @@ public LyraApplication(UserRepository userRepository, UserRoleRepository userRol
                 Conversation conversation = new Conversation();
                 conversation.getParticipants().add(moxi);
                 conversation.getParticipants().add(test);
-                conversation.setName("Les zouzous");
+                Conversation groupConversation = new Conversation();
+                groupConversation.getParticipants().add(moxi);
+                groupConversation.getParticipants().add(test);
+                groupConversation.getParticipants().add(martin);
+                groupConversation.setName("Les loulous");
                 conversationRepository.save(conversation);
+                conversationRepository.save(groupConversation);
                 contactRepository.save(testContact);
                 contactRepository.save(moxiContact);
             }

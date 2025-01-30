@@ -35,8 +35,9 @@ public ResponseEntity<?> getConversation() {
 				.collect(Collectors.toList()
 				)
 		);
+		dto.setName(conversation.getName());
 			dto.setLastMessage(conversation.getMessages().isEmpty()
-			? null : conversation.getMessages().get(conversation.getMessages().size() -1).getContent());
+			? null : conversation.getMessages().getLast().getContent());
 			return dto;
 	}).collect(Collectors.toList());
 	return ResponseEntity.ok(conversationDTOs);
@@ -49,8 +50,8 @@ public ResponseEntity<String> addConversation() {
 @GetMapping("/get/{id}")
 public ResponseEntity<?> getConversationById(@PathVariable("id") Long id) {
 	Conversation conversation = conversationService.findById(id);
-	ConversationDTO dto = new ConversationDTO(conversation);
 	messageService.transfertOldMessageToSql();
+	ConversationDTO dto = new ConversationDTO(conversation);
 	return ResponseEntity.ok(dto);
 }
 }
