@@ -7,7 +7,6 @@ import com.moxi.lyra.Mongo.Message.MongoMessage;
 import com.moxi.lyra.User.User;
 import lombok.extern.slf4j.Slf4j;
 import com.moxi.lyra.DTO.MessageDTO;
-import com.moxi.lyra.User.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -30,13 +29,10 @@ public class MessageController {
     @Autowired
     private SimpMessageSendingOperations messagingTemplate;
     @Autowired
-    private UserService userService;
-    @Autowired
     private MessageService messageService;
-@Autowired
-private ConversationService conversationService;
-@Autowired
-private MessageRepository messageRepository;
+    @Autowired
+    private ConversationService conversationService;
+
 
 @MessageMapping("/queue_name")
     public void setSession(@Payload Map<String, String> clientData) {
