@@ -1,6 +1,7 @@
-package com.moxi.lyra.DTO;
+package com.moxi.lyra.DTO.Conversation;
 
 import com.moxi.lyra.Conversation.Conversation;
+import com.moxi.lyra.DTO.MessageDTO;
 import com.moxi.lyra.User.User;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

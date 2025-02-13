@@ -2,15 +2,13 @@ package com.moxi.lyra.Conversation;
 
 import com.moxi.lyra.Config.CustomAnnotation.RequireAuthorization;
 import com.moxi.lyra.Config.Utils.SecurityUtils;
-import com.moxi.lyra.Conversation.Message.Message;
 import com.moxi.lyra.Conversation.Message.MessageService;
-import com.moxi.lyra.DTO.ConversationDTO;
+import com.moxi.lyra.DTO.Conversation.ConversationDTO;
 import com.moxi.lyra.User.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 

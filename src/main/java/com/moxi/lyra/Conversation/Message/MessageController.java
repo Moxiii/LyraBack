@@ -73,7 +73,6 @@ public void handleMessage(@DestinationVariable String queueID ,
                      .map(User::getUsername)
                      .filter(username -> !username.equals(senderDTO.getUsername()))
                     .findFirst().orElse(null);
-             log.warn("RECEIVER USERNAME: " + receiverUsername);
             if (receiverUsername != null) {
                 destination = "/user/" + receiverUsername + "/messages/";
             }else{ throw new RuntimeException("User not found"); }

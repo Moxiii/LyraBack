@@ -2,6 +2,7 @@ package com.moxi.lyra.Conversation.Message;
 
 import com.moxi.lyra.Conversation.Conversation;
 import com.moxi.lyra.Conversation.ConversationService;
+import com.moxi.lyra.DTO.Conversation.ConversationWithCount;
 import com.moxi.lyra.User.User;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
@@ -46,48 +47,57 @@ public Message convertToMysqlMessage(MongoMessage mongoMessage) {
     Message message = new Message();
     message.setContent(mongoMessage.getContent());
     message.setTimestamp(mongoMessage.getTimestamp());
+
     Set<User> users = new HashSet<>();
-    User receiver = userService.findByUsername(mongoMessage.getReceiver());
+
     User sender = userService.findByUsername(mongoMessage.getSender());
+    log.warn("SENDER MONGO: " + sender.getUsername());
     message.setSender(sender);
-    users.add(receiver);
+
     users.add(sender);
 
-    List<Object[]> existingConversations = conversationService.findByParticipants(users);
-    Conversation conversation = null;
-    if (existingConversations.isEmpty()) {
-        conversation = new Conversation();
-        conversation.setParticipants(users);
-        conversationService.save(conversation);
-    } else {
-        Optional<Object[]> matchedConv = existingConversations
-                .stream()
-                .filter(row -> {
-                    Conversation conv = (Conversation) row[0];
-                    Hibernate.initialize(conv.getParticipants());
-                    Long participantsCount = (Long) row[1];
-                    Set<Long> participantsIds = conv.getParticipants().stream()
-                            .map(User::getId)
-                            .collect(Collectors.toSet());
-                    Set<Long> usersIds = users.stream()
-                            .map(User::getId)
-                            .collect(Collectors.toSet());
-                    return participantsCount == users.size() && participantsIds.equals(usersIds);
-                })
-                .findFirst();
-        conversation = matchedConv.map(row -> (Conversation) row[0])
-                .orElseGet(() -> {
-                    Conversation newConv = new Conversation();
-                    newConv.setParticipants(users);
-                    return newConv;
-                });
-        if (!conversation.getMessages().contains(message)) {
-            conversation.getMessages().add(message);
-        }
-        conversationService.save(conversation);
+    List<ConversationWithCount> existingConversations = conversationService.findByParticipants(users);
+
+    Conversation conversation = existingConversations.stream()
+            .filter(convWithCount -> {
+                Conversation conv = convWithCount.getConversation();
+                Hibernate.initialize(conv.getParticipants());
+                Long participantsCount = convWithCount.getCount();
+                if (participantsCount >= 3) {
+                    users.addAll(conv.getParticipants());
+                } else {
+                    User receiver = userService.findByUsername(mongoMessage.getReceiver());
+                    if (receiver != null) {
+                        users.add(receiver);
+                    } else {
+                        log.error("Receiver user not found for username: {}", mongoMessage.getReceiver());
+                    }
+                }
+                Set<Long> participantsIds = conv.getParticipants().stream()
+                        .map(User::getId)
+                        .collect(Collectors.toSet());
+                Set<Long> usersIds = users.stream()
+                        .map(User::getId)
+                        .collect(Collectors.toSet());
+
+                return participantsCount.equals((long) users.size()) && participantsIds.equals(usersIds);
+            })
+            .map(ConversationWithCount::getConversation)
+            .findFirst()
+            .orElseGet(() -> {
+                Conversation newConv = new Conversation();
+                newConv.setParticipants(users);
+                return newConv;
+            });
+
+    if (!conversation.getMessages().contains(message)) {
+        conversation.getMessages().add(message);
     }
+
+    conversationService.save(conversation);
     message.setConversation(conversation);
     messageRepository.save(message);
+
     return message;
 }
 
